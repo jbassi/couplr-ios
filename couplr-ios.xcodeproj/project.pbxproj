@@ -17,6 +17,10 @@
 		0F37CA2219C53954007A6951 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37CA2119C53954007A6951 /* ProfileViewController.swift */; };
 		0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5A034B19C4E06A0050DC9F /* LoginViewController.swift */; };
 		0F6074F51A4FDF2A0045B5C3 /* FacebookSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */; };
+		0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */; };
+		0FF11BDE1A50C45600C14FDC /* GlobalConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */; };
+		0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BE01A50C55500C14FDC /* MatchViewController.swift */; };
+		0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BE31A50C63C00C14FDC /* PickerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +49,10 @@
 		0F5A034B19C4E06A0050DC9F /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		0F5A034E19C4E1860050DC9F /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
+		0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilityFunctions.swift; sourceTree = "<group>"; };
+		0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalConstants.swift; sourceTree = "<group>"; };
+		0FF11BE01A50C55500C14FDC /* MatchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchViewController.swift; sourceTree = "<group>"; };
+		0FF11BE31A50C63C00C14FDC /* PickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +95,9 @@
 		0F1B9EDF19C4DD7A00CD64FD /* couplr-ios */ = {
 			isa = PBXGroup;
 			children = (
+				0FF11BE21A50C62200C14FDC /* Generic Views */,
+				0FF11BD81A50B6E300C14FDC /* Uitilities */,
+				0FF11BDF1A50C52300C14FDC /* Match */,
 				0F37CA2019C53923007A6951 /* Profile */,
 				0F859B4319C4EB09000FB737 /* Login */,
 				0F1B9EE219C4DD7A00CD64FD /* AppDelegate.swift */,
@@ -149,6 +160,31 @@
 				0F37CA1C19C52455007A6951 /* CouplrLoginErrorHandler.swift */,
 			);
 			name = Login;
+			sourceTree = "<group>";
+		};
+		0FF11BD81A50B6E300C14FDC /* Uitilities */ = {
+			isa = PBXGroup;
+			children = (
+				0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */,
+				0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */,
+			);
+			name = Uitilities;
+			sourceTree = "<group>";
+		};
+		0FF11BDF1A50C52300C14FDC /* Match */ = {
+			isa = PBXGroup;
+			children = (
+				0FF11BE01A50C55500C14FDC /* MatchViewController.swift */,
+			);
+			name = Match;
+			sourceTree = "<group>";
+		};
+		0FF11BE21A50C62200C14FDC /* Generic Views */ = {
+			isa = PBXGroup;
+			children = (
+				0FF11BE31A50C63C00C14FDC /* PickerView.swift */,
+			);
+			name = "Generic Views";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -251,9 +287,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */,
+				0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */,
+				0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,
 				0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */,
 				0F37CA2219C53954007A6951 /* ProfileViewController.swift in Sources */,
+				0FF11BDE1A50C45600C14FDC /* GlobalConstants.swift in Sources */,
 				0F37CA1D19C52455007A6951 /* CouplrLoginErrorHandler.swift in Sources */,
 				0F1B9EE319C4DD7A00CD64FD /* AppDelegate.swift in Sources */,
 			);

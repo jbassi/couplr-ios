@@ -14,7 +14,6 @@ class ProfileViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         profilePicture = FBProfilePictureView(profileID: "me", pictureCropping: FBProfilePictureCropping.Square)
     }
 
