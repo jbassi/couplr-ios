@@ -47,24 +47,26 @@ class LoginViewController: UIViewController, FBLoginViewDelegate {
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         
-        CouplrSettingsManager.sharedInstance.shouldSkipLogin = false
+        CouplrSettingsManager.sharedInstance.shouldSkipLogin = true
         viewIsVisible = false
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
     // MARK: - IBActions
+    
     @IBAction func showLogin(segue: UIStoryboardSegue) {
         // Left intentionally blank to create an unwind swgue to this controller
     }
     
     // MARK: - Facebook Delegate Methods
+    
     func loginViewShowingLoggedInUser(loginView : FBLoginView!) {
         if (viewIsVisible) {
-            self.performSegueWithIdentifier("ShowTabBarViewController", sender: nil)
+            self.performSegueWithIdentifier("ShowTabBarViewController", sender: loginView)
         }
     }
     
@@ -81,4 +83,5 @@ class LoginViewController: UIViewController, FBLoginViewDelegate {
     func loginView(loginView : FBLoginView!, handleError:NSError) {
         CouplrLoginErrorHandler.handleError(handleError)
     }
+    
 }

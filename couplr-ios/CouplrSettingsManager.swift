@@ -9,8 +9,6 @@
 import UIKit
 
 class CouplrSettingsManager: NSObject {
-    // TODO: Make static?
-    let kShouldSkipLoginKey: String = "kShouldSkipLoginKey"
     
     class var sharedInstance: CouplrSettingsManager {
         struct CouplrSingleton {

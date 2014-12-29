@@ -8,6 +8,9 @@
 
 import UIKit
 
+/* CouplrSettingsManager Constants */
+let kShouldSkipLoginKey: String = "kShouldSkipLoginKey"
+
 /* PickerView Constants */
 let kPickerViewWidthInsets: CGFloat = 80.0
 let kPickerViewHeight: CGFloat = 180.0

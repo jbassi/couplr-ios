@@ -96,7 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				0FF11BE21A50C62200C14FDC /* Generic Views */,
-				0FF11BD81A50B6E300C14FDC /* Uitilities */,
+				0FF11BD81A50B6E300C14FDC /* Utilities */,
 				0FF11BDF1A50C52300C14FDC /* Match */,
 				0F37CA2019C53923007A6951 /* Profile */,
 				0F859B4319C4EB09000FB737 /* Login */,
@@ -162,13 +162,13 @@
 			name = Login;
 			sourceTree = "<group>";
 		};
-		0FF11BD81A50B6E300C14FDC /* Uitilities */ = {
+		0FF11BD81A50B6E300C14FDC /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
 				0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */,
 				0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */,
 			);
-			name = Uitilities;
+			name = Utilities;
 			sourceTree = "<group>";
 		};
 		0FF11BDF1A50C52300C14FDC /* Match */ = {
