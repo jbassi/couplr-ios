@@ -18,6 +18,8 @@ class MatchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         matchTitleLabel.setTitle(testData[0], forState: UIControlState.Normal)
+//        testFriendList()
+        testGETRequest()
     }
     
     override func didReceiveMemoryWarning() {

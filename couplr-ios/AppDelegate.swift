@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FBProfilePictureView.self
         return true
     }
-    
+
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String, annotation: AnyObject?) -> Bool {
         var FBLoginWasHandled: Bool = FBAppCall.handleOpenURL(url, sourceApplication: sourceApplication)
         return FBLoginWasHandled
