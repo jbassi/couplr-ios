@@ -120,10 +120,49 @@
                                     <action selector="showButtonPressed" destination="eGk-i9-lER" eventType="touchUpInside" id="id3-SU-get"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gev-os-w0J">
+                                <rect key="frame" x="280" y="513" width="40" height="30"/>
+                                <state key="normal" title="Reset">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="70u-3R-ST3">
+                                <rect key="frame" x="143" y="142" width="315" height="315"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="5" minimumInteritemSpacing="5" id="clN-tT-vbM">
+                                    <size key="itemSize" width="100" height="100"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="MatchViewCell" id="ASY-IT-Xeu" customClass="ProfilePictureCollectionViewCell" customModule="couplr_ios" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                            <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ama-Bv-cdU" customClass="ProfilePictureImageView" customModule="couplr_ios" customModuleProvider="target">
+                                                    <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
+                                                </imageView>
+                                            </subviews>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        </view>
+                                        <connections>
+                                            <outlet property="imageView" destination="Ama-Bv-cdU" id="ZyM-F4-YhR"/>
+                                        </connections>
+                                    </collectionViewCell>
+                                </cells>
+                            </collectionView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstAttribute="centerY" secondItem="Gev-os-w0J" secondAttribute="centerY" constant="-228" id="4jC-Xj-kfN"/>
                             <constraint firstAttribute="centerX" secondItem="oKn-lB-K4c" secondAttribute="centerX" id="CQE-7K-Sef"/>
+                            <constraint firstAttribute="centerX" secondItem="70u-3R-ST3" secondAttribute="centerX" constant="-0.5" id="HQl-mq-tMG"/>
+                            <constraint firstAttribute="centerY" secondItem="70u-3R-ST3" secondAttribute="centerY" constant="0.5" id="q6X-2l-5eR"/>
+                            <constraint firstAttribute="centerX" secondItem="Gev-os-w0J" secondAttribute="centerX" id="soU-H2-A5I"/>
                             <constraint firstAttribute="centerY" secondItem="oKn-lB-K4c" secondAttribute="centerY" constant="204" id="zSC-DU-hM6"/>
                         </constraints>
                     </view>
@@ -135,7 +174,9 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="collectionView" destination="70u-3R-ST3" id="fZX-zg-BCX"/>
                         <outlet property="matchTitleLabel" destination="oKn-lB-K4c" id="Uhz-Je-Jz1"/>
+                        <outlet property="shufflePeople" destination="Gev-os-w0J" id="7QS-dM-fbZ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6ku-9p-6N3" userLabel="First Responder" sceneMemberID="firstResponder"/>

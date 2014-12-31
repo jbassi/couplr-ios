@@ -21,6 +21,9 @@ let kPickerShowSpringDamping: CGFloat = 0.7
 let kPickerHideSpringDamping: CGFloat = 0.5
 let kPickerSpringVelocity: CGFloat = 0.5
 
+/* MatchViewControllerCollectionView Constants */
+let kMatchViewControllerCollectionViewNumberOfRows: Int = 9
+
 /* PickerView Colors */
 let kPickerTransparentLayerShowColor: UIColor = UIColor(white: 0.1, alpha: 0.8)
 let kPickerTransparentLayerHideColor: UIColor = UIColor(white: 1, alpha: 0)

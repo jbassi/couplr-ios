@@ -51,7 +51,6 @@ class PickerView: UIPickerView {
     func showAnimated(animated: Bool) {
         if animated {
             superview!.insertSubview(transparentLayer, belowSubview: self)
-//            UIApplication.sharedApplication().delegate!.window!?.insertSubview(transparentLayer, belowSubview: self)
             
             UIView.animateWithDuration(kPickerShowAnimationDuration, delay: 0, usingSpringWithDamping: kPickerShowSpringDamping, initialSpringVelocity: kPickerSpringVelocity, options: UIViewAnimationOptions(0), animations: {
                 self.frame.origin.y = round((self.superview!.frame.size.height - self.frame.size.height) / 2)

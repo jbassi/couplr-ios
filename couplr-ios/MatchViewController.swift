@@ -15,10 +15,26 @@ class MatchViewController: UIViewController {
     var testData = ["One Night Stand", "Prom King And Queen", "Likely To Get Married", "Should Not Be Together"]
     var selectedTitle: String?
 
+    @IBOutlet weak var shufflePeople: UIButton!
+    @IBOutlet weak var collectionView: UICollectionView!
+    var userFriends: NSArray?
+    var connectionData: NSMutableData = NSMutableData()
+    var connection: NSURLConnection?
+    
+    var requestHandler: CouplrFBRequestHandler = CouplrFBRequestHandler()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        collectionView.delegate = self
+        collectionView.dataSource = self
         matchTitleLabel.setTitle(testData[0], forState: UIControlState.Normal)
         edgeListFromStatusesForRootUser()
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        requestHandler.delegate = self
+        requestHandler.requestInvitableFriends()
     }
 
     override func didReceiveMemoryWarning() {
@@ -52,6 +68,36 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
 
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         matchTitleLabel.setTitle(testData[row], forState: UIControlState.Normal)
+    }
+    
+}
+
+extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return kMatchViewControllerCollectionViewNumberOfRows
+    }
+    
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as ProfilePictureCollectionViewCell
+        let url = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xap1/v/t1.0-1/c4.51.632.632/s100x100/1456027_10202214203495049_399160996_n.jpg?oh=e5d3d24e0b534091c52e51e73ab28ed1&oe=55473607&__gda__=1428901135_cb8e264f335868cb522ca25e64a3af92"
+        cell.imageView.performRequestWith(url)
+        return cell
+    }
+    
+}
+
+// MARK: - CouplrFBRequestHandlerProtocol
+
+extension MatchViewController: CouplrFBRequestHandlerProtocol {
+    
+    func couplrFBRequestHandlerWillRecieveInvitableFriends() {
+        // Display loading message
+    }
+    
+    func couplrFBRequestHandlerDidRecieveInvitableFriends(array: NSArray) {
+        userFriends = array
+        collectionView.reloadData()
     }
 
 }

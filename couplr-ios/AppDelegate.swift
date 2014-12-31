@@ -20,8 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String, annotation: AnyObject?) -> Bool {
-        var FBLoginWasHandled: Bool = FBAppCall.handleOpenURL(url, sourceApplication: sourceApplication)
-        return FBLoginWasHandled
+        return FBAppCall.handleOpenURL(url, sourceApplication: sourceApplication)
     }
 
     func applicationWillResignActive(application: UIApplication) {
