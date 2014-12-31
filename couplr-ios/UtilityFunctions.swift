@@ -14,6 +14,44 @@ func afterDelay(seconds: Double, closure: () -> ()) {
     dispatch_after(when, dispatch_get_main_queue(), closure)
 }
 
+func randomFloat() -> Float {
+    return Float(arc4random()) / Float(UINT32_MAX)
+}
+
+/**
+ * Returns a random positive integer LESS THAN a given upper
+ * bound.
+ */
+func randomInt(withUpperbound:Int) -> Int {
+    return Int(floorf(randomFloat() * (Float(withUpperbound))))
+}
+
+/**
+ * Returns a randomly sampled node given a list of sampling weights. If
+ * the list elements to sample is empty, returns a default value of 0.
+ * TODO This is a naive implementation. Make me faster!
+ */
+func weightedRandomSample(elements:[(UInt64, Float)]) -> UInt64 {
+    if elements.count == 0 {
+        return 0
+    }
+    var total:Float = 0
+    for (node:UInt64, value:Float) in elements {
+        total += value
+    }
+    var sampleTarget:Float = total * randomFloat()
+    var (result:UInt64, temp:Float) = elements[0]
+    for index:Int in 0..<elements.count {
+        let (node:UInt64, value:Float) = elements[index]
+        result = node
+        sampleTarget -= value
+        if sampleTarget <= 0 {
+            break
+        }
+    }
+    return result
+}
+
 func appendEdgesFromStatus(status:AnyObject!, withRootID:UInt64!, inout toBuilder:GraphBuilder) -> Void {
     var allComments:AnyObject? = status["comments"]
     var previousThreadID:UInt64 = withRootID;
@@ -66,6 +104,7 @@ func edgeListFromStatusesForRootUser() {
                 }
                 let graph:SocialGraph = builder.buildSocialGraph()
                 println(graph.toString())
+                println(graph.randomSample())
             }
         } as FBRequestHandler
     )

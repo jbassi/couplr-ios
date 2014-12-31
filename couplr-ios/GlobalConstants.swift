@@ -32,4 +32,6 @@ let kPickerTransparentLayerHideColor: UIColor = UIColor(white: 1, alpha: 0)
 let kCommentRootScore:Float = 1.0
 let kCommentPrevScore:Float = 0.1
 let kLikeRootScore:Float = 0.2
-let kSamplingWeightCoefficient:Float = 4.0
+let kSamplingWeightLimit:Float = 4.0
+let kUnconnectedEdgeWeight:Float = -10.0
+let kRandomSampleCount:Int = 9;
