@@ -21,6 +21,7 @@
 		0FF11BDE1A50C45600C14FDC /* GlobalConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */; };
 		0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BE01A50C55500C14FDC /* MatchViewController.swift */; };
 		0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BE31A50C63C00C14FDC /* PickerView.swift */; };
+		F43D50731A536CC2000E09CE /* GraphBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43D50721A536CC2000E09CE /* GraphBuilder.swift */; };
 		F4973F0B1A50E31700FEA3B0 /* SocialGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */; };
 /* End PBXBuildFile section */
 
@@ -54,6 +55,7 @@
 		0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalConstants.swift; sourceTree = "<group>"; };
 		0FF11BE01A50C55500C14FDC /* MatchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchViewController.swift; sourceTree = "<group>"; };
 		0FF11BE31A50C63C00C14FDC /* PickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerView.swift; sourceTree = "<group>"; };
+		F43D50721A536CC2000E09CE /* GraphBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphBuilder.swift; sourceTree = "<group>"; };
 		F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraph.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -194,6 +196,7 @@
 			isa = PBXGroup;
 			children = (
 				F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */,
+				F43D50721A536CC2000E09CE /* GraphBuilder.swift */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -302,6 +305,7 @@
 				0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */,
 				0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,
+				F43D50731A536CC2000E09CE /* GraphBuilder.swift in Sources */,
 				0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */,
 				0F37CA2219C53954007A6951 /* ProfileViewController.swift in Sources */,
 				0FF11BDE1A50C45600C14FDC /* GlobalConstants.swift in Sources */,

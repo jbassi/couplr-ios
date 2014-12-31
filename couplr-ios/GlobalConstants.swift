@@ -24,3 +24,9 @@ let kPickerSpringVelocity: CGFloat = 0.5
 /* PickerView Colors */
 let kPickerTransparentLayerShowColor: UIColor = UIColor(white: 0.1, alpha: 0.8)
 let kPickerTransparentLayerHideColor: UIColor = UIColor(white: 1, alpha: 0)
+
+/* Social graph constants */
+let kCommentRootScore:Float = 1.0
+let kCommentPrevScore:Float = 0.1
+let kLikeRootScore:Float = 0.2
+let kSamplingWeightCoefficient:Float = 4.0

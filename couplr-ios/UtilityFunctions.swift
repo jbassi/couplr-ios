@@ -14,21 +14,59 @@ func afterDelay(seconds: Double, closure: () -> ()) {
     dispatch_after(when, dispatch_get_main_queue(), closure)
 }
 
-func testFriendList() {
-    var friendsRequest : FBRequest = FBRequest.requestForMyFriends()
-    friendsRequest.startWithCompletionHandler{(connection:FBRequestConnection!, result:AnyObject!, error:NSError!) -> Void in
-        var resultdict = result as NSDictionary
-        println("Result Dict: \(resultdict)")
-        var data : NSArray = resultdict.objectForKey("data") as NSArray
+func appendEdgesFromStatus(status:AnyObject!, withRootID:UInt64!, inout toBuilder:GraphBuilder) -> Void {
+    var allComments:AnyObject? = status["comments"]
+    var previousThreadID:UInt64 = withRootID;
+    if allComments != nil {
+        let commentData:AnyObject! = allComments!["data"]!
+        for index in 0..<commentData.count {
+            let comment:AnyObject! = commentData[index]!
+            let from:AnyObject! = comment["from"]!
+            let fromIDObject:AnyObject! = from["id"]!
+            let fromID:UInt64 = UInt64(fromIDObject.description!.toInt()!)
+            let fromNameObject:AnyObject! = from["name"]
+            toBuilder.updateNameMappingForID(fromID, toName: fromNameObject.description!)
+            toBuilder.updateForEdgePair(EdgePair(first:withRootID, second:fromID), withWeight:kCommentRootScore)
+            toBuilder.updateForEdgePair(EdgePair(first:previousThreadID, second:fromID), withWeight:kCommentPrevScore)
+            previousThreadID = fromID
+        }
+    }
+    var allLikes:AnyObject? = status["likes"]
+    if allLikes != nil {
+        let likeData:AnyObject! = allLikes!["data"]!
+        for index in 0..<likeData.count {
+            let like:AnyObject! = likeData[index]!
+            let fromIDObject:AnyObject! = like["id"]!
+            let fromID:UInt64 = UInt64(fromIDObject.description!.toInt()!)
+            let fromNameObject:AnyObject! = like["name"]
+            toBuilder.updateNameMappingForID(fromID, toName: fromNameObject.description!)
+            toBuilder.updateForEdgePair(EdgePair(first:withRootID, second:fromID), withWeight: kLikeRootScore)
+        }
     }
 }
 
-func testGETRequest() {
-    let url = NSURL(string: "https://graph.facebook.com/me/friends?access_token=CAACEdEose0cBAERCh5lCtu57Toam4vfY3aW9SzaT69g27pMxbsFqZB5lnGLZBsWMQsn2Gz9De4Sf3AXZARHRuNbBXWsTf93qdy6yPKsb9UVZCsOBhlpmZAOieUmaiPYoWVFhtv7CpYakZBKc4cJPBXeNAcOXN3ZBZBQoVk8ZCHdDggUZBtOd8wZAITMO4WP8ERkC9mvgUdZBsElAF9ZAZBzoou1Q7tpHKChXUhJOAZD")
-    
-    let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
-        println(NSString(data: data, encoding: NSUTF8StringEncoding))
-    }
-    
-    task.resume()
+func edgeListFromStatusesForRootUser() {
+    FBRequestConnection.startWithGraphPath(
+        "me/statuses?limit=100",
+        completionHandler: { (connection, result, error) -> Void in
+            if error == nil {
+                let statusData:AnyObject! = result["data"]!
+                let statusCount:Int = statusData.count
+                let firstStatusFromObject:AnyObject! = statusData[0]!["from"]!
+                let firstStatusFromObjectID:AnyObject! = firstStatusFromObject["id"]!
+                let firstStatusFromObjectName:AnyObject! = firstStatusFromObject["name"]!
+                let firstStatusFromObjectIDAsInt:UInt64! = UInt64(firstStatusFromObjectID.description!.toInt()!)
+                let firstStatusFromObjectNameAsString:String! = firstStatusFromObjectName.description!
+                var builder:GraphBuilder = GraphBuilder()
+                builder.updateNameMappingForID(firstStatusFromObjectIDAsInt, toName: firstStatusFromObjectNameAsString)
+                builder.updateRootUserID(firstStatusFromObjectIDAsInt)
+                for index in 0..<statusCount {
+                    let status:AnyObject! = statusData[index]!
+                    appendEdgesFromStatus(status, firstStatusFromObjectIDAsInt, &builder)
+                }
+                let graph:SocialGraph = builder.buildSocialGraph()
+                println(graph.toString())
+            }
+        } as FBRequestHandler
+    )
 }

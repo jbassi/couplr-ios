@@ -3,14 +3,17 @@
  * Represents a user's social graph derived from scraping Facebook data.
  */
 class SocialGraph {
-
+    
     /**
      * Initializes an empty graph rooted at a given user with a mapping from
      * user ID.
      */
-    init(root:UInt64) {
+    init(root:UInt64, names:[UInt64:String]) {
         self.root = root
+        self.names = names
         self.edges = [UInt64:[UInt64:Float]]()
+        self.directedTotalWeight = 0
+        self.directedEdgeCount = 0
     }
 
     /**
@@ -31,6 +34,10 @@ class SocialGraph {
         removeEdgeFrom(node, toNode:fromNode)
         removeEdgeFrom(fromNode, toNode:node)
     }
+    
+    /**
+     * Computes the sampling weight of an edge
+     */
 
     /**
      * Adds a directed edge with specified weight between two users. Does
@@ -42,8 +49,10 @@ class SocialGraph {
     func addEdgeFrom(node:UInt64, toNode:UInt64, withWeight:Float = 1) {
         if edges[node] == nil {
             edges[node] = [UInt64:Float]()
+            directedEdgeCount++
         }
         edges[node]![toNode] = weightFrom(node, toNode:toNode) + withWeight
+        directedTotalWeight += withWeight
     }
 
     /**
@@ -53,6 +62,8 @@ class SocialGraph {
      */
     func removeEdgeFrom(node:UInt64, toNode:UInt64) {
         if edges[node] != nil && edges[node]![toNode] != nil {
+            directedEdgeCount--
+            directedTotalWeight -= edges[node]![toNode]!
             edges[node]![toNode] = nil
         }
     }
@@ -74,8 +85,11 @@ class SocialGraph {
     /**
      * Returns a string representation of this graph, displaying its edges.
      */
-    func toString(names:[UInt64:String] = [UInt64:String]()) -> String {
+    func toString() -> String {
         var out:String = "SocialGraph({\n"
+        out += "    node count   : \(self.names.count)\n"
+        out += "    edge count   : \(directedEdgeCount/2)\n"
+        out += "    total weight : \(directedTotalWeight/2)\n\n"
         for (node, neighbors) in edges {
             var nodeName:String = names[node] != nil ? names[node]! : String(node)
             out += "    \(nodeName) = [\n"
@@ -91,5 +105,7 @@ class SocialGraph {
 
     var root:UInt64
     var edges:[UInt64:[UInt64:Float]]
+    var names:[UInt64:String]
+    var directedEdgeCount:Int
+    var directedTotalWeight:Float
 }
-
