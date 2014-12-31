@@ -95,7 +95,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
 extension MatchViewController: SocialGraphControllerDelegate {
     
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph) {
-//        println(graph.toString())
+        graph.updateGenders()
     }
     
 }

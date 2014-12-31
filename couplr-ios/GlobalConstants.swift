@@ -33,5 +33,9 @@ let kCommentRootScore:Float = 1.0
 let kCommentPrevScore:Float = 0.1
 let kLikeRootScore:Float = 0.2
 let kSamplingWeightLimit:Float = 4.0
-let kUnconnectedEdgeWeight:Float = -10.0
-let kRandomSampleCount:Int = 9;
+let kUnconnectedEdgeWeight:Float = -100.0
+let kRandomSampleCount:Int = 9
+let kGenderBiasCoefficient:Float = 5
+
+/* URL request prefixes */
+let kGenderResolverURL:String = "http://api.genderize.io?"

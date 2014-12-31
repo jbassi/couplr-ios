@@ -77,7 +77,13 @@ class SocialGraphController {
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
-                    println(graph.randomSample())
+//                    println(graph.toString())
+//                    println(">>>>>>> Printing some random samples before gender bias")
+//                    for index in 0..<3 {
+//                        println(graph.randomSample())
+//                        println()
+//                    }
+//                    println("=======")
                 }
             } as FBRequestHandler
         )

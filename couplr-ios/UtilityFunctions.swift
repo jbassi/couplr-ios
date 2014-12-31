@@ -18,6 +18,25 @@ func randomFloat() -> Float {
     return Float(arc4random()) / Float(UINT32_MAX)
 }
 
+func parseArrayFromJSONData(inputData: NSData) -> Array<NSDictionary> {
+    var error: NSError?
+    var boardsDictionary = NSJSONSerialization.JSONObjectWithData(inputData, options: NSJSONReadingOptions.MutableContainers, error: &error) as Array<NSDictionary>
+    return boardsDictionary
+}
+
+/**
+ * Sends a GET request to the specified URL and fires the given callback
+ * when a response is received.
+ */
+func getRequestToURL(url:String, callback:(NSData?, NSURLResponse?, NSError?) -> Void) -> Void {
+    let nsurl = NSURL(string: url)
+    let task = NSURLSession.sharedSession().dataTaskWithURL(nsurl!) {
+        (data:NSData?, response:NSURLResponse?, error:NSError?) in
+        callback(data, response, error)
+    }
+    task.resume()
+}
+
 /**
  * Returns a random positive integer LESS THAN a given upper
  * bound.

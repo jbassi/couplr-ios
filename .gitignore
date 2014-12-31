@@ -31,3 +31,6 @@ couplr-iosTests/
 
 # FB SDK
 FacebookSDK/
+
+# Temporary files
+sample_*.tmp
