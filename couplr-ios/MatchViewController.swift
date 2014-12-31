@@ -22,13 +22,14 @@ class MatchViewController: UIViewController {
     var connection: NSURLConnection?
     
     var requestHandler: CouplrFBRequestHandler = CouplrFBRequestHandler()
+    let socialGraphController = SocialGraphController.sharedInstance
     
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.delegate = self
         collectionView.dataSource = self
+        socialGraphController.delegate = self
         matchTitleLabel.setTitle(testData[0], forState: UIControlState.Normal)
-        edgeListFromStatusesForRootUser()
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -72,6 +73,8 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     
 }
 
+// MARK: - UICollectionViewDelegate and UICollectionViewDataSource Methods
+
 extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -87,9 +90,20 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     
 }
 
+// MARK: - SocialGraphControllerDelegate Methods
+
+extension MatchViewController: SocialGraphControllerDelegate {
+    
+    func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph) {
+//        println(graph.toString())
+    }
+    
+}
+
+
 // MARK: - CouplrFBRequestHandlerProtocol
 
-extension MatchViewController: CouplrFBRequestHandlerProtocol {
+extension MatchViewController: CouplrFBRequestHandlerDelegate {
     
     func couplrFBRequestHandlerWillRecieveInvitableFriends() {
         // Display loading message

@@ -8,14 +8,14 @@
 
 import UIKit
 
-protocol CouplrFBRequestHandlerProtocol: class {
+protocol CouplrFBRequestHandlerDelegate: class {
     func couplrFBRequestHandlerWillRecieveInvitableFriends()
     func couplrFBRequestHandlerDidRecieveInvitableFriends(array: NSArray)
 }
 
 class CouplrFBRequestHandler {
     
-    weak var delegate: CouplrFBRequestHandlerProtocol?
+    weak var delegate: CouplrFBRequestHandlerDelegate?
     
     init() {
         delegate = nil

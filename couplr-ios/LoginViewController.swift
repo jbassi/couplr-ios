@@ -8,13 +8,15 @@
 
 import UIKit
 
-class LoginViewController: UIViewController, FBLoginViewDelegate {
+class LoginViewController: UIViewController {
 
     @IBOutlet var loginView: FBLoginView!
     @IBOutlet var continueButton: UIButton!
 
     var viewDidAppear: Bool = false
     var viewIsVisible: Bool = false
+    
+    let socialGraphController = SocialGraphController.sharedInstance
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,6 +38,7 @@ class LoginViewController: UIViewController, FBLoginViewDelegate {
             var activeSession: FBSession = FBSession.activeSession()
 
             if(settings.shouldSkipLogin || activeSession.isOpen) {
+                socialGraphController.edgeListFromStatusesForRootUser()
                 self.performSegueWithIdentifier("ShowTabBarViewController", sender: nil)
             } else {
                 viewIsVisible = true
@@ -62,26 +65,31 @@ class LoginViewController: UIViewController, FBLoginViewDelegate {
         // Left intentionally blank to create an unwind swgue to this controller
     }
 
-    // MARK: - Facebook Delegate Methods
+}
 
+// MARK: - Facebook Delegate Methods
+
+extension LoginViewController: FBLoginViewDelegate {
+    
     func loginViewShowingLoggedInUser(loginView : FBLoginView!) {
         if (viewIsVisible) {
+            socialGraphController.edgeListFromStatusesForRootUser()
             self.performSegueWithIdentifier("ShowTabBarViewController", sender: loginView)
         }
     }
-
+    
     func loginViewShowingLoggedOutUser(loginView: FBLoginView!) {
         continueButton.hidden = true
     }
-
+    
     func loginViewFetchedUserInfo(loginView : FBLoginView!, user: FBGraphUser) {
         var buttonTitle: String = "Continue As \(user.name)..."
         continueButton.setTitle(buttonTitle, forState: UIControlState.Normal)
         continueButton.hidden = false
     }
-
+    
     func loginView(loginView : FBLoginView!, handleError:NSError) {
         CouplrLoginErrorHandler.handleError(handleError)
     }
-
+    
 }
