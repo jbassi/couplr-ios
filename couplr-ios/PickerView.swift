@@ -64,9 +64,8 @@ class PickerView: UIPickerView {
             UIView.animateWithDuration(kPickerHideAnimationDuration, delay: 0, usingSpringWithDamping: kPickerHideSpringDamping, initialSpringVelocity: kPickerSpringVelocity, options: UIViewAnimationOptions(0), animations: {
                 self.frame.origin.y = self.superview!.frame.size.height + self.frame.size.height
                 self.transparentLayer.backgroundColor = kPickerTransparentLayerHideColor
-                }, completion: nil)
-            
-            transparentLayer.removeFromSuperview()
+                }, completion: { (value:Bool) in self.transparentLayer.removeFromSuperview()
+            })
         }
     }
     

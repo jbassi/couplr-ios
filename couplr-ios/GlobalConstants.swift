@@ -21,6 +21,9 @@ let kPickerShowSpringDamping: CGFloat = 0.7
 let kPickerHideSpringDamping: CGFloat = 0.5
 let kPickerSpringVelocity: CGFloat = 0.5
 
+/* ProfilePictureCollectionViewCell Constants */
+let kProfilePictureCollectionViewCellHideAnimationDuration = 0.2
+
 /* MatchViewControllerCollectionView Constants */
 let kMatchViewControllerCollectionViewNumberOfRows: Int = 9
 

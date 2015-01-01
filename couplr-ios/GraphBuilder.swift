@@ -1,5 +1,5 @@
 //
-//  EdgeSet.swift
+//  GraphBuilder.swift
 //  couplr-ios
 //
 //  Created by Wenson Hsieh on 12/30/14.

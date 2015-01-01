@@ -11,18 +11,18 @@ import UIKit
 class MatchViewController: UIViewController {
 
     @IBOutlet weak var matchTitleLabel: UIButton!
-
+    @IBOutlet weak var collectionView: UICollectionView!
+    
     var testData = ["One Night Stand", "Prom King And Queen", "Friendzoned Forever", "Zombie Apocalypse Survivors", "Married But Not Married", "Whipped", "Met At Band Camp", "Partners In Crime", "Met At Chess Club", "Opposites Attract", "PDA Overload", "Met At A Frat Party", "Met At Church", "Overly Attached", "One True Paring"]
     var selectedTitle: String?
-
-    @IBOutlet weak var collectionView: UICollectionView!
 
     var connectionData: NSMutableData = NSMutableData()
     var connection: NSURLConnection?
     var userPictures: [UInt64:String]?
     var randomPeople: [UInt64:String]?
-    var randomPeopleArray: Array<UInt64> = Array<UInt64>()
+    var randomPeopleArray = Array<UInt64>()
     var socialGraphLoaded: Bool = false
+    var selectedUsers = Array<UInt64>()
     
     let socialGraphController = SocialGraphController.sharedInstance
     
@@ -30,6 +30,7 @@ class MatchViewController: UIViewController {
         super.viewDidLoad()
         collectionView.delegate = self
         collectionView.dataSource = self
+        collectionView.allowsMultipleSelection = true
         socialGraphController.delegate = self
         matchTitleLabel.setTitle(testData[0], forState: UIControlState.Normal)
     }
@@ -64,13 +65,14 @@ class MatchViewController: UIViewController {
         if socialGraphLoaded {
             randomPeople = socialGraphController.graph!.randomSample()
             randomPeopleDictionaryToArray()
+            selectedUsers.removeAll(keepCapacity: true)
             collectionView.reloadData()
         }
     }
     
     func randomPeopleDictionaryToArray() {
         if randomPeople != nil {
-            randomPeopleArray = Array<UInt64>()
+            randomPeopleArray.removeAll(keepCapacity: true)
             for (id, name) in randomPeople! {
                 randomPeopleArray.append(id)
             }
@@ -117,6 +119,25 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
             cell.imageView.performRequestWith(userPictures![userID]!)
         }
         return cell
+    }
+    
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        if selectedUsers.count < 2 {
+            let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
+            cell.userName = randomPeople![randomPeopleArray[indexPath.row]]!
+            selectedUsers.append(randomPeopleArray[indexPath.row])
+            collectionView.selectItemAtIndexPath(indexPath, animated: false, scrollPosition: .None)
+        } else {
+            collectionView.deselectItemAtIndexPath(indexPath, animated: false)
+        }
+    }
+    
+    func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+        let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
+        if let index = find(selectedUsers, randomPeopleArray[indexPath.row]) {
+             selectedUsers.removeAtIndex(index)
+        }
+        collectionView.deselectItemAtIndexPath(indexPath, animated: false)
     }
     
 }
