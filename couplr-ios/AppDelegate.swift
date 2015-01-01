@@ -16,6 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         FBLoginView.self
         FBProfilePictureView.self
+        application.applicationSupportsShakeToEdit = true
         return true
     }
 

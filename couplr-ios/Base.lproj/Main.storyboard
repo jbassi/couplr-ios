@@ -125,6 +125,9 @@
                                 <state key="normal" title="Reset">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections>
+                                    <action selector="shufflePeople" destination="eGk-i9-lER" eventType="touchUpInside" id="sAP-hZ-B15"/>
+                                </connections>
                             </button>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="70u-3R-ST3">
                                 <rect key="frame" x="143" y="142" width="315" height="315"/>
@@ -176,7 +179,6 @@
                     <connections>
                         <outlet property="collectionView" destination="70u-3R-ST3" id="fZX-zg-BCX"/>
                         <outlet property="matchTitleLabel" destination="oKn-lB-K4c" id="Uhz-Je-Jz1"/>
-                        <outlet property="shufflePeople" destination="Gev-os-w0J" id="7QS-dM-fbZ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6ku-9p-6N3" userLabel="First Responder" sceneMemberID="firstResponder"/>

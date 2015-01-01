@@ -19,7 +19,6 @@
 		0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5A034B19C4E06A0050DC9F /* LoginViewController.swift */; };
 		0F6074F51A4FDF2A0045B5C3 /* FacebookSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */; };
 		0F9C98891A539E0A004CAC4D /* ProfilePictureImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */; };
-		0FA10B3D1A537024007A5A9D /* CouplerFBRequestHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA10B3C1A537023007A5A9D /* CouplerFBRequestHandler.swift */; };
 		0FA10B3F1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */; };
 		0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */; };
 		0FF11BDE1A50C45600C14FDC /* GlobalConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */; };
@@ -57,7 +56,6 @@
 		0F5A034E19C4E1860050DC9F /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
 		0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePictureImageView.swift; sourceTree = "<group>"; };
-		0FA10B3C1A537023007A5A9D /* CouplerFBRequestHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CouplerFBRequestHandler.swift; sourceTree = "<group>"; };
 		0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePictureCollectionViewCell.swift; sourceTree = "<group>"; };
 		0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilityFunctions.swift; sourceTree = "<group>"; };
 		0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalConstants.swift; sourceTree = "<group>"; };
@@ -180,7 +178,6 @@
 			children = (
 				0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */,
 				0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */,
-				0FA10B3C1A537023007A5A9D /* CouplerFBRequestHandler.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -316,7 +313,6 @@
 				0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */,
 				0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */,
 				0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */,
-				0FA10B3D1A537024007A5A9D /* CouplerFBRequestHandler.swift in Sources */,
 				0F9C98891A539E0A004CAC4D /* ProfilePictureImageView.swift in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,
 				F43D50731A536CC2000E09CE /* GraphBuilder.swift in Sources */,

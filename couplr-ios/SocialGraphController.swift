@@ -10,6 +10,7 @@ import UIKit
 
 protocol SocialGraphControllerDelegate: class {
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph)
+    func socialGraphControllerDidLoadUserPictureURLs(users: [UInt64:String])
 }
 
 class SocialGraphController {
@@ -76,6 +77,7 @@ class SocialGraphController {
                     }
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
+                    self.profilePictureURLsFromGraphIDs()
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
 //                    println(graph.toString())
 //                    println(">>>>>>> Printing some random samples before gender bias")
@@ -87,6 +89,16 @@ class SocialGraphController {
                 }
             } as FBRequestHandler
         )
+    }
+    
+    func profilePictureURLsFromGraphIDs() {
+        if graph != nil && graph?.names != nil {
+            for (id, name) in graph!.names {
+                let path = "https://graph.facebook.com/"+String(id)+"/picture?width=200&height=200"
+                graph!.pictureURLs[id] = path
+            }
+            delegate?.socialGraphControllerDidLoadUserPictureURLs(graph!.pictureURLs)
+        }
     }
     
 }

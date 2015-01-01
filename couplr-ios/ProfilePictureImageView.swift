@@ -24,11 +24,6 @@ class ProfilePictureImageView: UIImageView {
     }
     
     func performRequestWith(URL: NSString) {
-        /*
-        if URL == nil {
-            return
-        }
-        */
         pictureURL = URL
         let request: NSURLRequest = NSURLRequest(URL: NSURL(string: URL)!)
         connection = NSURLConnection(request: request, delegate: self)

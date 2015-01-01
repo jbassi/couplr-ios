@@ -51,6 +51,7 @@ public class SocialGraph {
         self.root = root
         self.names = names
         self.edges = [UInt64:[UInt64:Float]]()
+        self.pictureURLs = [UInt64:String]()
         self.directedTotalWeight = 0
         self.directedEdgeCount = 0
         self.genders = [String:Gender]()
@@ -319,6 +320,7 @@ public class SocialGraph {
     var edges:[UInt64:[UInt64:Float]]
     var names:[UInt64:String]
     var genders:[String:Gender]
+    var pictureURLs:[UInt64:String]
     var directedEdgeCount:Int
     var directedTotalWeight:Float
 }

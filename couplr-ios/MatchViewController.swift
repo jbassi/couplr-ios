@@ -12,16 +12,18 @@ class MatchViewController: UIViewController {
 
     @IBOutlet weak var matchTitleLabel: UIButton!
 
-    var testData = ["One Night Stand", "Prom King And Queen", "Likely To Get Married", "Should Not Be Together"]
+    var testData = ["One Night Stand", "Prom King And Queen", "Friendzoned Forever", "Zombie Apocalypse Survivors", "Married But Not Married", "Whipped", "Met At Band Camp", "Partners In Crime", "Met At Chess Club", "Opposites Attract", "PDA Overload", "Met At A Frat Party", "Met At Church", "Overly Attached", "One True Paring"]
     var selectedTitle: String?
 
-    @IBOutlet weak var shufflePeople: UIButton!
     @IBOutlet weak var collectionView: UICollectionView!
-    var userFriends: NSArray?
+
     var connectionData: NSMutableData = NSMutableData()
     var connection: NSURLConnection?
+    var userPictures: [UInt64:String]?
+    var randomPeople: [UInt64:String]?
+    var randomPeopleArray: Array<UInt64> = Array<UInt64>()
+    var socialGraphLoaded: Bool = false
     
-    var requestHandler: CouplrFBRequestHandler = CouplrFBRequestHandler()
     let socialGraphController = SocialGraphController.sharedInstance
     
     override func viewDidLoad() {
@@ -32,21 +34,47 @@ class MatchViewController: UIViewController {
         matchTitleLabel.setTitle(testData[0], forState: UIControlState.Normal)
     }
     
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        requestHandler.delegate = self
-        requestHandler.requestInvitableFriends()
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        self.becomeFirstResponder()
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        self.resignFirstResponder()
+        super.viewWillDisappear(animated)
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    override func canBecomeFirstResponder() -> Bool {
+        return true
     }
-
+    
+    override func motionEnded(motion: UIEventSubtype, withEvent event: UIEvent) {
+        if motion == UIEventSubtype.MotionShake {
+            shufflePeople()
+        }
+    }
+    
     @IBAction func showButtonPressed() {
         let pickerView = PickerView.createPickerViewInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
         pickerView.dataSource = self
         pickerView.delegate = self
+    }
+    
+    @IBAction func shufflePeople() {
+        if socialGraphLoaded {
+            randomPeople = socialGraphController.graph!.randomSample()
+            randomPeopleDictionaryToArray()
+            collectionView.reloadData()
+        }
+    }
+    
+    func randomPeopleDictionaryToArray() {
+        if randomPeople != nil {
+            randomPeopleArray = Array<UInt64>()
+            for (id, name) in randomPeople! {
+                randomPeopleArray.append(id)
+            }
+        }
     }
 
 }
@@ -83,8 +111,11 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as ProfilePictureCollectionViewCell
-        let url = "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xap1/v/t1.0-1/c4.51.632.632/s100x100/1456027_10202214203495049_399160996_n.jpg?oh=e5d3d24e0b534091c52e51e73ab28ed1&oe=55473607&__gda__=1428901135_cb8e264f335868cb522ca25e64a3af92"
-        cell.imageView.performRequestWith(url)
+        
+        if randomPeopleArray.count > 0 {
+            let userID = randomPeopleArray[indexPath.row]
+            cell.imageView.performRequestWith(userPictures![userID]!)
+        }
         return cell
     }
     
@@ -96,22 +127,14 @@ extension MatchViewController: SocialGraphControllerDelegate {
     
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph) {
         graph.updateGenders()
-    }
-    
-}
-
-
-// MARK: - CouplrFBRequestHandlerProtocol
-
-extension MatchViewController: CouplrFBRequestHandlerDelegate {
-    
-    func couplrFBRequestHandlerWillRecieveInvitableFriends() {
-        // Display loading message
-    }
-    
-    func couplrFBRequestHandlerDidRecieveInvitableFriends(array: NSArray) {
-        userFriends = array
+        socialGraphLoaded = true
+        randomPeople = socialGraphController.graph!.randomSample()
+        randomPeopleDictionaryToArray()
         collectionView.reloadData()
     }
-
+    
+    func socialGraphControllerDidLoadUserPictureURLs(users: [UInt64 : String]) {
+        userPictures = users
+    }
+    
 }
