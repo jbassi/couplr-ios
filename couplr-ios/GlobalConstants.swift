@@ -33,13 +33,19 @@ let kPickerTransparentLayerHideColor: UIColor = UIColor(white: 1, alpha: 0)
 
 /* Social graph constants */
 let kUnconnectedEdgeWeight:Float = -1000.0
+// Like and comment scores
 let kCommentRootScore:Float = 0.8
 let kCommentPrevScore:Float = 0.1
 let kLikeRootScore:Float = 0.2
 let kCommentLikeScore:Float = 0.4
-let kSamplingWeightLimit:Float = 100
+let kSamplingWeightLimit:Float = 10
 let kRandomSampleCount:Int = 9
-let kGenderBiasCoefficient:Float = 3
+// Gender multiplier
+let kGenderMultiplierMaxExponent:Float = 2.5
+let kGenderMultiplierBase:Float = 1.5
+// Edge weight normalization
+let kNormalizedEdgeWeightRange:(Float, Float) = (-2, 2)
+let kSigmoidExponentialBase:Float = 1.5
 let kShowRandomWalkDebugOutput:Bool = true
 
 /* URL request prefixes */

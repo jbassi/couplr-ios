@@ -60,6 +60,10 @@ public class SocialGraph {
             self.genders[firstName] = Gender.Undetermined
         }
     }
+    
+    public var description:String {
+        return toString()
+    }
 
     /**
      * Returns the connection weight between two given nodes.
@@ -242,23 +246,22 @@ public class SocialGraph {
         }
         return Gender.Undetermined
     }
-
+    
     /**
-     * Computes the score of a potential next hop node from a given current node. Examines
-     * the current gender ratio of nodes traversed as well as the edge weight to help determine
-     * this score. If the next hop node is not even connected, returns a kUnconnectedEdgeWeight.
+     * Computes the gender bias for the next hop node using the current gender ratio.
      */
-    private func scoreFrom(node:UInt64, toNextHop:UInt64, withGenderRatio:(m:Float, f:Float)) -> Float {
-        let edgeWeight:Float = weightFrom(node, toNode:toNextHop)
-        let nextHopGender:Gender = genderFromID(toNextHop)
+    private func genderMultiplierForNextHopNode(nextHop:UInt64, withGenderRatio:(Float, Float)) -> Float {
+        let nextHopGender:Gender = genderFromID(nextHop)
+        var genderExponent:Float = 0
         switch nextHopGender {
         case .Undetermined:
-            return edgeWeight
+            genderExponent = 0
         case .Male:
-            return edgeWeight + (kGenderBiasCoefficient * (2 * withGenderRatio.1 - 1))
+            genderExponent = kGenderMultiplierMaxExponent * (2 * withGenderRatio.1 - 1)
         case .Female:
-            return edgeWeight + (kGenderBiasCoefficient * (2 * withGenderRatio.0 - 1))
+            genderExponent = kGenderMultiplierMaxExponent * (2 * withGenderRatio.0 - 1)
         }
+        return pow(kGenderMultiplierBase, genderExponent)
     }
 
     /**
@@ -267,7 +270,7 @@ public class SocialGraph {
      * The output will sum to 1. If no known males or females were encountered, the output
      * defaults to (0.5, 0.5)
      */
-    private func genderRatio(nodesTraversed:[UInt64:String]) -> (Float, Float) {
+    private func genderRatioForNodes(nodesTraversed:[UInt64:String]) -> (Float, Float) {
         var mcount:Float = 0
         var fcount:Float = 0
         for (id:UInt64, name:String) in nodesTraversed {
@@ -298,7 +301,7 @@ public class SocialGraph {
      * between 0 and withLimit.
      */
     private func sampleWeightForScore(score:Float, withLimit:Float = kSamplingWeightLimit) -> Float {
-        return withLimit / (1.0 + exp(-score))
+        return withLimit / (1.0 + pow(kSigmoidExponentialBase, -score))
     }
 
     /**
@@ -323,13 +326,11 @@ public class SocialGraph {
      */
     private func takeRandomStepFrom(node:UInt64, withNodesTraversed:[UInt64:String]) -> UInt64 {
         var possibleNextNodes:[(UInt64, Float)] = [(UInt64, Float)]()
-        let ratio:(Float, Float) = genderRatio(withNodesTraversed)
-        for (neighbor:UInt64, weight:Float) in self.edges[node]! {
-            if withNodesTraversed[neighbor] != nil {
-                continue
-            }
-            let neighborScore:Float = scoreFrom(node, toNextHop:neighbor, withGenderRatio:ratio)
-            let sampleWeight:Float = sampleWeightForScore(neighborScore)
+        let genderRatio:(Float, Float) = genderRatioForNodes(withNodesTraversed)
+        var normalizedWeights:[UInt64:Float] = normalizedEdgeWeightsForNode(node, withNodesTraversed: withNodesTraversed)
+        for (neighbor:UInt64, weight:Float) in normalizedWeights {
+            let multiplier:Float = genderMultiplierForNextHopNode(neighbor, withGenderRatio: genderRatio)
+            let sampleWeight:Float = multiplier * sampleWeightForScore(weight)
             possibleNextNodes.append((neighbor, sampleWeight))
         }
         if kShowRandomWalkDebugOutput {
@@ -337,18 +338,66 @@ public class SocialGraph {
                 println("[!] Beginning random walk...")
             }
             print("    [\(withNodesTraversed.count)] Now at \(names[node]!).")
-            println(" Current gender ratio: m=\(ratio.0) : f=\(ratio.1)")
+            let maleRatioRounded:String = String(format: "%.2f", genderRatio.0)
+            let femaleRatioRounded:String = String(format: "%.2f", genderRatio.1)
+            println(" (m:f = \(maleRatioRounded):\(femaleRatioRounded))")
             if possibleNextNodes.count == 0 {
                 println("        No unvisited neighbors to step to!")
                 
             } else {
+                var total:Float = 0
                 for (id:UInt64, weight:Float) in possibleNextNodes {
-                    println("        \(names[id]!): \(weight)")
+                    total += weight
+                }
+                for (id:UInt64, weight:Float) in possibleNextNodes {
+                    let percentageAsString:String = String(format: "%.2f", Double(100.0 * (weight/total)))
+                    println("        \(names[id]!): \(percentageAsString)% (w=\(normalizedWeights[id]!))")
                 }
             }
         }
         return weightedRandomSample(possibleNextNodes)
     }
+    
+    /**
+     * Computes the normalized weights for a node. Ignores any node that has already
+     * been traversed. The resulting edges range between -1 and 1 (the lowest weight
+     * maps to -1 and the highest weight to 1, with all other weights linearly scaling
+     * on the interval [-1, 1]). If all edges are the same weight, simply maps each
+     * edge to 0.
+     */
+    private func normalizedEdgeWeightsForNode(node:UInt64, withNodesTraversed:[UInt64:String]) -> [UInt64:Float] {
+        var normalizedWeights:[UInt64:Float] = [UInt64:Float]()
+        var minWeight:Float = Float.infinity
+        var maxWeight:Float = -Float.infinity
+        for (neighbor:UInt64, weight:Float) in edges[node]! {
+            if withNodesTraversed[neighbor] != nil {
+                continue
+            }
+            normalizedWeights[neighbor] = weight
+            if weight < minWeight {
+                minWeight = weight
+            }
+            if weight > maxWeight {
+                maxWeight = weight
+            }
+        }
+        if normalizedWeights.count == 0 {
+            return normalizedWeights
+        }
+        let normalizedGap:Float = kNormalizedEdgeWeightRange.1 - kNormalizedEdgeWeightRange.0
+        let scalar:Float = normalizedGap / (maxWeight - minWeight)
+        // TODO Maybe using <> comparison here is safer?
+        let allEdgesHaveEqualWeight:Bool = minWeight == maxWeight
+        for (neighbor:UInt64, weight:Float) in normalizedWeights {
+            if allEdgesHaveEqualWeight {
+                normalizedWeights[neighbor] = (normalizedGap / 2) + kNormalizedEdgeWeightRange.0
+            } else {
+                normalizedWeights[neighbor] = (weight - minWeight) * scalar + kNormalizedEdgeWeightRange.0
+            }
+        }
+        return normalizedWeights
+    }
+    
 
     /**
      * Adds a directed edge with specified weight between two users. Does
