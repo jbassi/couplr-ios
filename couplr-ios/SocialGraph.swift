@@ -119,7 +119,7 @@ public class SocialGraph {
                 println("[!] Loaded \(jsonData.count) gender predictions.")
             }
         }
-        var requestURL:String = kGenderResolverPrefix
+        var requestURL:String = kGenderizeURLPrefix
         var counter:Int = 0
         for (firstName:String, gender:Gender) in genders {
             if gender == Gender.Undetermined {
@@ -220,6 +220,13 @@ public class SocialGraph {
             }
         }
         sample[root] = nil
+        if kShowRandomWalkDebugOutput {
+            println("    Done. Final random walk result...")
+            for (id:UInt64, name:String) in sample {
+                println("        \(name) (\(id))")
+            }
+            println()
+        }
         return sample
     }
 
@@ -332,7 +339,7 @@ public class SocialGraph {
             print("    [\(withNodesTraversed.count)] Now at \(names[node]!).")
             println(" Current gender ratio: m=\(ratio.0) : f=\(ratio.1)")
             if possibleNextNodes.count == 0 {
-                println("    No unvisited neighbors to step to!")
+                println("        No unvisited neighbors to step to!")
                 
             } else {
                 for (id:UInt64, weight:Float) in possibleNextNodes {

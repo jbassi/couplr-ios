@@ -37,11 +37,11 @@ let kCommentRootScore:Float = 0.8
 let kCommentPrevScore:Float = 0.1
 let kLikeRootScore:Float = 0.2
 let kCommentLikeScore:Float = 0.4
-let kSamplingWeightLimit:Float = 5
+let kSamplingWeightLimit:Float = 100
 let kRandomSampleCount:Int = 9
-let kGenderBiasCoefficient:Float = 5
-let kShowRandomWalkDebugOutput:Bool = false
+let kGenderBiasCoefficient:Float = 3
+let kShowRandomWalkDebugOutput:Bool = true
 
 /* URL request prefixes */
-let kGenderResolverPrefix:String = "http://api.genderize.io?"
+let kGenderizeURLPrefix:String = "http://api.genderize.io?"
 let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
