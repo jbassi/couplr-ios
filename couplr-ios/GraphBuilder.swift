@@ -22,7 +22,8 @@ public class EdgePair : Hashable {
     }
     
     public var hashValue:Int {
-        return (Int(self.first) & 0xFFFFFFFF) + (Int(self.second) & 0xFFFFFFFF << 32)
+        let sum:UInt64 = first + second
+        return (UInt(sum & 0xFFFF0000) ^ UInt(sum & 0x0000FFFF)).hashValue
     }
     
     var first:UInt64
@@ -46,11 +47,12 @@ public class GraphBuilder {
         for (pair:EdgePair, weight:Float) in self.edges {
             graph.connectNode(pair.first, toNode: pair.second, withWeight: weight)
         }
-        if andLoadGender {
+        if !andFetchCommentLikes && andLoadGender {
+            // Only update the gender.
             graph.updateGenders()
-        }
-        if andFetchCommentLikes {
-            graph.updateCommentLikes(commentsWithLikesForAuthor)
+        } else if andFetchCommentLikes {
+            // Wait until after fetching comment likes to update the gender, if at all.
+            graph.updateCommentLikes(commentsWithLikesForAuthor, doLoadGender:andLoadGender)
         }
         return graph
     }

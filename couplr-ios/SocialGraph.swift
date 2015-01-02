@@ -142,7 +142,7 @@ public class SocialGraph {
      * API for the list of friends who liked the comments and updates the graph
      * data with the corresponding information.
      */
-    public func updateCommentLikes(commentsWithLikes:[String:UInt64]) {
+    public func updateCommentLikes(commentsWithLikes:[String:UInt64], doLoadGender:Bool = false) {
         let handler:(AnyObject?, AnyObject?, AnyObject?)->() = { (connection, result, error) -> Void in
             if error == nil {
                 let responseCount:Int = result!.count
@@ -158,7 +158,7 @@ public class SocialGraph {
                     let likesArray:JSON = responseJSON["likes"]["data"]
                     for index in 0..<likesArray.length {
                         let likeJSON:JSON = likesArray[index]
-                        let id:UInt64 = UInt64(likeJSON["id"].asString!.toInt()!)
+                        let id:UInt64 = uint64FromAnyObject(likeJSON["id"].asString!)
                         let name:String = likeJSON["name"].asString!
                         if commentAuthor == id {
                             continue
@@ -172,6 +172,9 @@ public class SocialGraph {
                     }
                 }
                 println("[!] Loaded \(totalLikeCount) comment likes.")
+                if doLoadGender {
+                    self.updateGenders()
+                }
             }
         }
         var requests:[[String:String]] = []

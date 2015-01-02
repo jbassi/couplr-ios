@@ -40,7 +40,8 @@ func firstNameFromFullName(fullName:String) -> String {
  *      IDs are 64-bit and toInt fails.
  */
 func uint64FromAnyObject(anyObject:AnyObject!) -> UInt64 {
-    return UInt64(anyObject.description!.toInt()!)
+    let numNSStr:NSString = NSString(string:anyObject.description)
+    return UInt64(numNSStr.longLongValue)
 }
 
 /**

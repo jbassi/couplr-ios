@@ -42,10 +42,10 @@ let kSamplingWeightLimit:Float = 10
 let kRandomSampleCount:Int = 9
 // Gender multiplier
 let kGenderMultiplierMaxExponent:Float = 2.5
-let kGenderMultiplierBase:Float = 1.5
+let kGenderMultiplierBase:Float = 1.7
 // Edge weight normalization
-let kNormalizedEdgeWeightRange:(Float, Float) = (-2, 2)
-let kSigmoidExponentialBase:Float = 1.5
+let kNormalizedEdgeWeightRange:(Float, Float) = (-2.2, 2.2)
+let kSigmoidExponentialBase:Float = 1.8
 let kShowRandomWalkDebugOutput:Bool = true
 
 /* URL request prefixes */
