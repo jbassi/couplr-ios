@@ -42,4 +42,5 @@ let kRandomSampleCount:Int = 9
 let kGenderBiasCoefficient:Float = 5
 
 /* URL request prefixes */
-let kGenderResolverURL:String = "http://api.genderize.io?"
+let kGenderResolverPrefix:String = "http://api.genderize.io?"
+let kFBGraphURLPrefix:String = "https://graph.facebook.com/"

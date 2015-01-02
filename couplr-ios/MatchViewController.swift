@@ -116,7 +116,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
         
         if randomPeopleArray.count > 0 {
             let userID = randomPeopleArray[indexPath.row]
-            cell.imageView.performRequestWith(userPictures![userID]!)
+            cell.imageView.performRequestWith(profilePictureURLFromID(userID))
         }
         return cell
     }

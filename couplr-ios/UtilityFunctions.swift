@@ -24,6 +24,10 @@ func parseArrayFromJSONData(inputData: NSData) -> Array<NSDictionary> {
     return boardsDictionary
 }
 
+func profilePictureURLFromID(id:UInt64, withWidth:Int = 200, withHeight:Int = 200) -> String {
+    return "\(kFBGraphURLPrefix)\(id)/picture?width=\(withWidth)&height=\(withHeight)"
+}
+
 /**
  * Extracts an Int from an AnyObject.
  *

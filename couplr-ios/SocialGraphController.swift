@@ -89,8 +89,7 @@ class SocialGraphController {
     func profilePictureURLsFromGraphIDs() {
         if graph != nil && graph?.names != nil {
             for (id, name) in graph!.names {
-                let path = "https://graph.facebook.com/"+String(id)+"/picture?width=200&height=200"
-                graph!.pictureURLs[id] = path
+                graph!.pictureURLs[id] = profilePictureURLFromID(id)
             }
             delegate?.socialGraphControllerDidLoadUserPictureURLs(graph!.pictureURLs)
         }

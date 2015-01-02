@@ -110,7 +110,7 @@ public class SocialGraph {
                 println("[!] Loaded \(jsonData.count) gender predictions.")
             }
         }
-        var requestURL:String = kGenderResolverURL
+        var requestURL:String = kGenderResolverPrefix
         var counter:Int = 0
         for (firstName:String, gender:Gender) in genders {
             if gender == Gender.Undetermined {
