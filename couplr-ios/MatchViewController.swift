@@ -147,7 +147,6 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
 extension MatchViewController: SocialGraphControllerDelegate {
     
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph) {
-        graph.updateGenders()
         socialGraphLoaded = true
         randomPeople = socialGraphController.graph!.randomSample()
         randomPeopleDictionaryToArray()

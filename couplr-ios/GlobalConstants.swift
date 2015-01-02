@@ -32,11 +32,12 @@ let kPickerTransparentLayerShowColor: UIColor = UIColor(white: 0.1, alpha: 0.8)
 let kPickerTransparentLayerHideColor: UIColor = UIColor(white: 1, alpha: 0)
 
 /* Social graph constants */
-let kCommentRootScore:Float = 1.0
+let kUnconnectedEdgeWeight:Float = -1000.0
+let kCommentRootScore:Float = 0.8
 let kCommentPrevScore:Float = 0.1
 let kLikeRootScore:Float = 0.2
-let kSamplingWeightLimit:Float = 4.0
-let kUnconnectedEdgeWeight:Float = -100.0
+let kCommentLikeScore:Float = 0.4
+let kSamplingWeightLimit:Float = 5
 let kRandomSampleCount:Int = 9
 let kGenderBiasCoefficient:Float = 5
 

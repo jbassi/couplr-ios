@@ -107,11 +107,7 @@ public class SocialGraph {
                     let (firstName:String, gender:String) = (nameObject.description, genderObject.description)
                     self.genders[firstName] = genderFromString(gender)
                 }
-//                for index in 0...10 {
-//                    println(self.randomSample())
-//                    println()
-//                }
-//                println("<<<<<<< Random samples after gender bias")
+                println("[!] Loaded \(jsonData.count) gender predictions.")
             }
         }
         var requestURL:String = kGenderResolverURL
@@ -126,6 +122,56 @@ public class SocialGraph {
             requestURL = requestURL.substringToIndex(requestURL.endIndex.predecessor())
             getRequestToURL(requestURL, addGenders)
         }
+    }
+
+    /**
+     * Given a set of IDs indicating comments with likes, queries the Facebook
+     * API for the list of friends who liked the comments and updates the graph
+     * data with the corresponding information.
+     */
+    public func updateCommentLikes(commentsWithLikes:[String:UInt64]) {
+        let handler:(AnyObject?, AnyObject?, AnyObject?)->() = { (connection, result, error) -> Void in
+            if error == nil {
+                let responseCount:Int = result!.count
+                var totalLikeCount:Int = 0;
+                for index in 0..<responseCount {
+                    let responseBody:String! = result![index]!["body"]! as? String!
+                    let responseJSON:JSON! = JSON.parse(responseBody)
+                    let commentID:String = responseJSON["id"].description
+                    var commentAuthor:UInt64? = commentsWithLikes[commentID]
+                    if commentAuthor == nil {
+                        continue
+                    }
+                    let likesArray:JSON = responseJSON["likes"]["data"]
+                    for index in 0..<likesArray.length {
+                        let likeJSON:JSON = likesArray[index]
+                        let id:UInt64 = UInt64(likeJSON["id"].asString!.toInt()!)
+                        let name:String = likeJSON["name"].asString!
+                        if commentAuthor == id {
+                            continue
+                        }
+                        if self.names[id] == nil {
+                            self.names[id] = name
+                        }
+                        totalLikeCount++
+                        self.connectNode(commentAuthor!, toNode:id, withWeight:kCommentLikeScore)
+                    }
+                }
+                println("[!] Loaded \(totalLikeCount) comment likes.")
+            }
+        }
+        var requests:[[String:String]] = []
+        for (id:String, author:UInt64) in commentsWithLikes {
+            let graphPath:String = "\(id)?fields=likes"
+            let dictionary:NSDictionary = NSDictionary()
+            requests.append(["method":"GET", "relative_url":graphPath])
+        }
+        // TODO This is a clusterfuck. There's probably a cleaner way to do this...?
+        var encodingError:NSError? = nil
+        let jsonData:NSData? = NSJSONSerialization.dataWithJSONObject(requests, options: nil, error: &encodingError)
+        var jsonString:NSString = NSString(data:jsonData!, encoding:NSUTF8StringEncoding)!
+        let params:NSDictionary = NSDictionary(dictionary: ["batch": jsonString])
+        FBRequestConnection.startWithGraphPath("", parameters: params, HTTPMethod:"POST", completionHandler:handler)
     }
 
     /**
@@ -266,13 +312,6 @@ public class SocialGraph {
             let sampleWeight:Float = sampleWeightForScore(neighborScore)
             possibleNextNodes.append((neighbor, sampleWeight))
         }
-//        println("Currently @\(self.names[node]!)")
-//        println("Gender ratio: [m=\(ratio.0)), f=\(ratio.1)]")
-//        println("Next possible nodes: [")
-//        for (id:UInt64, weight:Float) in possibleNextNodes {
-//            println("    w(\(self.names[id]!)) = \(weight)")
-//        }
-//        println("]")
         return weightedRandomSample(possibleNextNodes)
     }
 
@@ -316,11 +355,14 @@ public class SocialGraph {
         return (edges[node] == nil || edges[node]![toNode] == nil) ? kUnconnectedEdgeWeight : edges[node]![toNode]!
     }
 
+    // Core app-related data.
     var root:UInt64
     var edges:[UInt64:[UInt64:Float]]
     var names:[UInt64:String]
     var genders:[String:Gender]
     var pictureURLs:[UInt64:String]
+
+    // Edge-based metadata for future heuristics.
     var directedEdgeCount:Int
     var directedTotalWeight:Float
 }

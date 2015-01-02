@@ -25,6 +25,17 @@ func parseArrayFromJSONData(inputData: NSData) -> Array<NSDictionary> {
 }
 
 /**
+ * Extracts an Int from an AnyObject.
+ *
+ * TODO This is god-awful, we'll need to find a safer way to implement this.
+ * TODO On 32-bit platforms, this causes the app the crash since Facebook
+ *      IDs are 64-bit and toInt fails.
+ */
+func uint64FromAnyObject(anyObject:AnyObject!) -> UInt64 {
+    return UInt64(anyObject.description!.toInt()!)
+}
+
+/**
  * Sends a GET request to the specified URL and fires the given callback
  * when a response is received.
  */

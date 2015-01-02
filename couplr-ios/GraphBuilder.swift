@@ -7,9 +7,10 @@
 //
 
 /**
- * Represents a set of edges used to construct a SocialGraph.
+ * Represents a set of edges used to construct a SocialGraph. Forms the glue between
+ * the graph data structure and the parsed comment data from Facebook.
  */
-class EdgePair : Hashable {
+public class EdgePair : Hashable {
     init(first:UInt64, second:UInt64) {
         if first > second {
             self.first = second
@@ -20,7 +21,7 @@ class EdgePair : Hashable {
         }
     }
     
-    var hashValue:Int {
+    public var hashValue:Int {
         return (Int(self.first) & 0xFFFFFFFF) + (Int(self.second) & 0xFFFFFFFF << 32)
     }
     
@@ -28,34 +29,41 @@ class EdgePair : Hashable {
     var second:UInt64
 }
 
-func ==(a: EdgePair, b: EdgePair) -> Bool {
+public func ==(a: EdgePair, b: EdgePair) -> Bool {
     return a.first == b.first && a.second == b.second
 }
 
-class GraphBuilder {
-    init() {
+public class GraphBuilder {
+    init(forRootUserID:UInt64, withName:String) {
         self.edges = [EdgePair:Float]()
-        self.names = [UInt64:String]()
-        self.rootID = 0
+        self.names = [forRootUserID:withName]
+        self.rootID = forRootUserID
+        self.commentsWithLikesForAuthor = [String:UInt64]()
     }
     
-    func buildSocialGraph() -> SocialGraph {
-        let result:SocialGraph = SocialGraph(root:self.rootID, names:self.names)
+    public func buildSocialGraph(andLoadGender:Bool = true, andFetchCommentLikes:Bool = true) -> SocialGraph {
+        let graph:SocialGraph = SocialGraph(root:self.rootID, names:self.names)
         for (pair:EdgePair, weight:Float) in self.edges {
-            result.connectNode(pair.first, toNode: pair.second, withWeight: weight)
+            graph.connectNode(pair.first, toNode: pair.second, withWeight: weight)
         }
-        return result
+        if andLoadGender {
+            graph.updateGenders()
+        }
+        if andFetchCommentLikes {
+            graph.updateCommentLikes(commentsWithLikesForAuthor)
+        }
+        return graph
     }
     
-    func updateRootUserID(id:UInt64) {
+    public func updateRootUserID(id:UInt64) {
         self.rootID = id
     }
     
-    func updateNameMappingForID(id:UInt64, toName:String) {
+    public func updateNameMappingForID(id:UInt64, toName:String) {
         self.names[id] = toName
     }
     
-    func updateForEdgePair(pair:EdgePair, withWeight:Float) -> Bool {
+    public func updateForEdgePair(pair:EdgePair, withWeight:Float) -> Bool {
         if self.names[pair.first] == nil || self.names[pair.second] == nil || pair.first >= pair.second {
             // Do not allow self-edges or edges connecting unknown ids.
             return false
@@ -74,7 +82,12 @@ class GraphBuilder {
         return true
     }
     
+    public func updateCommentsWithLikes(id:String, forAuthorID:UInt64) {
+        commentsWithLikesForAuthor[id] = forAuthorID
+    }
+    
     var edges:[EdgePair:Float]
     var names:[UInt64:String]
     var rootID:UInt64
+    var commentsWithLikesForAuthor:[String:UInt64]
 }

@@ -25,20 +25,26 @@ class SocialGraphController {
         return SocialGraphSingleton.instance
     }
     
-    func appendEdgesFromStatus(status:AnyObject!, withRootID:UInt64!, inout toBuilder:GraphBuilder) -> Void {
+    func updateFromStatus(status:AnyObject!, withRootID:UInt64!, inout withBuilder:GraphBuilder) -> Void {
         var allComments:AnyObject? = status["comments"]
         var previousThreadID:UInt64 = withRootID;
         if allComments != nil {
             let commentData:AnyObject! = allComments!["data"]!
             for index in 0..<commentData.count {
                 let comment:AnyObject! = commentData[index]!
+                // Add scores for the author of the comment.
                 let from:AnyObject! = comment["from"]!
-                let fromIDObject:AnyObject! = from["id"]!
-                let fromID:UInt64 = UInt64(fromIDObject.description!.toInt()!)
-                let fromNameObject:AnyObject! = from["name"]
-                toBuilder.updateNameMappingForID(fromID, toName: fromNameObject.description!)
-                toBuilder.updateForEdgePair(EdgePair(first:withRootID, second:fromID), withWeight:kCommentRootScore)
-                toBuilder.updateForEdgePair(EdgePair(first:previousThreadID, second:fromID), withWeight:kCommentPrevScore)
+                let fromID:UInt64 = uint64FromAnyObject(from["id"]!)
+                let fromNameObject:AnyObject! = from["name"]!
+                withBuilder.updateNameMappingForID(fromID, toName: fromNameObject.description!)
+                withBuilder.updateForEdgePair(EdgePair(first:withRootID, second:fromID), withWeight:kCommentRootScore)
+                withBuilder.updateForEdgePair(EdgePair(first:previousThreadID, second:fromID), withWeight:kCommentPrevScore)
+                // Check if the comment has any likes.
+                if let commentIDObject:AnyObject? = comment["id"] {
+                    if uint64FromAnyObject(comment["like_count"]!) > 0 {
+                        withBuilder.updateCommentsWithLikes(commentIDObject!.description!, forAuthorID:fromID)
+                    }
+                }
                 previousThreadID = fromID
             }
         }
@@ -47,16 +53,15 @@ class SocialGraphController {
             let likeData:AnyObject! = allLikes!["data"]!
             for index in 0..<likeData.count {
                 let like:AnyObject! = likeData[index]!
-                let fromIDObject:AnyObject! = like["id"]!
-                let fromID:UInt64 = UInt64(fromIDObject.description!.toInt()!)
+                let fromID:UInt64 = uint64FromAnyObject(like["id"]!)
                 let fromNameObject:AnyObject! = like["name"]
-                toBuilder.updateNameMappingForID(fromID, toName: fromNameObject.description!)
-                toBuilder.updateForEdgePair(EdgePair(first:withRootID, second:fromID), withWeight: kLikeRootScore)
+                withBuilder.updateNameMappingForID(fromID, toName: fromNameObject.description!)
+                withBuilder.updateForEdgePair(EdgePair(first:withRootID, second:fromID), withWeight: kLikeRootScore)
             }
         }
     }
     
-    func edgeListFromStatusesForRootUser() {
+    func initializeGraph() {
         FBRequestConnection.startWithGraphPath(
             "me/statuses?limit=100",
             completionHandler: { (connection, result, error) -> Void in
@@ -64,28 +69,18 @@ class SocialGraphController {
                     let statusData:AnyObject! = result["data"]!
                     let statusCount:Int = statusData.count
                     let firstStatusFromObject:AnyObject! = statusData[0]!["from"]!
-                    let firstStatusFromObjectID:AnyObject! = firstStatusFromObject["id"]!
                     let firstStatusFromObjectName:AnyObject! = firstStatusFromObject["name"]!
-                    let firstStatusFromObjectIDAsInt:UInt64! = UInt64(firstStatusFromObjectID.description!.toInt()!)
-                    let firstStatusFromObjectNameAsString:String! = firstStatusFromObjectName.description!
-                    var builder:GraphBuilder = GraphBuilder()
-                    builder.updateNameMappingForID(firstStatusFromObjectIDAsInt, toName: firstStatusFromObjectNameAsString)
-                    builder.updateRootUserID(firstStatusFromObjectIDAsInt)
+                    let rootUserID:UInt64! = uint64FromAnyObject(firstStatusFromObject["id"]!)
+                    let rootUserName:String! = firstStatusFromObjectName.description!
+                    var builder:GraphBuilder = GraphBuilder(forRootUserID:rootUserID, withName: rootUserName)
                     for index in 0..<statusCount {
                         let status:AnyObject! = statusData[index]!
-                        self.appendEdgesFromStatus(status, withRootID: firstStatusFromObjectIDAsInt, toBuilder: &builder)
+                        self.updateFromStatus(status, withRootID: rootUserID, withBuilder: &builder)
                     }
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
                     self.profilePictureURLsFromGraphIDs()
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
-//                    println(graph.toString())
-//                    println(">>>>>>> Printing some random samples before gender bias")
-//                    for index in 0..<3 {
-//                        println(graph.randomSample())
-//                        println()
-//                    }
-//                    println("=======")
                 }
             } as FBRequestHandler
         )
