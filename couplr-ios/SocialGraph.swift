@@ -88,6 +88,15 @@ public class SocialGraph {
         out += "})"
         return out
     }
+    
+    public func updateNodeWithID(id:UInt64, andName:String) {
+        names[id] = andName
+        let firstName:String = firstNameFromFullName(andName)
+        if genders[firstName] == nil {
+            genders[firstName] = Gender.Undetermined
+        }
+        pictureURLs[id] = profilePictureURLFromID(id)
+    }
 
     /**
      * Load a map from first name to gender using the first names encountered
@@ -151,7 +160,8 @@ public class SocialGraph {
                             continue
                         }
                         if self.names[id] == nil {
-                            self.names[id] = name
+                            // Introduce a new node to the graph.
+                            self.updateNodeWithID(id, andName: name)
                         }
                         totalLikeCount++
                         self.connectNode(commentAuthor!, toNode:id, withWeight:kCommentLikeScore)
@@ -205,19 +215,22 @@ public class SocialGraph {
                 nextStep = sampleRandomNode(sample)
             }
             sample[nextStep] = names[nextStep]!
-            nextStep = takeRandomStepFrom(nextStep, withNodesTraversed:sample)
+            if sample.count <= size {
+                nextStep = takeRandomStepFrom(nextStep, withNodesTraversed:sample)
+            }
         }
         sample[root] = nil
         return sample
     }
 
     /**
-     * Shortcut for finding the gender given user ID. Uses the graph's data structures to map
-     * ID -> name -> first name -> gender. Returns Gender.Undetermined if ID lookup failed.
+     * Shortcut for finding the gender given user ID. Uses the graph's data structures
+     * to map ID -> name -> first name -> gender. Returns Gender.Undetermined if ID
+     * lookup failed.
      */
     private func genderFromID(id:UInt64) -> Gender {
         if let name:String = names[id] {
-            let firstName:String = name.substringToIndex(name.rangeOfString(" ")!.startIndex)
+            let firstName:String = firstNameFromFullName(name)
             return genders[firstName] == nil ? Gender.Undetermined : genders[firstName]!
         }
         return Gender.Undetermined
@@ -311,6 +324,21 @@ public class SocialGraph {
             let neighborScore:Float = scoreFrom(node, toNextHop:neighbor, withGenderRatio:ratio)
             let sampleWeight:Float = sampleWeightForScore(neighborScore)
             possibleNextNodes.append((neighbor, sampleWeight))
+        }
+        if kShowRandomWalkDebugOutput {
+            if withNodesTraversed.count == 1 {
+                println("[!] Beginning random walk...")
+            }
+            print("    [\(withNodesTraversed.count)] Now at \(names[node]!).")
+            println(" Current gender ratio: m=\(ratio.0) : f=\(ratio.1)")
+            if possibleNextNodes.count == 0 {
+                println("    No unvisited neighbors to step to!")
+                
+            } else {
+                for (id:UInt64, weight:Float) in possibleNextNodes {
+                    println("        \(names[id]!): \(weight)")
+                }
+            }
         }
         return weightedRandomSample(possibleNextNodes)
     }

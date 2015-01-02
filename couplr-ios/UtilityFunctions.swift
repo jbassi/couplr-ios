@@ -28,6 +28,10 @@ func profilePictureURLFromID(id:UInt64, withWidth:Int = 200, withHeight:Int = 20
     return "\(kFBGraphURLPrefix)\(id)/picture?width=\(withWidth)&height=\(withHeight)"
 }
 
+func firstNameFromFullName(fullName:String) -> String {
+    return fullName.substringToIndex(fullName.rangeOfString(" ")!.startIndex)
+}
+
 /**
  * Extracts an Int from an AnyObject.
  *

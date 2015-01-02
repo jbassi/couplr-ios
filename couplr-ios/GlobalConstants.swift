@@ -40,6 +40,7 @@ let kCommentLikeScore:Float = 0.4
 let kSamplingWeightLimit:Float = 5
 let kRandomSampleCount:Int = 9
 let kGenderBiasCoefficient:Float = 5
+let kShowRandomWalkDebugOutput:Bool = false
 
 /* URL request prefixes */
 let kGenderResolverPrefix:String = "http://api.genderize.io?"
