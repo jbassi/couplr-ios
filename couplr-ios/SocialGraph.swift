@@ -346,7 +346,6 @@ public class SocialGraph {
             println(" (m:f = \(maleRatioRounded):\(femaleRatioRounded))")
             if possibleNextNodes.count == 0 {
                 println("        No unvisited neighbors to step to!")
-                
             } else {
                 var total:Float = 0
                 for (id:UInt64, weight:Float) in possibleNextNodes {
@@ -401,7 +400,6 @@ public class SocialGraph {
         return normalizedWeights
     }
     
-
     /**
      * Adds a directed edge with specified weight between two users. Does
      * not check for self-edges. If an edge already exists between the users,

@@ -48,6 +48,10 @@ let kNormalizedEdgeWeightRange:(Float, Float) = (-2.2, 2.2)
 let kSigmoidExponentialBase:Float = 1.8
 let kShowRandomWalkDebugOutput:Bool = true
 
+/* Parse configuration */
+let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
+let kParseClientKey:String = "3qw7fEgFDKJgCT1hPSii3JhF0NZHo1fCym3of2Wh"
+
 /* URL request prefixes */
 let kGenderizeURLPrefix:String = "http://api.genderize.io?"
 let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
