@@ -90,3 +90,18 @@ func weightedRandomSample(elements:[(UInt64, Float)]) -> UInt64 {
     }
     return result
 }
+
+/**
+ * Prints log messages for debugging.
+ */
+func log(message:String, withIndentLevel:Int = 0, withNewline:Bool = true, withFlag:Character = "+") -> Void {
+    var spacing:String = " "
+    for i:Int in 0..<withIndentLevel {
+        spacing += " "
+    }
+    if withNewline {
+        println("[\(withFlag)]\(spacing)\(message)")
+    } else {
+        print("[\(withFlag)]\(spacing)\(message)")
+    }
+}

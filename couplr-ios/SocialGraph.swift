@@ -56,10 +56,7 @@ public class SocialGraph {
         self.totalEdgeWeight = 0
         self.edgeCount = 0
         self.genders = [String:Gender]()
-        for (id:UInt64, fullName:String) in self.names {
-            let firstName:String = fullName.substringToIndex(fullName.rangeOfString(" ")!.startIndex)
-            self.genders[firstName] = Gender.Undetermined
-        }
+        updateFirstNames()
     }
     
     public var description:String {
@@ -109,6 +106,7 @@ public class SocialGraph {
      * to Gender.Undetermined.
      */
     public func updateGenders() {
+        updateFirstNames()
         let addGenders:(NSData?, NSURLResponse?, NSError?) -> Void = {
             (data:NSData?, response:NSURLResponse?, error:NSError?) in
             if error == nil {
@@ -120,7 +118,7 @@ public class SocialGraph {
                     let (firstName:String, gender:String) = (nameObject.description, genderObject.description)
                     self.genders[firstName] = genderFromString(gender)
                 }
-                println("[+] Loaded \(jsonData.count) gender predictions.")
+                log("Loaded \(jsonData.count) gender predictions.")
                 self.saveGraphDataWithWeightThreshold()
             }
         }
@@ -144,6 +142,7 @@ public class SocialGraph {
      * data with the corresponding information.
      */
     public func updateCommentLikes(commentsWithLikes:[String:UInt64], doLoadGender:Bool = false) {
+        var remainingCommentsWithLikes:[String:UInt64] = [String:UInt64]()
         let handler:(AnyObject?, AnyObject?, AnyObject?)->() = { (connection, result, error) -> Void in
             if error == nil {
                 let responseCount:Int = result!.count
@@ -172,17 +171,23 @@ public class SocialGraph {
                         self.connectNode(commentAuthor!, toNode:id, withWeight:kCommentLikeScore)
                     }
                 }
-                println("[+] Loaded \(totalLikeCount) comment likes.")
-                if doLoadGender {
+                log("Loaded \(totalLikeCount) comment likes.")
+                if remainingCommentsWithLikes.count > 0 {
+                    self.updateCommentLikes(remainingCommentsWithLikes, doLoadGender: doLoadGender)
+                } else if doLoadGender {
                     self.updateGenders()
                 }
             }
         }
         var requests:[[String:String]] = []
         for (id:String, author:UInt64) in commentsWithLikes {
-            let graphPath:String = "\(id)?fields=likes"
-            let dictionary:NSDictionary = NSDictionary()
-            requests.append(["method":"GET", "relative_url":graphPath])
+            if requests.count >= kMaxAllowedBatchRequestSize {
+                remainingCommentsWithLikes[id] = author
+            } else {
+                let graphPath:String = "\(id)?fields=likes"
+                let dictionary:NSDictionary = NSDictionary()
+                requests.append(["method":"GET", "relative_url":graphPath])
+            }
         }
         var encodingError:NSError? = nil
         let jsonData:NSData? = NSJSONSerialization.dataWithJSONObject(requests, options: nil, error: &encodingError)
@@ -211,7 +216,10 @@ public class SocialGraph {
             for (node:UInt64, neighbors:[UInt64:Float]) in self.edges {
                 let nodeNum:NSNumber = NSNumber(unsignedLongLong:node)
                 let nodeAsString:NSString = nodeNum.stringValue
-                for (neighbor:UInt64, weight:Float) in neighbors {
+                for (neighbor:UInt64, var weight:Float) in neighbors {
+                    if node == self.root || neighbor == self.root {
+                        weight /= 5 // TODO Normalize this to number of comments or something?
+                    }
                     if node < neighbor && weight > minEdgeWeight {
                         let neighborNum:NSNumber = NSNumber(unsignedLongLong:neighbor)
                         let neighborAsString:NSString = neighborNum.stringValue
@@ -228,19 +236,18 @@ public class SocialGraph {
             graphData["names"] = nameDictionary
             graphData["edges"] = edgeArray
             if objects.count > 0 {
-                print("[!] Saving graph data with object id \(graphData.objectId) ")
+                log("Saving graph with id \(graphData.objectId) (\(nameDictionary.count) nodes, \(edgeArray.count) edges).", withFlag:"!")
             } else {
-                print("[!] Saving graph data with new object id ")
+                log("Saving graph with new id (\(nameDictionary.count) nodes, \(edgeArray.count) edges).", withFlag:"!")
             }
-            println("(\(nameDictionary.count) nodes, \(edgeArray.count) edges).")
             graphData.saveInBackgroundWithBlock({
                 (succeeded:Bool, error:NSError?) -> Void in
                 if succeeded && error == nil {
-                    println("[+]    Successfully saved graph to Parse.")
+                    log("Successfully saved graph to Parse.", withIndentLevel:4, withFlag:"+")
                 } else if error != nil {
-                    println("[-]    An error occured while saving to Parse: \(error).")
+                    log("An error occured while saving to Parse.", withIndentLevel:4, withFlag:"-")
                 } else {
-                    println("[?]    Unknown error occurred while saving to Parse.")
+                    log("Unknown error occurred while saving to Parse.", withIndentLevel:4, withFlag:"?")
                 }
             })
         })
@@ -301,8 +308,25 @@ public class SocialGraph {
         return sample
     }
     
+    /**
+     * Returns whether or not two nodes are connected. Assumes that all edges are undirected.
+     */
     public func hasEdgeFromNode(node:UInt64, to:UInt64) -> Bool {
         return self[node, to] > kUnconnectedEdgeWeight
+    }
+    
+    /**
+     * Takes all names that appear as values in self.names and extracts first names. Then
+     * adds each first name to self.genders, if it is not already present. New first names
+     * are initially mapped to Gender.Undetermined.
+     */
+    private func updateFirstNames() {
+        for (id:UInt64, fullName:String) in self.names {
+            let firstName:String = fullName.substringToIndex(fullName.rangeOfString(" ")!.startIndex)
+            if self.genders[firstName] == nil {
+                self.genders[firstName] = Gender.Undetermined
+            }
+        }
     }
 
     /**

@@ -11,6 +11,9 @@ import UIKit
 /* CouplrSettingsManager Constants */
 let kShouldSkipLoginKey: String = "kShouldSkipLoginKey"
 
+/* Facebook API */
+let kMaxAllowedBatchRequestSize:Int = 50
+
 /* PickerView Constants */
 let kPickerViewWidthInsets: CGFloat = 80.0
 let kPickerViewHeight: CGFloat = 180.0
