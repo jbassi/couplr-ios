@@ -46,7 +46,7 @@ let kGenderMultiplierBase:Float = 1.7
 // Edge weight normalization
 let kNormalizedEdgeWeightRange:(Float, Float) = (-2.2, 2.2)
 let kSigmoidExponentialBase:Float = 1.8
-let kShowRandomWalkDebugOutput:Bool = true
+let kShowRandomWalkDebugOutput:Bool = false
 
 /* Parse configuration */
 let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"

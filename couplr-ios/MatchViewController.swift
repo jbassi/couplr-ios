@@ -7,6 +7,19 @@
 //
 
 import UIKit
+import Parse
+
+/**
+* Loads match titles from Parse and passes them to a given callback
+* function.
+*/
+func loadMatchTitles(withCallback:([AnyObject]!, NSError?) -> Void) {
+    var query = PFQuery(className:"MatchTitle")
+    query.findObjectsInBackgroundWithBlock {
+        (objects: [AnyObject]!, error: NSError?) -> Void in
+        withCallback(objects, error)
+    }
+}
 
 class MatchViewController: UIViewController {
 
@@ -151,10 +164,5 @@ extension MatchViewController: SocialGraphControllerDelegate {
         randomPeople = socialGraphController.graph!.randomSample()
         randomPeopleDictionaryToArray()
         collectionView.reloadData()
-    }
-    
-    func socialGraphControllerDidLoadUserPictureURLs(users: [UInt64 : String]) {
-        userPictures = users
-    }
-    
+    }    
 }

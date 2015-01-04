@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 Jeremy Bassi. All rights reserved.
 //
 
+import Parse
+
 /**
  * It's not quite politically correct, but it's a start.
  * TODO Better support for non-heteronormativity.
@@ -51,9 +53,8 @@ public class SocialGraph {
         self.root = root
         self.names = names
         self.edges = [UInt64:[UInt64:Float]]()
-        self.pictureURLs = [UInt64:String]()
-        self.directedTotalWeight = 0
-        self.directedEdgeCount = 0
+        self.totalEdgeWeight = 0
+        self.edgeCount = 0
         self.genders = [String:Gender]()
         for (id:UInt64, fullName:String) in self.names {
             let firstName:String = fullName.substringToIndex(fullName.rangeOfString(" ")!.startIndex)
@@ -78,8 +79,8 @@ public class SocialGraph {
     public func toString() -> String {
         var out:String = "SocialGraph({\n"
         out += "    node count   : \(self.names.count)\n"
-        out += "    edge count   : \(directedEdgeCount/2)\n"
-        out += "    total weight : \(directedTotalWeight/2)\n\n"
+        out += "    edge count   : \(edgeCount)\n"
+        out += "    total weight : \(totalEdgeWeight)\n\n"
         for (node, neighbors) in edges {
             var nodeName:String = names[node] != nil ? names[node]! : String(node)
             out += "    \(nodeName) = [\n"
@@ -99,7 +100,6 @@ public class SocialGraph {
         if genders[firstName] == nil {
             genders[firstName] = Gender.Undetermined
         }
-        pictureURLs[id] = profilePictureURLFromID(id)
     }
 
     /**
@@ -120,7 +120,8 @@ public class SocialGraph {
                     let (firstName:String, gender:String) = (nameObject.description, genderObject.description)
                     self.genders[firstName] = genderFromString(gender)
                 }
-                println("[!] Loaded \(jsonData.count) gender predictions.")
+                println("[+] Loaded \(jsonData.count) gender predictions.")
+                self.saveGraphDataWithWeightThreshold()
             }
         }
         var requestURL:String = kGenderizeURLPrefix
@@ -171,7 +172,7 @@ public class SocialGraph {
                         self.connectNode(commentAuthor!, toNode:id, withWeight:kCommentLikeScore)
                     }
                 }
-                println("[!] Loaded \(totalLikeCount) comment likes.")
+                println("[+] Loaded \(totalLikeCount) comment likes.")
                 if doLoadGender {
                     self.updateGenders()
                 }
@@ -183,12 +184,66 @@ public class SocialGraph {
             let dictionary:NSDictionary = NSDictionary()
             requests.append(["method":"GET", "relative_url":graphPath])
         }
-        // TODO This is a clusterfuck. There's probably a cleaner way to do this...?
         var encodingError:NSError? = nil
         let jsonData:NSData? = NSJSONSerialization.dataWithJSONObject(requests, options: nil, error: &encodingError)
         var jsonString:NSString = NSString(data:jsonData!, encoding:NSUTF8StringEncoding)!
         let params:NSDictionary = NSDictionary(dictionary: ["batch": jsonString])
         FBRequestConnection.startWithGraphPath("", parameters: params, HTTPMethod:"POST", completionHandler:handler)
+    }
+    
+    /**
+     * Asynchronously upload a subset of the graph to the Parse database. Only
+     * include edges GREATER THAN a given threshold. By default, kCommentPrevScore
+     * is chosen to remove all links that may have occured due to error.
+     */
+    public func saveGraphDataWithWeightThreshold(minEdgeWeight:Float = kCommentPrevScore) {
+        var query:PFQuery = PFQuery(className:"GraphData")
+        query.whereKey("rootId", equalTo:NSNumber(unsignedLongLong:root))
+        query.findObjectsInBackgroundWithBlock({
+            (objects:[AnyObject]!, error:NSError?) -> Void in
+            var graphData:PFObject = PFObject(className:"GraphData")
+            if objects.count > 0 {
+                graphData.objectId = objects[0].objectId
+            }
+            graphData["rootId"] = NSNumber(unsignedLongLong:self.root)
+            var edgeArray:[[NSNumber]] = [[NSNumber]]()
+            var nameDictionary:[NSString:NSString] = [NSString:NSString]()
+            for (node:UInt64, neighbors:[UInt64:Float]) in self.edges {
+                let nodeNum:NSNumber = NSNumber(unsignedLongLong:node)
+                let nodeAsString:NSString = nodeNum.stringValue
+                for (neighbor:UInt64, weight:Float) in neighbors {
+                    if node < neighbor && weight > minEdgeWeight {
+                        let neighborNum:NSNumber = NSNumber(unsignedLongLong:neighbor)
+                        let neighborAsString:NSString = neighborNum.stringValue
+                        edgeArray.append([nodeNum, neighborNum, weight])
+                        if nameDictionary[nodeAsString] == nil {
+                            nameDictionary[nodeAsString] = self.names[node]
+                        }
+                        if nameDictionary[neighborAsString] == nil {
+                            nameDictionary[neighborAsString] = self.names[neighbor]
+                        }
+                    }
+                }
+            }
+            graphData["names"] = nameDictionary
+            graphData["edges"] = edgeArray
+            if objects.count > 0 {
+                print("[!] Saving graph data with object id \(graphData.objectId) ")
+            } else {
+                print("[!] Saving graph data with new object id ")
+            }
+            println("(\(nameDictionary.count) nodes, \(edgeArray.count) edges).")
+            graphData.saveInBackgroundWithBlock({
+                (succeeded:Bool, error:NSError?) -> Void in
+                if succeeded && error == nil {
+                    println("[+]    Successfully saved graph to Parse.")
+                } else if error != nil {
+                    println("[-]    An error occured while saving to Parse: \(error).")
+                } else {
+                    println("[?]    Unknown error occurred while saving to Parse.")
+                }
+            })
+        })
     }
 
     /**
@@ -197,6 +252,10 @@ public class SocialGraph {
      * enforce symmetry.
      */
     public func connectNode(node:UInt64, toNode:UInt64, withWeight:Float = 1) {
+        if !hasEdgeFromNode(node, to:toNode) {
+            edgeCount++
+        }
+        totalEdgeWeight += withWeight
         addEdgeFrom(node, toNode:toNode, withWeight:withWeight)
         addEdgeFrom(toNode, toNode:node, withWeight:withWeight)
     }
@@ -206,8 +265,13 @@ public class SocialGraph {
      * graph will enforce symmetry.
      */
     public func disconnectNode(node:UInt64, fromNode:UInt64) {
-        removeEdgeFrom(node, toNode:fromNode)
-        removeEdgeFrom(fromNode, toNode:node)
+        let currentEdgeWeight:Float = self[node, fromNode]
+        if currentEdgeWeight > kUnconnectedEdgeWeight {
+            edgeCount--
+            totalEdgeWeight -= currentEdgeWeight
+            removeEdgeFrom(node, toNode:fromNode)
+            removeEdgeFrom(fromNode, toNode:node)
+        }
     }
 
     /**
@@ -235,6 +299,10 @@ public class SocialGraph {
             println()
         }
         return sample
+    }
+    
+    public func hasEdgeFromNode(node:UInt64, to:UInt64) -> Bool {
+        return self[node, to] > kUnconnectedEdgeWeight
     }
 
     /**
@@ -410,14 +478,12 @@ public class SocialGraph {
     private func addEdgeFrom(node:UInt64, toNode:UInt64, withWeight:Float = 1) {
         if edges[node] == nil {
             edges[node] = [UInt64:Float]()
-            directedEdgeCount++
         }
         var currentWeight:Float = weightFrom(node, toNode:toNode)
         if currentWeight <= kUnconnectedEdgeWeight {
             currentWeight = 0
         }
         edges[node]![toNode] = currentWeight + withWeight
-        directedTotalWeight += withWeight
     }
 
     /**
@@ -427,8 +493,6 @@ public class SocialGraph {
      */
     private func removeEdgeFrom(node:UInt64, toNode:UInt64) {
         if edges[node] != nil && edges[node]![toNode] != nil {
-            directedEdgeCount--
-            directedTotalWeight -= edges[node]![toNode]!
             edges[node]![toNode] = nil
         }
     }
@@ -439,15 +503,14 @@ public class SocialGraph {
     private func weightFrom(node:UInt64, toNode:UInt64) -> Float {
         return (edges[node] == nil || edges[node]![toNode] == nil) ? kUnconnectedEdgeWeight : edges[node]![toNode]!
     }
-
+    
     // Core app-related data.
     var root:UInt64
     var edges:[UInt64:[UInt64:Float]]
     var names:[UInt64:String]
     var genders:[String:Gender]
-    var pictureURLs:[UInt64:String]
 
     // Edge-based metadata for future heuristics.
-    var directedEdgeCount:Int
-    var directedTotalWeight:Float
+    var totalEdgeWeight:Float
+    var edgeCount:Int
 }

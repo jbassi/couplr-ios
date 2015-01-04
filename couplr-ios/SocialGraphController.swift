@@ -10,7 +10,6 @@ import UIKit
 
 protocol SocialGraphControllerDelegate: class {
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph)
-    func socialGraphControllerDidLoadUserPictureURLs(users: [UInt64:String])
 }
 
 class SocialGraphController {
@@ -79,20 +78,9 @@ class SocialGraphController {
                     }
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
-                    self.profilePictureURLsFromGraphIDs()
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
                 }
             } as FBRequestHandler
         )
     }
-    
-    func profilePictureURLsFromGraphIDs() {
-        if graph != nil && graph?.names != nil {
-            for (id, name) in graph!.names {
-                graph!.pictureURLs[id] = profilePictureURLFromID(id)
-            }
-            delegate?.socialGraphControllerDidLoadUserPictureURLs(graph!.pictureURLs)
-        }
-    }
-    
 }

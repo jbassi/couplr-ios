@@ -72,7 +72,7 @@ public class GraphBuilder {
         }
         if self.edges[pair] != nil {
             let newWeight:Float = self.edges[pair]! + withWeight
-            if newWeight == 0 {
+            if abs(newWeight) < 0.01 {
                 // If the updated weight is zero, simply remove the edge.
                 self.edges[pair] = nil
             } else {
