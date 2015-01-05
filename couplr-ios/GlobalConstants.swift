@@ -43,13 +43,13 @@ let kLikeRootScore:Float = 0.2
 let kCommentLikeScore:Float = 0.4
 let kSamplingWeightLimit:Float = 10
 let kRandomSampleCount:Int = 9
+let kMaxGraphDataQueries:Int = 4
 // Gender multiplier
 let kGenderMultiplierMaxExponent:Float = 2.5
 let kGenderMultiplierBase:Float = 1.7
 // Edge weight normalization
 let kNormalizedEdgeWeightRange:(Float, Float) = (-2.2, 2.2)
 let kSigmoidExponentialBase:Float = 1.8
-let kShowRandomWalkDebugOutput:Bool = false
 
 /* Parse configuration */
 let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
@@ -58,3 +58,7 @@ let kParseClientKey:String = "3qw7fEgFDKJgCT1hPSii3JhF0NZHo1fCym3of2Wh"
 /* URL request prefixes */
 let kGenderizeURLPrefix:String = "http://api.genderize.io?"
 let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
+
+/* Debugging outputs */
+let kShowRandomWalkDebugOutput:Bool = false
+let kOutputLogMessages:Bool = true

@@ -56,6 +56,8 @@ public class SocialGraph {
         self.totalEdgeWeight = 0
         self.edgeCount = 0
         self.genders = [String:Gender]()
+        self.isCurrentlyUpdatingGender = false
+        self.shouldReupdateGender = false
         updateFirstNames()
     }
     
@@ -91,11 +93,19 @@ public class SocialGraph {
         return out
     }
     
+    /**
+     * Update the graph with a new node and name. Adds the new node to the name
+     * mapping if it does not already appear. Also adds the first name to the
+     * gender mapping if the first name does not already appear, with an initial
+     * value of Gender.Undetermined.
+     */
     public func updateNodeWithID(id:UInt64, andName:String) {
-        names[id] = andName
-        let firstName:String = firstNameFromFullName(andName)
-        if genders[firstName] == nil {
-            genders[firstName] = Gender.Undetermined
+        if names[id] == nil {
+            names[id] = andName
+            let firstName:String = firstNameFromFullName(andName)
+            if genders[firstName] == nil {
+                genders[firstName] = Gender.Undetermined
+            }
         }
     }
 
@@ -104,8 +114,16 @@ public class SocialGraph {
      * in the graph. Sends a request for each first name for which gender is
      * currently unknown. Initially, the gender dictionary maps all first names
      * to Gender.Undetermined.
+     *
+     * If another gender update is currently taking place when this function is
+     * invoked, it will wait until the first response is received before executing.
      */
     public func updateGenders() {
+        if isCurrentlyUpdatingGender {
+            shouldReupdateGender = true
+        }
+        log("Requesting gender update...", withFlag:"!")
+        isCurrentlyUpdatingGender = true
         updateFirstNames()
         let addGenders:(NSData?, NSURLResponse?, NSError?) -> Void = {
             (data:NSData?, response:NSURLResponse?, error:NSError?) in
@@ -118,8 +136,14 @@ public class SocialGraph {
                     let (firstName:String, gender:String) = (nameObject.description, genderObject.description)
                     self.genders[firstName] = genderFromString(gender)
                 }
-                log("Loaded \(jsonData.count) gender predictions.")
-                self.saveGraphDataWithWeightThreshold()
+                let (males:Int, females:Int, undetermined:Int) = self.overallGenderCount()
+                log("Gender response received (\(jsonData.count) predictions).", withIndent:1)
+                log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent:1)
+            }
+            self.isCurrentlyUpdatingGender = false
+            if self.shouldReupdateGender {
+                self.shouldReupdateGender = false
+                self.updateGenders()
             }
         }
         var requestURL:String = kGenderizeURLPrefix
@@ -141,7 +165,8 @@ public class SocialGraph {
      * API for the list of friends who liked the comments and updates the graph
      * data with the corresponding information.
      */
-    public func updateCommentLikes(commentsWithLikes:[String:UInt64], doLoadGender:Bool = false) {
+    public func updateCommentLikes(commentsWithLikes:[String:UInt64], andSaveGraphData:Bool = true) {
+        log("Requesting \(commentsWithLikes.count) liked comments...", withFlag:"!")
         var remainingCommentsWithLikes:[String:UInt64] = [String:UInt64]()
         let handler:(AnyObject?, AnyObject?, AnyObject?)->() = { (connection, result, error) -> Void in
             if error == nil {
@@ -171,11 +196,12 @@ public class SocialGraph {
                         self.connectNode(commentAuthor!, toNode:id, withWeight:kCommentLikeScore)
                     }
                 }
-                log("Loaded \(totalLikeCount) comment likes.")
+                log("Loaded \(totalLikeCount) comment likes.", withIndent:1)
                 if remainingCommentsWithLikes.count > 0 {
-                    self.updateCommentLikes(remainingCommentsWithLikes, doLoadGender: doLoadGender)
-                } else if doLoadGender {
-                    self.updateGenders()
+                    log("\(remainingCommentsWithLikes.count) remaining comments. Continuing query...", withIndent:1)
+                    self.updateCommentLikes(remainingCommentsWithLikes)
+                } else if andSaveGraphData {
+                    self.saveGraphData()
                 }
             }
         }
@@ -201,14 +227,18 @@ public class SocialGraph {
      * include edges GREATER THAN a given threshold. By default, kCommentPrevScore
      * is chosen to remove all links that may have occured due to error.
      */
-    public func saveGraphDataWithWeightThreshold(minEdgeWeight:Float = kCommentPrevScore) {
+    public func saveGraphData(minWeight:Float = kCommentPrevScore) {
         var query:PFQuery = PFQuery(className:"GraphData")
         query.whereKey("rootId", equalTo:NSNumber(unsignedLongLong:root))
+        log("Searching for objectId of \(root)'s graph data...", withFlag:"!")
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
             var graphData:PFObject = PFObject(className:"GraphData")
             if objects.count > 0 {
                 graphData.objectId = objects[0].objectId
+                log("Found objectId: \(graphData.objectId)", withIndent:1)
+            } else {
+                log("No existing objectId found.", withIndent:1, withFlag:"?")
             }
             graphData["rootId"] = NSNumber(unsignedLongLong:self.root)
             var edgeArray:[[NSNumber]] = [[NSNumber]]()
@@ -220,7 +250,7 @@ public class SocialGraph {
                     if node == self.root || neighbor == self.root {
                         weight /= 5 // TODO Normalize this to number of comments or something?
                     }
-                    if node < neighbor && weight > minEdgeWeight {
+                    if node < neighbor && weight > minWeight {
                         let neighborNum:NSNumber = NSNumber(unsignedLongLong:neighbor)
                         let neighborAsString:NSString = neighborNum.stringValue
                         edgeArray.append([nodeNum, neighborNum, weight])
@@ -235,19 +265,16 @@ public class SocialGraph {
             }
             graphData["names"] = nameDictionary
             graphData["edges"] = edgeArray
-            if objects.count > 0 {
-                log("Saving graph with id \(graphData.objectId) (\(nameDictionary.count) nodes, \(edgeArray.count) edges).", withFlag:"!")
-            } else {
-                log("Saving graph with new id (\(nameDictionary.count) nodes, \(edgeArray.count) edges).", withFlag:"!")
-            }
+            log("Saving graph with \(nameDictionary.count) nodes, \(edgeArray.count) edges.", withFlag:"!", withIndent:1)
             graphData.saveInBackgroundWithBlock({
                 (succeeded:Bool, error:NSError?) -> Void in
                 if succeeded && error == nil {
-                    log("Successfully saved graph to Parse.", withIndentLevel:4, withFlag:"+")
+                    log("Successfully saved graph to Parse.", withIndent:1, withFlag:"+")
+                    self.updateGraphData()
                 } else if error != nil {
-                    log("An error occured while saving to Parse.", withIndentLevel:4, withFlag:"-")
+                    log("An error occured while saving to Parse.", withIndent:1, withFlag:"-")
                 } else {
-                    log("Unknown error occurred while saving to Parse.", withIndentLevel:4, withFlag:"?")
+                    log("Unknown error occurred while saving to Parse.", withIndent:1, withFlag:"?")
                 }
             })
         })
@@ -316,6 +343,144 @@ public class SocialGraph {
     }
     
     /**
+     * Queries the Facebook API for the user's friends, and uses the information to fetch
+     * graph data from Parse. Only keeps one active request at a time, and makes a maximum
+     * of maxNumFriends requests before stopping.
+     */
+    public func updateGraphData(maxNumFriends:Int = kMaxGraphDataQueries) {
+        log("Fetching friends list...", withFlag:"!")
+        let request:FBRequest = FBRequest.requestForMyFriends()
+        request.startWithCompletionHandler{(connection:FBRequestConnection!, result:AnyObject!, error:NSError!) -> Void in
+            if error == nil {
+                var couplrFriends:[UInt64] = [UInt64]()
+                let friendsData:AnyObject! = result["data"]!
+                for index in 0..<friendsData.count {
+                    let friendObject:AnyObject! = friendsData[index]!
+                    couplrFriends.append(uint64FromAnyObject(friendObject["id"]))
+                }
+                log("Found \(couplrFriends.count) friend(s).", withIndent:1)
+                self.fetchAndUpdateGraphDataForFriends(&couplrFriends)
+            }
+        }
+    }
+    
+    /**
+     * Given a list of friends, pops off the next highest connected friend and
+     * returns the friend's id.
+     */
+    private func popNextHighestConnectedFriend(inout friendList:[UInt64]) -> UInt64 {
+        if friendList.count == 0 {
+            return 0
+        }
+        var maxFriendWeight:Float = -Float.infinity
+        var nextFriend:UInt64 = 0
+        var maxFriendIndex:Int = 0
+        for index:Int in 0..<friendList.count {
+            let friend:UInt64 = friendList[index]
+            var friendWeight:Float;
+            if self.names[friend] == nil {
+                friendWeight = -1
+            } else {
+                friendWeight = self[self.root, friend]
+                if friendWeight < kUnconnectedEdgeWeight {
+                    friendWeight = 0
+                }
+            }
+            if friendWeight > maxFriendWeight {
+                maxFriendWeight = friendWeight
+                nextFriend = friend
+                maxFriendIndex = index
+            }
+        }
+        friendList.removeAtIndex(maxFriendIndex)
+        return nextFriend
+    }
+    
+    /**
+     * Makes a request to Parse for the graph rooted at the user given by id. If the graph
+     * data exists, updates the graph using the new graph data, introducing new nodes and
+     * edges and incrementing existing ones.
+     */
+    private func fetchAndUpdateGraphDataForFriends(inout idList:[UInt64], numFriendsQueried:Int = 0) {
+        let id:UInt64 = popNextHighestConnectedFriend(&idList)
+        if numFriendsQueried > kMaxGraphDataQueries || id == 0 {
+            log("Done. No more friends to query.")
+            updateGenders()
+            return
+        }
+        log("Pulling the social graph of root id \(id)...", withFlag:"!")
+        var query:PFQuery = PFQuery(className:"GraphData")
+        query.whereKey("rootId", equalTo: NSNumber(unsignedLongLong:id))
+        query.findObjectsInBackgroundWithBlock({
+            (objects:[AnyObject]!, error:NSError?) -> Void in
+            if error != nil || objects.count < 1 {
+                log("User \(id)'s graph was not found. Moving on...", withFlag:"?", withIndent:1)
+                self.fetchAndUpdateGraphDataForFriends(&idList, numFriendsQueried: numFriendsQueried)
+                return
+            }
+            let graphData:AnyObject! = objects[0]
+            let newNamesObject:AnyObject! = graphData["names"]
+            var newNames:[UInt64:String] = [UInt64:String]()
+            for nodeAsObject:AnyObject in newNamesObject.allKeys {
+                let node:UInt64 = uint64FromAnyObject(nodeAsObject)
+                newNames[node] = newNamesObject[nodeAsObject.description] as? String
+            }
+            let newEdges:AnyObject! = graphData["edges"]
+            // Parse incoming graph's edges into a dictionary for fast lookup.
+            var newEdgeMap:[UInt64:[UInt64:Float]] = [UInt64:[UInt64:Float]]()
+            for index in 0..<newEdges.count {
+                let edge:AnyObject! = newEdges[index]!
+                let src:UInt64 = uint64FromAnyObject(edge[0])
+                let dst:UInt64 = uint64FromAnyObject(edge[1])
+                let weight:Float = Float(edge[2] as NSNumber)
+                if newEdgeMap[src] == nil {
+                    newEdgeMap[src] = [UInt64:Float]()
+                }
+                if newEdgeMap[dst] == nil {
+                    newEdgeMap[dst] = [UInt64:Float]()
+                }
+                newEdgeMap[src]![dst] = weight
+                newEdgeMap[dst]![src] = weight
+            }
+            var newNodeList:[UInt64] = [UInt64]()
+            // Use new edges to determine whether each new node should be added to the graph.
+            for (node:UInt64, name:String) in newNames {
+                if self.names[node] != nil {
+                    continue
+                }
+                // Check whether the node has enough neighbors in the current social network.
+                let neighbors:[UInt64:Float] = newEdgeMap[node]!
+                var mutualFriendCount:Int = 0
+                for (neighbor:UInt64, weight:Float) in neighbors {
+                    if self.names[neighbor] != nil {
+                        mutualFriendCount++
+                    }
+                }
+                if mutualFriendCount >= 2 {
+                    newNodeList.append(node)
+                }
+            }
+            // Update the graph to contain all the new nodes.
+            for newNode:UInt64 in newNodeList {
+                self.updateNodeWithID(newNode, andName:newNames[newNode]!)
+            }
+            // Add all new edges that connect two members of the original graph.
+            var edgeUpdateCount:Int = 0
+            for (node:UInt64, neighbors:[UInt64:Float]) in newEdgeMap {
+                for (neighbor:UInt64, weight:Float) in neighbors {
+                    if node < neighbor && self.names[node] != nil && self.names[neighbor] != nil {
+                        self.connectNode(node, toNode:neighbor, withWeight:weight)
+                        edgeUpdateCount++
+                    }
+                }
+            }
+            log("Finished updating graph for root id \(id).", withIndent:1)
+            log("\(newNodeList.count) nodes added; \(edgeUpdateCount) edges updated.", withIndent:1)
+            self.fetchAndUpdateGraphDataForFriends(&idList, numFriendsQueried: numFriendsQueried + 1)
+        })
+    }
+    
+    /**
      * Takes all names that appear as values in self.names and extracts first names. Then
      * adds each first name to self.genders, if it is not already present. New first names
      * are initially mapped to Gender.Undetermined.
@@ -357,6 +522,35 @@ public class SocialGraph {
             genderExponent = kGenderMultiplierMaxExponent * (2 * withGenderRatio.0 - 1)
         }
         return pow(kGenderMultiplierBase, genderExponent)
+    }
+    
+    /**
+     * Counts the overall gender of people in the social network, not
+     * counting the root user. Returns a tuple of the form (# male, #
+     * female, # undetermined).
+     */
+    private func overallGenderCount() -> (Int, Int, Int) {
+        var mcount:Int = 0
+        var fcount:Int = 0
+        var ucount:Int = 0
+        for (id:UInt64, name:String) in names {
+            if id == root {
+                continue
+            }
+            let gender:Gender = genderFromID(id)
+            switch gender {
+            case .Undetermined:
+                ucount++
+                break
+            case .Male:
+                mcount++
+                break
+            case .Female:
+                fcount++
+                break
+            }
+        }
+        return (mcount, fcount, ucount)
     }
 
     /**
@@ -537,4 +731,8 @@ public class SocialGraph {
     // Edge-based metadata for future heuristics.
     var totalEdgeWeight:Float
     var edgeCount:Int
+    
+    // Miscellaneous state variables.
+    var isCurrentlyUpdatingGender:Bool
+    var shouldReupdateGender:Bool
 }

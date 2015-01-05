@@ -61,6 +61,7 @@ class SocialGraphController {
     }
     
     func initializeGraph() {
+        log("Requesting user statuses...", withFlag:"!")
         FBRequestConnection.startWithGraphPath(
             "me/statuses?limit=100",
             completionHandler: { (connection, result, error) -> Void in
@@ -79,6 +80,10 @@ class SocialGraphController {
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
+                    log("Initialized base graph from \(statusCount) comments.")
+                    log("Num. nodes = \(graph.names.count), num. edges = \(graph.edgeCount)", withIndent:1)
+                    graph.updateGenders()
+                    graph.updateCommentLikes(builder.commentsWithLikesForAuthor)
                 }
             } as FBRequestHandler
         )

@@ -94,10 +94,13 @@ func weightedRandomSample(elements:[(UInt64, Float)]) -> UInt64 {
 /**
  * Prints log messages for debugging.
  */
-func log(message:String, withIndentLevel:Int = 0, withNewline:Bool = true, withFlag:Character = "+") -> Void {
+func log(message:String, withIndent:Int = 0, withNewline:Bool = true, withFlag:Character = "+") -> Void {
+    if !kOutputLogMessages {
+        return
+    }
     var spacing:String = " "
-    for i:Int in 0..<withIndentLevel {
-        spacing += " "
+    for i:Int in 0..<withIndent {
+        spacing += "    "
     }
     if withNewline {
         println("[\(withFlag)]\(spacing)\(message)")

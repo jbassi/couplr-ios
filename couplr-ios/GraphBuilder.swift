@@ -42,17 +42,10 @@ public class GraphBuilder {
         self.commentsWithLikesForAuthor = [String:UInt64]()
     }
     
-    public func buildSocialGraph(andLoadGender:Bool = true, andFetchCommentLikes:Bool = true) -> SocialGraph {
+    public func buildSocialGraph() -> SocialGraph {
         let graph:SocialGraph = SocialGraph(root:self.rootID, names:self.names)
         for (pair:EdgePair, weight:Float) in self.edges {
             graph.connectNode(pair.first, toNode: pair.second, withWeight: weight)
-        }
-        if !andFetchCommentLikes && andLoadGender {
-            // Only update the gender.
-            graph.updateGenders()
-        } else if andFetchCommentLikes {
-            // Wait until after fetching comment likes to update the gender, if at all.
-            graph.updateCommentLikes(commentsWithLikesForAuthor, doLoadGender:andLoadGender)
         }
         return graph
     }
