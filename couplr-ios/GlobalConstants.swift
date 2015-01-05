@@ -11,6 +11,20 @@ import UIKit
 /* CouplrSettingsManager Constants */
 let kShouldSkipLoginKey: String = "kShouldSkipLoginKey"
 
+/* CouplrNavigationController Constants */
+let kMatchViewButtonTag = 1000
+let kProfileViewButtonTag = 1001
+let kMatchViewButtonTitle = "Matches"
+let kProfileViewButtonTitle = "Profile"
+let kCouplrNavigationBarHeight: CGFloat = 50.0
+let kCouplrNavigationBarButtonHeight: CGFloat = 50.0
+let kCouplrNavigationBarSelectionIndicatorHeight: CGFloat = 10.0
+
+/* Storyboard View Names */
+let kStoryboardName = "Main"
+let kStoryboardMatchViewControllerName = "MatchViewController"
+let kStoryboardProfileViewControllerName = "ProfileViewController"
+
 /* Facebook API */
 let kMaxAllowedBatchRequestSize:Int = 50
 

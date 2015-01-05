@@ -10,15 +10,14 @@ import UIKit
 
 class ProfileViewController: UIViewController {
     
-    @IBOutlet var profilePicture: FBProfilePictureView!
+    @IBOutlet weak var profilePicture: ProfilePictureImageView!
+    
+    let socialGraphController = SocialGraphController.sharedInstance
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        profilePicture = FBProfilePictureView(profileID: "me", pictureCropping: FBProfilePictureCropping.Square)
+        let userID = socialGraphController.graph?.root
+        profilePicture.performRequestWith(profilePictureURLFromID(userID!))
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
+    
 }
