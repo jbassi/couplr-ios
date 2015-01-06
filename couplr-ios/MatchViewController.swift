@@ -33,6 +33,7 @@ class MatchViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.allowsMultipleSelection = true
         socialGraphController.delegate = self
+        socialGraphController.initializeGraph()
         matchTitleLabel.setTitle(testData[0], forState: UIControlState.Normal)
     }
     

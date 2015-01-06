@@ -21,10 +21,6 @@ public class MatchTitle {
     var picture:String
 }
 
-public class Match {
-    
-}
-
 /**
  * Represents an edge in the MatchGraph consisting of all the matches
  * between two people in the graph.

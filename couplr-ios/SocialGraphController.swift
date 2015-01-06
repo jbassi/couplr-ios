@@ -49,9 +49,8 @@ public class SocialGraphController {
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
                     log("Initialized base graph from \(statusCount) comments.")
                     log("Num. nodes = \(graph.names.count), num. edges = \(graph.edgeCount)", withIndent:1)
-                    graph.updateGenders()
-                    graph.updateCommentLikes(builder.commentsWithLikesForAuthor, andSaveGraphData:true)
-                    // Initialize matches network.
+                    self.graph?.updateGenders()
+                    self.graph?.updateCommentLikes(builder.commentsWithLikesForAuthor, andSaveGraphData:true)
                 }
             } as FBRequestHandler
         )

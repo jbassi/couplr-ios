@@ -307,33 +307,6 @@ public class SocialGraph {
             removeEdgeFrom(fromNode, toNode:node)
         }
     }
-
-    /**
-     * Samples some number of users by performing a weighted random walk on the
-     * graph starting at the root user.
-     */
-    public func randomSample(size:Int = kRandomSampleCount) -> [UInt64:String] {
-        var sample:[UInt64:String] = [root:names[root]!]
-        var nextStep:UInt64 = takeRandomStepFrom(root, withNodesTraversed:sample)
-        while sample.count <= size {
-            if nextStep == 0 {
-                nextStep = sampleRandomNode(sample)
-            }
-            sample[nextStep] = names[nextStep]!
-            if sample.count <= size {
-                nextStep = takeRandomStepFrom(nextStep, withNodesTraversed:sample)
-            }
-        }
-        sample[root] = nil
-        if kShowRandomWalkDebugOutput {
-            println("    Done. Final random walk result...")
-            for (id:UInt64, name:String) in sample {
-                println("        \(name) (\(id))")
-            }
-            println()
-        }
-        return sample
-    }
     
     /**
      * Returns whether or not two nodes are connected. Assumes that all edges are undirected.
@@ -362,6 +335,94 @@ public class SocialGraph {
                 self.fetchAndUpdateGraphDataForFriends(&couplrFriends)
             }
         }
+    }
+    
+    /**
+     * Samples some number of users by performing a weighted random walk on the
+     * graph starting at the root user.
+     */
+    public func randomSample(size:Int = kRandomSampleCount) -> [UInt64:String] {
+        var sample:[UInt64:String] = [UInt64:String]()
+        var nextStep:UInt64 = root
+        while sample.count < size {
+            nextStep = takeRandomStepFrom(nextStep, withNodesTraversed:sample)
+            if nextStep == 0 {
+                nextStep = sampleRandomNode(sample)
+            }
+            sample[nextStep] = names[nextStep]!
+        }
+        if kShowRandomWalkDebugOutput {
+            println("    Done. Final random walk result...")
+            for (id:UInt64, name:String) in sample {
+                println("        \(name) (\(id))")
+            }
+            println()
+        }
+        return sample
+    }
+    
+    /**
+     * Given a current node and a list of nodes previously traversed, randomly jumps
+     * to a new neighboring node that does not already appear in the list of previous
+     * nodes. If there is no such node, returns 0.
+     */
+    private func takeRandomStepFrom(node:UInt64, withNodesTraversed:[UInt64:String]) -> UInt64 {
+        var possibleNextNodes:[(UInt64, Float)] = [(UInt64, Float)]()
+        let currentGender:Gender = node == root ? Gender.Undetermined : genderFromID(node)
+        var sameGenderScoreSum:Float = 0
+        var differentGenderScoreSum:Float = 0
+        let meanEdgeWeight:Float = totalEdgeWeight / Float(self.names.count * 2)
+        // Compute sampling weights prior to gender renormalization.
+        for (neighbor:UInt64, weight:Float) in self.edges[node]! {
+            if neighbor == root || withNodesTraversed[neighbor] != nil {
+                continue
+            }
+            let neighborScore:Float = sampleWeightForScore(weight - meanEdgeWeight)
+            possibleNextNodes.append((neighbor, neighborScore))
+            let gender:Gender = genderFromID(neighbor)
+            if currentGender == Gender.Undetermined || gender == Gender.Undetermined {
+                continue
+            } else if gender == currentGender {
+                sameGenderScoreSum += neighborScore
+            } else {
+                differentGenderScoreSum += neighborScore
+            }
+        }
+        if currentGender != Gender.Undetermined {
+            // Compute gender-renormalized weights.
+            let newSameGenderScoreSum:Float = (sameGenderScoreSum + differentGenderScoreSum) / Float(1 + kGenderBiasRatio)
+            let newDifferentGenderScoreSum:Float = kGenderBiasRatio * newSameGenderScoreSum
+            for index in 0..<possibleNextNodes.count {
+                let (neighbor:UInt64, weight:Float) = possibleNextNodes[index]
+                let gender:Gender = genderFromID(neighbor)
+                if gender == Gender.Undetermined {
+                    continue
+                } else if gender == currentGender {
+                    possibleNextNodes[index].1 = weight * newSameGenderScoreSum / sameGenderScoreSum
+                } else {
+                    possibleNextNodes[index].1 = weight * newDifferentGenderScoreSum / differentGenderScoreSum
+                }
+            }
+        }
+        if kShowRandomWalkDebugOutput {
+            if withNodesTraversed.count == 0 {
+                println("[!] Beginning random walk...")
+            }
+            print("    [\(withNodesTraversed.count + 1)] Now at \(names[node]!) (\(genderFromID(node).description()))\n")
+            if possibleNextNodes.count == 0 {
+                println("        No unvisited neighbors to step to!")
+            } else {
+                var total:Float = 0
+                for (id:UInt64, weight:Float) in possibleNextNodes {
+                    total += weight
+                }
+                for (id:UInt64, weight:Float) in possibleNextNodes {
+                    let percentageAsString:String = String(format: "%.2f", Double(100.0 * (weight/total)))
+                    println("        \(names[id]!): \(percentageAsString)% (w=\(weight))")
+                }
+            }
+        }
+        return weightedRandomSample(possibleNextNodes)
     }
     
     /**
@@ -508,23 +569,6 @@ public class SocialGraph {
     }
     
     /**
-     * Computes the gender bias for the next hop node using the current gender ratio.
-     */
-    private func genderMultiplierForNextHopNode(nextHop:UInt64, withGenderRatio:(Float, Float)) -> Float {
-        let nextHopGender:Gender = genderFromID(nextHop)
-        var genderExponent:Float = 0
-        switch nextHopGender {
-        case .Undetermined:
-            genderExponent = 0
-        case .Male:
-            genderExponent = kGenderMultiplierMaxExponent * (2 * withGenderRatio.1 - 1)
-        case .Female:
-            genderExponent = kGenderMultiplierMaxExponent * (2 * withGenderRatio.0 - 1)
-        }
-        return pow(kGenderMultiplierBase, genderExponent)
-    }
-    
-    /**
      * Counts the overall gender of people in the social network, not
      * counting the root user. Returns a tuple of the form (# male, #
      * female, # undetermined).
@@ -554,38 +598,6 @@ public class SocialGraph {
     }
 
     /**
-     * Returns the ratio of known male and females in a set of nodes. Skips over Undetermined
-     * genders as well as the root node (i.e. they are simply not counted as male or female).
-     * The output will sum to 1. If no known males or females were encountered, the output
-     * defaults to (0.5, 0.5)
-     */
-    private func genderRatioForNodes(nodesTraversed:[UInt64:String]) -> (Float, Float) {
-        var mcount:Float = 0
-        var fcount:Float = 0
-        for (id:UInt64, name:String) in nodesTraversed {
-            if id == root {
-                continue
-            }
-            let gender:Gender = genderFromID(id)
-            switch gender {
-            case .Undetermined:
-                break
-            case .Male:
-                mcount++
-                break
-            case .Female:
-                fcount++
-                break
-            }
-        }
-        if mcount == 0 && fcount == 0 {
-            return (0.5, 0.5)
-        }
-        let total:Float = mcount + fcount
-        return (mcount/total, fcount/total)
-    }
-
-    /**
      * Computes the sampling weight of an edge using a sigmoid function with range
      * between 0 and withLimit.
      */
@@ -597,10 +609,10 @@ public class SocialGraph {
      * Randomly samples a node in the graph.
      * TODO Add gendered bias.
      */
-    private func sampleRandomNode(withNodesTraversed:[UInt64:String]) -> UInt64 {
+    private func sampleRandomNode(withNodesTraversed:[UInt64:String], excludeRoot:Bool = true) -> UInt64 {
         var possibleNextNodes:[UInt64] = [UInt64]()
         for (neighbor:UInt64, temp:String) in self.names {
-            if withNodesTraversed[neighbor] != nil {
+            if withNodesTraversed[neighbor] != nil || neighbor == root {
                 continue
             }
             possibleNextNodes.append(neighbor)
@@ -608,84 +620,6 @@ public class SocialGraph {
         return possibleNextNodes[randomInt(possibleNextNodes.count)]
     }
 
-    /**
-     * Given a current node and a list of nodes previously traversed, randomly jumps
-     * to a new neighboring node that does not already appear in the list of previous
-     * nodes. If there is no such node, returns 0.
-     */
-    private func takeRandomStepFrom(node:UInt64, withNodesTraversed:[UInt64:String]) -> UInt64 {
-        var possibleNextNodes:[(UInt64, Float)] = [(UInt64, Float)]()
-        let genderRatio:(Float, Float) = genderRatioForNodes(withNodesTraversed)
-        var normalizedWeights:[UInt64:Float] = normalizedEdgeWeightsForNode(node, withNodesTraversed: withNodesTraversed)
-        for (neighbor:UInt64, weight:Float) in normalizedWeights {
-            let multiplier:Float = genderMultiplierForNextHopNode(neighbor, withGenderRatio: genderRatio)
-            let sampleWeight:Float = multiplier * sampleWeightForScore(weight)
-            possibleNextNodes.append((neighbor, sampleWeight))
-        }
-        if kShowRandomWalkDebugOutput {
-            if withNodesTraversed.count == 1 {
-                println("[!] Beginning random walk...")
-            }
-            print("    [\(withNodesTraversed.count)] Now at \(names[node]!).")
-            let maleRatioRounded:String = String(format: "%.2f", genderRatio.0)
-            let femaleRatioRounded:String = String(format: "%.2f", genderRatio.1)
-            println(" (m:f = \(maleRatioRounded):\(femaleRatioRounded))")
-            if possibleNextNodes.count == 0 {
-                println("        No unvisited neighbors to step to!")
-            } else {
-                var total:Float = 0
-                for (id:UInt64, weight:Float) in possibleNextNodes {
-                    total += weight
-                }
-                for (id:UInt64, weight:Float) in possibleNextNodes {
-                    let percentageAsString:String = String(format: "%.2f", Double(100.0 * (weight/total)))
-                    println("        \(names[id]!): \(percentageAsString)% (w=\(normalizedWeights[id]!))")
-                }
-            }
-        }
-        return weightedRandomSample(possibleNextNodes)
-    }
-    
-    /**
-     * Computes the normalized weights for a node. Ignores any node that has already
-     * been traversed. The resulting edges range between -1 and 1 (the lowest weight
-     * maps to -1 and the highest weight to 1, with all other weights linearly scaling
-     * on the interval [-1, 1]). If all edges are the same weight, simply maps each
-     * edge to 0.
-     */
-    private func normalizedEdgeWeightsForNode(node:UInt64, withNodesTraversed:[UInt64:String]) -> [UInt64:Float] {
-        var normalizedWeights:[UInt64:Float] = [UInt64:Float]()
-        var minWeight:Float = Float.infinity
-        var maxWeight:Float = -Float.infinity
-        for (neighbor:UInt64, weight:Float) in edges[node]! {
-            if withNodesTraversed[neighbor] != nil {
-                continue
-            }
-            normalizedWeights[neighbor] = weight
-            if weight < minWeight {
-                minWeight = weight
-            }
-            if weight > maxWeight {
-                maxWeight = weight
-            }
-        }
-        if normalizedWeights.count == 0 {
-            return normalizedWeights
-        }
-        let normalizedGap:Float = kNormalizedEdgeWeightRange.1 - kNormalizedEdgeWeightRange.0
-        let scalar:Float = normalizedGap / (maxWeight - minWeight)
-        // TODO Maybe using <> comparison here is safer?
-        let allEdgesHaveEqualWeight:Bool = minWeight == maxWeight
-        for (neighbor:UInt64, weight:Float) in normalizedWeights {
-            if allEdgesHaveEqualWeight {
-                normalizedWeights[neighbor] = (normalizedGap / 2) + kNormalizedEdgeWeightRange.0
-            } else {
-                normalizedWeights[neighbor] = (weight - minWeight) * scalar + kNormalizedEdgeWeightRange.0
-            }
-        }
-        return normalizedWeights
-    }
-    
     /**
      * Adds a directed edge with specified weight between two users. Does
      * not check for self-edges. If an edge already exists between the users,

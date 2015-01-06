@@ -38,7 +38,6 @@ class LoginViewController: UIViewController {
             var activeSession: FBSession = FBSession.activeSession()
 
             if(settings.shouldSkipLogin || activeSession.isOpen) {
-                socialGraphController.initializeGraph()
                 self.performSegueWithIdentifier("ShowTabBarViewController", sender: nil)
             } else {
                 viewIsVisible = true
@@ -74,7 +73,6 @@ extension LoginViewController: FBLoginViewDelegate {
     
     func loginViewShowingLoggedInUser(loginView : FBLoginView!) {
         if (viewIsVisible) {
-            socialGraphController.initializeGraph()
             self.performSegueWithIdentifier("ShowTabBarViewController", sender: loginView)
         }
     }

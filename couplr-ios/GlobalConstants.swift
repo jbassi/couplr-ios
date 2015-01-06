@@ -58,12 +58,9 @@ let kCommentLikeScore:Float = 0.4
 let kSamplingWeightLimit:Float = 10
 let kRandomSampleCount:Int = 9
 let kMaxGraphDataQueries:Int = 4
-// Gender multiplier
-let kGenderMultiplierMaxExponent:Float = 2.5
-let kGenderMultiplierBase:Float = 1.7
-// Edge weight normalization
-let kNormalizedEdgeWeightRange:(Float, Float) = (-2.2, 2.2)
-let kSigmoidExponentialBase:Float = 1.8
+// Make it this much more likely to land on someone of the opposite gender.
+let kGenderBiasRatio:Float = 8.0
+let kSigmoidExponentialBase:Float = 3.0
 
 /* Parse configuration */
 let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
