@@ -9,18 +9,6 @@
 import UIKit
 import Parse
 
-/**
-* Loads match titles from Parse and passes them to a given callback
-* function.
-*/
-func loadMatchTitles(withCallback:([AnyObject]!, NSError?) -> Void) {
-    var query = PFQuery(className:"MatchTitle")
-    query.findObjectsInBackgroundWithBlock {
-        (objects: [AnyObject]!, error: NSError?) -> Void in
-        withCallback(objects, error)
-    }
-}
-
 class MatchViewController: UIViewController {
 
     @IBOutlet weak var matchTitleLabel: UIButton!

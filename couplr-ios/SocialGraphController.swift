@@ -12,10 +12,11 @@ protocol SocialGraphControllerDelegate: class {
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph)
 }
 
-class SocialGraphController {
+public class SocialGraphController {
     
     weak var delegate: SocialGraphControllerDelegate?
     var graph: SocialGraph?
+    var matches: MatchGraph?
     
     class var sharedInstance: SocialGraphController {
         struct SocialGraphSingleton {
@@ -24,7 +25,39 @@ class SocialGraphController {
         return SocialGraphSingleton.instance
     }
     
-    func updateFromStatus(status:AnyObject!, withRootID:UInt64!, inout withBuilder:GraphBuilder) -> Void {
+    public func initializeGraph() {
+        log("Requesting user statuses...", withFlag:"!")
+        matches = MatchGraph()
+        matches?.fetchMatchTitles()
+        FBRequestConnection.startWithGraphPath(
+            "me/statuses?limit=100",
+            completionHandler: { (connection, result, error) -> Void in
+                if error == nil {
+                    let statusData:AnyObject! = result["data"]!
+                    let statusCount:Int = statusData.count
+                    let firstStatusFromObject:AnyObject! = statusData[0]!["from"]!
+                    let firstStatusFromObjectName:AnyObject! = firstStatusFromObject["name"]!
+                    let rootUserID:UInt64! = uint64FromAnyObject(firstStatusFromObject["id"]!)
+                    let rootUserName:String! = firstStatusFromObjectName.description!
+                    var builder:GraphBuilder = GraphBuilder(forRootUserID:rootUserID, withName: rootUserName)
+                    for index in 0..<statusCount {
+                        let status:AnyObject! = statusData[index]!
+                        self.updateFromStatus(status, withRootID: rootUserID, withBuilder: &builder)
+                    }
+                    let graph:SocialGraph = builder.buildSocialGraph()
+                    self.graph = graph
+                    self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
+                    log("Initialized base graph from \(statusCount) comments.")
+                    log("Num. nodes = \(graph.names.count), num. edges = \(graph.edgeCount)", withIndent:1)
+                    graph.updateGenders()
+                    graph.updateCommentLikes(builder.commentsWithLikesForAuthor, andSaveGraphData:true)
+                    // Initialize matches network.
+                }
+            } as FBRequestHandler
+        )
+    }
+    
+    private func updateFromStatus(status:AnyObject!, withRootID:UInt64!, inout withBuilder:GraphBuilder) -> Void {
         var allComments:AnyObject? = status["comments"]
         var previousThreadID:UInt64 = withRootID;
         if allComments != nil {
@@ -58,34 +91,5 @@ class SocialGraphController {
                 withBuilder.updateForEdgePair(EdgePair(first:withRootID, second:fromID), withWeight: kLikeRootScore)
             }
         }
-    }
-    
-    func initializeGraph() {
-        log("Requesting user statuses...", withFlag:"!")
-        FBRequestConnection.startWithGraphPath(
-            "me/statuses?limit=100",
-            completionHandler: { (connection, result, error) -> Void in
-                if error == nil {
-                    let statusData:AnyObject! = result["data"]!
-                    let statusCount:Int = statusData.count
-                    let firstStatusFromObject:AnyObject! = statusData[0]!["from"]!
-                    let firstStatusFromObjectName:AnyObject! = firstStatusFromObject["name"]!
-                    let rootUserID:UInt64! = uint64FromAnyObject(firstStatusFromObject["id"]!)
-                    let rootUserName:String! = firstStatusFromObjectName.description!
-                    var builder:GraphBuilder = GraphBuilder(forRootUserID:rootUserID, withName: rootUserName)
-                    for index in 0..<statusCount {
-                        let status:AnyObject! = statusData[index]!
-                        self.updateFromStatus(status, withRootID: rootUserID, withBuilder: &builder)
-                    }
-                    let graph:SocialGraph = builder.buildSocialGraph()
-                    self.graph = graph
-                    self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
-                    log("Initialized base graph from \(statusCount) comments.")
-                    log("Num. nodes = \(graph.names.count), num. edges = \(graph.edgeCount)", withIndent:1)
-                    graph.updateGenders()
-                    graph.updateCommentLikes(builder.commentsWithLikesForAuthor)
-                }
-            } as FBRequestHandler
-        )
     }
 }

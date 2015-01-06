@@ -32,12 +32,22 @@ func firstNameFromFullName(fullName:String) -> String {
     return fullName.substringToIndex(fullName.rangeOfString(" ")!.startIndex)
 }
 
+func sampleWithoutReplacement(var list:[UInt64], count:Int) -> [UInt64] {
+    var result:[UInt64] = [UInt64]()
+    for sampleNum:Int in 0..<count {
+        let sampleIndex:Int = sampleNum + randomInt(list.count - sampleNum)
+        let tempValue:UInt64 = list[sampleNum]
+        list[sampleNum] = list[sampleIndex]
+        list[sampleIndex] = tempValue
+        result.append(list[sampleNum])
+    }
+    return result
+}
+
 /**
  * Extracts an Int from an AnyObject.
  *
  * TODO This is god-awful, we'll need to find a safer way to implement this.
- * TODO On 32-bit platforms, this causes the app the crash since Facebook
- *      IDs are 64-bit and toInt fails.
  */
 func uint64FromAnyObject(anyObject:AnyObject!) -> UInt64 {
     let numNSStr:NSString = NSString(string:anyObject.description)

@@ -165,7 +165,7 @@ public class SocialGraph {
      * API for the list of friends who liked the comments and updates the graph
      * data with the corresponding information.
      */
-    public func updateCommentLikes(commentsWithLikes:[String:UInt64], andSaveGraphData:Bool = true) {
+    public func updateCommentLikes(commentsWithLikes:[String:UInt64], andSaveGraphData:Bool) {
         log("Requesting \(commentsWithLikes.count) liked comments...", withFlag:"!")
         var remainingCommentsWithLikes:[String:UInt64] = [String:UInt64]()
         let handler:(AnyObject?, AnyObject?, AnyObject?)->() = { (connection, result, error) -> Void in
@@ -199,7 +199,7 @@ public class SocialGraph {
                 log("Loaded \(totalLikeCount) comment likes.", withIndent:1)
                 if remainingCommentsWithLikes.count > 0 {
                     log("\(remainingCommentsWithLikes.count) remaining comments. Continuing query...", withIndent:1)
-                    self.updateCommentLikes(remainingCommentsWithLikes)
+                    self.updateCommentLikes(remainingCommentsWithLikes, andSaveGraphData:andSaveGraphData)
                 } else if andSaveGraphData {
                     self.saveGraphData()
                 }
