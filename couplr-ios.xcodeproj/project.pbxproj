@@ -19,6 +19,7 @@
 		0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5A034B19C4E06A0050DC9F /* LoginViewController.swift */; };
 		0F6074F51A4FDF2A0045B5C3 /* FacebookSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */; };
 		0F9C98891A539E0A004CAC4D /* ProfilePictureImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */; };
+		0F9F1CBF1A5CFB7300E683A1 /* FXBlurView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F9F1CBE1A5CFB7300E683A1 /* FXBlurView.m */; };
 		0FA10B3F1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */; };
 		0FDD9F6F1A5BA0E700927558 /* ProfileDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */; };
 		0FE7AAF51A5C5D9000398B0E /* ProfileViewControllerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE7AAF41A5C5D9000398B0E /* ProfileViewControllerTableViewCell.swift */; };
@@ -76,6 +77,8 @@
 		0F5A034E19C4E1860050DC9F /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
 		0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePictureImageView.swift; sourceTree = "<group>"; };
+		0F9F1CBD1A5CFB7300E683A1 /* FXBlurView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FXBlurView.h; sourceTree = "<group>"; };
+		0F9F1CBE1A5CFB7300E683A1 /* FXBlurView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FXBlurView.m; sourceTree = "<group>"; };
 		0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePictureCollectionViewCell.swift; sourceTree = "<group>"; };
 		0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileDetailView.swift; sourceTree = "<group>"; };
 		0FE7AAF41A5C5D9000398B0E /* ProfileViewControllerTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileViewControllerTableViewCell.swift; sourceTree = "<group>"; };
@@ -243,6 +246,15 @@
 			name = Login;
 			sourceTree = "<group>";
 		};
+		0F9F1CBC1A5CFB7300E683A1 /* FXBlurView */ = {
+			isa = PBXGroup;
+			children = (
+				0F9F1CBD1A5CFB7300E683A1 /* FXBlurView.h */,
+				0F9F1CBE1A5CFB7300E683A1 /* FXBlurView.m */,
+			);
+			path = FXBlurView;
+			sourceTree = "<group>";
+		};
 		0FF11BD81A50B6E300C14FDC /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -264,6 +276,7 @@
 		0FF11BE21A50C62200C14FDC /* Generic Views */ = {
 			isa = PBXGroup;
 			children = (
+				0F9F1CBC1A5CFB7300E683A1 /* FXBlurView */,
 				0FF11BE31A50C63C00C14FDC /* PickerView.swift */,
 				0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */,
 				0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */,
@@ -388,6 +401,7 @@
 			files = (
 				0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */,
 				0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */,
+				0F9F1CBF1A5CFB7300E683A1 /* FXBlurView.m in Sources */,
 				0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */,
 				0F9C98891A539E0A004CAC4D /* ProfilePictureImageView.swift in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,

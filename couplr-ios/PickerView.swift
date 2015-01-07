@@ -11,6 +11,7 @@ import Foundation
 class PickerView: UIPickerView {
     
     let transparentLayer: UIView = UIView()
+    let blurView = FXBlurView()
     
     class func createPickerViewInView(view: UIView, animated: Bool) -> PickerView {
         let pickerView = PickerView(frame: view.bounds)
@@ -25,6 +26,14 @@ class PickerView: UIPickerView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         transparentLayer.frame = UIScreen.mainScreen().bounds
+        transparentLayer.backgroundColor = kPickerTransparentLayerBackgroundColor
+        transparentLayer.alpha = 0
+        
+        blurView.frame = UIScreen.mainScreen().bounds
+        blurView.blurEnabled = true
+        blurView.tintColor = UIColor.clearColor()
+        blurView.blurRadius = kPickerViewBlurViewBlurRadius
+        blurView.alpha = 0
         
         let boxWidth: CGFloat = frame.width - kPickerViewWidthInsets
         let boxHeight: CGFloat = kPickerViewHeight
@@ -39,7 +48,7 @@ class PickerView: UIPickerView {
         
         var gestureRecognizer = UITapGestureRecognizer(target: self, action: Selector("handleTapGesture:"))
         gestureRecognizer.delegate = self
-        transparentLayer.addGestureRecognizer(gestureRecognizer)
+        blurView.addGestureRecognizer(gestureRecognizer)
     }
     
     required init(coder aDecoder: NSCoder) {
@@ -50,23 +59,27 @@ class PickerView: UIPickerView {
     
     func showAnimated(animated: Bool) {
         if animated {
-            superview!.insertSubview(transparentLayer, belowSubview: self)
+            superview!.insertSubview(blurView, belowSubview: self)
+            superview!.insertSubview(transparentLayer, belowSubview: blurView)
             
             UIView.animateWithDuration(kPickerShowAnimationDuration, delay: 0, usingSpringWithDamping: kPickerShowSpringDamping, initialSpringVelocity: kPickerSpringVelocity, options: UIViewAnimationOptions(0), animations: {
                 self.frame.origin.y = round((self.superview!.frame.size.height - self.frame.size.height) / 2)
             }, completion: nil)
             UIView.animateWithDuration(kPickerShowAnimationDuration, animations: {
-                self.transparentLayer.backgroundColor = kPickerTransparentLayerShowColor
+                self.transparentLayer.alpha = 1
+                self.blurView.alpha = 1
             }, completion: nil)
         }
     }
     
     func hideAnimated(animated: Bool) {
         if animated {
-            UIView.animateWithDuration(kPickerHideAnimationDuration, delay: 0, usingSpringWithDamping: kPickerHideSpringDamping, initialSpringVelocity: kPickerSpringVelocity, options: UIViewAnimationOptions(0), animations: {
-                self.frame.origin.y = self.superview!.frame.size.height + self.frame.size.height
-                self.transparentLayer.backgroundColor = kPickerTransparentLayerHideColor
+            UIView.animateWithDuration(kPickerHideAnimationDuration, animations: {
+                    self.frame.origin.y = self.superview!.frame.size.height + self.frame.size.height
+                    self.transparentLayer.alpha = 0
+                    self.blurView.alpha = 0
                 }, completion: { (completed:Bool) in
+                    self.blurView.removeFromSuperview()
                     self.transparentLayer.removeFromSuperview()
             })
         }

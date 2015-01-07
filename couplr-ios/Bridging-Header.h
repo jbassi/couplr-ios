@@ -10,5 +10,6 @@
 #define couplr_ios_Bridging_Header_h
 
 #import <FacebookSDK/FacebookSDK.h>
+#import "FXBlurView.h"
 
 #endif

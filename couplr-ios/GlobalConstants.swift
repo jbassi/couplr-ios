@@ -39,8 +39,9 @@ let kMaxAllowedBatchRequestSize:Int = 50
 let kPickerViewWidthInsets: CGFloat = 80.0
 let kPickerViewHeight: CGFloat = 180.0
 let kPickerViewCornerRadius: CGFloat = 3.0
-let kPickerShowAnimationDuration: NSTimeInterval = 0.6
-let kPickerHideAnimationDuration: NSTimeInterval = 0.5
+let kPickerViewBlurViewBlurRadius: CGFloat = 20.0
+let kPickerShowAnimationDuration: NSTimeInterval = 0.5
+let kPickerHideAnimationDuration: NSTimeInterval = 0.4
 let kPickerShowSpringDamping: CGFloat = 0.7
 let kPickerHideSpringDamping: CGFloat = 0.5
 let kPickerSpringVelocity: CGFloat = 0.5
@@ -73,8 +74,7 @@ let kProfileDetailViewProfileNameLabelFont = UIFont(name: "HelveticaNeue-Light",
 let kMatchViewControllerCollectionViewNumberOfRows: Int = 9
 
 /* PickerView Colors */
-let kPickerTransparentLayerShowColor: UIColor = UIColor(white: 0.1, alpha: 0.8)
-let kPickerTransparentLayerHideColor: UIColor = UIColor(white: 1, alpha: 0)
+let kPickerTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, alpha: 0.6)
 
 /* Social graph constants */
 let kUnconnectedEdgeWeight:Float = -1000.0
