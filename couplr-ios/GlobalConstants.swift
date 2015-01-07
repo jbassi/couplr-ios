@@ -8,6 +8,10 @@
 
 import UIKit
 
+/* iOS Navigation Bar Height */
+let kStatusBarSize = UIApplication.sharedApplication().statusBarFrame.size
+let kStatusBarHeight = min(kStatusBarSize.width, kStatusBarSize.height)
+
 /* CouplrSettingsManager Constants */
 let kShouldSkipLoginKey: String = "kShouldSkipLoginKey"
 
@@ -18,7 +22,7 @@ let kMatchViewButtonTitle = "Matches"
 let kProfileViewButtonTitle = "Profile"
 let kCouplrNavigationBarHeight: CGFloat = 50.0
 let kCouplrNavigationBarButtonHeight: CGFloat = 50.0
-let kCouplrNavigationBarSelectionIndicatorHeight: CGFloat = 10.0
+let kCouplrNavigationBarSelectionIndicatorHeight: CGFloat = 7.0
 
 /* Storyboard View Names */
 let kStoryboardName = "Main"
@@ -40,6 +44,27 @@ let kPickerSpringVelocity: CGFloat = 0.5
 
 /* ProfilePictureCollectionViewCell Constants */
 let kProfilePictureCollectionViewCellHideAnimationDuration = 0.2
+
+/* ProfileViewControllerTableViewCell Constants */
+let kProfileViewControllerTableViewCellPadding: CGFloat = 10.0
+let kProfileViewControllerTableViewCellWidth: CGFloat = 40.0
+
+/* ProfileViewController Constants */
+let kProfileViewControllerMaximumNumberOfMatches = 99
+let kProfileViewControllerMaximumNumberOfMatchesString = "99+"
+let kProfileViewControllerDetailViewHeight: CGFloat = 150
+
+/* ProfileDetailView Constants */
+let kProfileDetailViewProfilePictureRatio: CGFloat = 0.70
+let kProfileDetailViewProfilePicturePadding: CGFloat = 4
+let kProfileDetailViewProfilePictureXRatio: CGFloat = 0.075
+let kProfileDetailViewProfilePictureYRatio: CGFloat = 0.20
+let kProfileDetailViewBottomBorderWidth: CGFloat = 10
+let kProfileDetailViewBottomBorderHeight: CGFloat = 1
+let kProfileDetailViewNameLabelX: CGFloat = 32
+
+/* ProfileDetailView Fonts */
+let kProfileDetailViewProfileNameLabelFont = UIFont(name: "HelveticaNeue-Light", size: 26)
 
 /* MatchViewControllerCollectionView Constants */
 let kMatchViewControllerCollectionViewNumberOfRows: Int = 9
@@ -76,4 +101,4 @@ let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 
 /* Debugging outputs */
 let kShowRandomWalkDebugOutput:Bool = false
-let kOutputLogMessages:Bool = true
+let kOutputLogMessages:Bool = false

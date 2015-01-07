@@ -16,7 +16,11 @@ class ProfilePictureImageView: UIImageView {
     var pictureURL: NSString?
     var connection: NSURLConnection?
     
-    init(pictureURL: NSString) {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    init(pictureURL: NSString = "") {
         super.init()
         self.pictureURL = pictureURL
         let request: NSURLRequest = NSURLRequest(URL: NSURL(string: pictureURL)!)

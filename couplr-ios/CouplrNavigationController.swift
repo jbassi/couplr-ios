@@ -10,8 +10,8 @@ import UIKit
 
 class CouplrNavigationController: UINavigationController {
     
-    var navigationSelectionBar: UIView?
-    var customNavigationBar: UIView?
+    var navigationSelectionBar = UIView()
+    var customNavigationBar = UIView()
     
     var viewControllerArray = Array<UIViewController>()
     var pageViewController: UIPageViewController?
@@ -46,7 +46,7 @@ class CouplrNavigationController: UINavigationController {
     }
     
     func setupNavigationBarButtons() {
-        customNavigationBar = UIView(frame: CGRectMake(0, view.frame.size.height-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight))
+        customNavigationBar.frame = CGRectMake(0, view.frame.size.height-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight)
         
         let buttonWidth = view.frame.width / 2
         let matchViewButton = UIButton(frame: CGRectMake(0, 0, buttonWidth, kCouplrNavigationBarButtonHeight))
@@ -64,19 +64,19 @@ class CouplrNavigationController: UINavigationController {
         matchViewButton.tag = kMatchViewButtonTag
         profileViewButton.tag = kProfileViewButtonTag
         
-        customNavigationBar?.addSubview(matchViewButton)
-        customNavigationBar?.addSubview(profileViewButton)
-        view.addSubview(customNavigationBar!)
+        customNavigationBar.addSubview(matchViewButton)
+        customNavigationBar.addSubview(profileViewButton)
+        view.addSubview(customNavigationBar)
         
         setupNavigationSelectionBar()
     }
     
     func setupNavigationSelectionBar() {
         let selectionBarWidth = view.frame.width / 2
-        navigationSelectionBar = UIView(frame: CGRectMake(0, 0, selectionBarWidth, kCouplrNavigationBarSelectionIndicatorHeight))
-        navigationSelectionBar?.backgroundColor = UIColor.greenColor()
-        navigationSelectionBar?.alpha = 0.8
-        customNavigationBar?.addSubview(navigationSelectionBar!)
+        navigationSelectionBar.frame = CGRectMake(0, 0, selectionBarWidth, kCouplrNavigationBarSelectionIndicatorHeight)
+        navigationSelectionBar.backgroundColor = UIColor.greenColor()
+        navigationSelectionBar.alpha = 0.8
+        customNavigationBar.addSubview(navigationSelectionBar)
     }
     
     func syncScrollView() {
@@ -155,9 +155,9 @@ extension CouplrNavigationController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
         let xDistanceFromCenter = view.frame.size.width - pageScrollView!.contentOffset.x
-        let xCoordinate = navigationSelectionBar!.frame.size.width * CGFloat(currentPageIndex)
+        let xCoordinate = navigationSelectionBar.frame.size.width * CGFloat(currentPageIndex)
         
-        navigationSelectionBar!.frame = CGRectMake(xCoordinate-xDistanceFromCenter/CGFloat(viewControllerArray.count), navigationSelectionBar!.frame.origin.y, navigationSelectionBar!.frame.size.width, navigationSelectionBar!.frame.size.height)
+        navigationSelectionBar.frame = CGRectMake(xCoordinate-xDistanceFromCenter/CGFloat(viewControllerArray.count), navigationSelectionBar.frame.origin.y, navigationSelectionBar.frame.size.width, navigationSelectionBar.frame.size.height)
     }
     
 }

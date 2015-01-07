@@ -20,6 +20,8 @@
 		0F6074F51A4FDF2A0045B5C3 /* FacebookSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */; };
 		0F9C98891A539E0A004CAC4D /* ProfilePictureImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */; };
 		0FA10B3F1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */; };
+		0FDD9F6F1A5BA0E700927558 /* ProfileDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */; };
+		0FE7AAF51A5C5D9000398B0E /* ProfileViewControllerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE7AAF41A5C5D9000398B0E /* ProfileViewControllerTableViewCell.swift */; };
 		0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */; };
 		0FF11BDE1A50C45600C14FDC /* GlobalConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */; };
 		0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BE01A50C55500C14FDC /* MatchViewController.swift */; };
@@ -75,6 +77,8 @@
 		0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
 		0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePictureImageView.swift; sourceTree = "<group>"; };
 		0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePictureCollectionViewCell.swift; sourceTree = "<group>"; };
+		0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileDetailView.swift; sourceTree = "<group>"; };
+		0FE7AAF41A5C5D9000398B0E /* ProfileViewControllerTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileViewControllerTableViewCell.swift; sourceTree = "<group>"; };
 		0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilityFunctions.swift; sourceTree = "<group>"; };
 		0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalConstants.swift; sourceTree = "<group>"; };
 		0FF11BE01A50C55500C14FDC /* MatchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchViewController.swift; sourceTree = "<group>"; };
@@ -264,6 +268,8 @@
 				0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */,
 				0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */,
 				0FFBA3031A562D4E00A95F66 /* CouplrNavigationController.swift */,
+				0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */,
+				0FE7AAF41A5C5D9000398B0E /* ProfileViewControllerTableViewCell.swift */,
 			);
 			name = "Generic Views";
 			sourceTree = "<group>";
@@ -385,6 +391,7 @@
 				0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */,
 				0F9C98891A539E0A004CAC4D /* ProfilePictureImageView.swift in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,
+				0FDD9F6F1A5BA0E700927558 /* ProfileDetailView.swift in Sources */,
 				F43D50731A536CC2000E09CE /* GraphBuilder.swift in Sources */,
 				F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */,
 				0F24FB401A53BD5C00201C31 /* SocialGraphController.swift in Sources */,
@@ -397,6 +404,7 @@
 				0FFBA3041A562D4E00A95F66 /* CouplrNavigationController.swift in Sources */,
 				0F37CA1D19C52455007A6951 /* CouplrLoginErrorHandler.swift in Sources */,
 				0F1B9EE319C4DD7A00CD64FD /* AppDelegate.swift in Sources */,
+				0FE7AAF51A5C5D9000398B0E /* ProfileViewControllerTableViewCell.swift in Sources */,
 				F4B954D81A561C67002D4ED9 /* JSON.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
