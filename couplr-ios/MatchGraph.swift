@@ -58,6 +58,7 @@ public class MatchGraph {
     public init() {
         self.matches = [UInt64:[UInt64:MatchList]]()
         self.titles = [Int:MatchTitle]()
+        self.graph = nil
     }
     
     /**
@@ -110,28 +111,49 @@ public class MatchGraph {
                     let second:UInt64 = uint64FromAnyObject(matchData["secondId"])
                     let voter:UInt64 = uint64FromAnyObject(matchData["voterId"])
                     let titleId:Int = matchData["titleId"] as Int
-                    self.updateDirectedEdge(first, to:second, voter:voter, titleId:titleId)
-                    self.updateDirectedEdge(second, to:first, voter:voter, titleId:titleId)
+                    self.tryToUpdateDirectedEdge(first, to:second, voter:voter, titleId:titleId)
+                    self.tryToUpdateDirectedEdge(second, to:first, voter:voter, titleId:titleId)
                 }
             }
         }
     }
     
     /**
-     * Updates the graph going in one direction.
+     * Attempts to add a new match to the graph. If the match is successfully
+     * added and the social graph exists, notifies the social graph about the
+     * new match.
      */
-    private func updateDirectedEdge(from:UInt64, to:UInt64, voter:UInt64, titleId:Int) {
+    public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int, andRootUser:UInt64 = 0) {
+        if andRootUser == 0 && graph == nil {
+            log("MatchGraph::userDidMatch expected self.graph to exist. Cannot register match.", withFlag:"-")
+            return
+        }
+        var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:toSecondId, voter:andRootUser, titleId:withTitleId)
+        didUpdate = didUpdate && tryToUpdateDirectedEdge(toSecondId, to:firstId, voter:andRootUser , titleId:withTitleId)
+        if !didUpdate {
+            log("User already voted on [\(firstId), \(toSecondId)] with title \"\(titles[withTitleId])\"")
+            return
+        }
+        graph?.userDidMatch(firstId, toSecondId:toSecondId)
+    }
+    
+    /**
+     * Updates the graph going in one direction. Returns if the edge was successfully
+     * added (i.e. the user did not already vote on the pair for the same title).
+     */
+    private func tryToUpdateDirectedEdge(from:UInt64, to:UInt64, voter:UInt64, titleId:Int) -> Bool {
         // Make a new adjacency map if none exists.
         if matches[from] == nil {
-            self.matches[from] = [UInt64:MatchList]()
+            matches[from] = [UInt64:MatchList]()
         }
         // Make a new MatchList if none exists.
-        if self.matches[from]![to] == nil {
-            self.matches[from]![to] = MatchList()
+        if matches[from]![to] == nil {
+            matches[from]![to] = MatchList()
         }
-        self.matches[from]![to]!.updateMatch(titleId, voter:voter)
+        return matches[from]![to]!.updateMatch(titleId, voter:voter)
     }
     
     var matches:[UInt64:[UInt64:MatchList]]
     var titles:[Int:MatchTitle]
+    var graph:SocialGraph?
 }

@@ -55,9 +55,11 @@ public class SocialGraph {
         self.edges = [UInt64:[UInt64:Float]]()
         self.totalEdgeWeight = 0
         self.edgeCount = 0
+        self.totalEdgeWeightFromRoot = 0
         self.genders = [String:Gender]()
         self.isCurrentlyUpdatingGender = false
         self.shouldReupdateGender = false
+        self.walkWeightMultipliers = [UInt64:Float]()
         updateFirstNames()
     }
     
@@ -248,7 +250,7 @@ public class SocialGraph {
                 let nodeAsString:NSString = nodeNum.stringValue
                 for (neighbor:UInt64, var weight:Float) in neighbors {
                     if node == self.root || neighbor == self.root {
-                        weight /= 5 // TODO Normalize this to number of comments or something?
+                        weight *= kScaleFactorForExportingRootEdges
                     }
                     if node < neighbor && weight > minWeight {
                         let neighborNum:NSNumber = NSNumber(unsignedLongLong:neighbor)
@@ -290,6 +292,9 @@ public class SocialGraph {
             edgeCount++
         }
         totalEdgeWeight += withWeight
+        if node == root || toNode == root {
+            totalEdgeWeightFromRoot += withWeight
+        }
         addEdgeFrom(node, toNode:toNode, withWeight:withWeight)
         addEdgeFrom(toNode, toNode:node, withWeight:withWeight)
     }
@@ -303,6 +308,9 @@ public class SocialGraph {
         if currentEdgeWeight > kUnconnectedEdgeWeight {
             edgeCount--
             totalEdgeWeight -= currentEdgeWeight
+            if node == root || fromNode == root {
+                totalEdgeWeightFromRoot -= currentEdgeWeight
+            }
             removeEdgeFrom(node, toNode:fromNode)
             removeEdgeFrom(fromNode, toNode:node)
         }
@@ -338,6 +346,14 @@ public class SocialGraph {
     }
     
     /**
+     * Notifies the social graph that the user voted on a new match.
+     */
+    public func userDidMatch(firstId:UInt64, toSecondId:UInt64) {
+        walkWeightMultipliers[firstId] = kWalkWeightMultiplierBoost
+        walkWeightMultipliers[toSecondId] = kWalkWeightMultiplierBoost
+    }
+    
+    /**
      * Samples some number of users by performing a weighted random walk on the
      * graph starting at the root user.
      */
@@ -358,27 +374,30 @@ public class SocialGraph {
             }
             println()
         }
+        decayWalkWeightMultipliers()
         return sample
     }
     
     /**
      * Given a current node and a list of nodes previously traversed, randomly jumps
      * to a new neighboring node that does not already appear in the list of previous
-     * nodes. If there is no such node, returns 0.
+     * nodes and is not the root. If there is no such node, returns 0.
      */
     private func takeRandomStepFrom(node:UInt64, withNodesTraversed:[UInt64:String]) -> UInt64 {
         var possibleNextNodes:[(UInt64, Float)] = [(UInt64, Float)]()
+        var originalWeights:[Float] = [Float]() // Debugging purposes.
         let currentGender:Gender = node == root ? Gender.Undetermined : genderFromID(node)
         var sameGenderScoreSum:Float = 0
         var differentGenderScoreSum:Float = 0
-        let meanEdgeWeight:Float = totalEdgeWeight / Float(self.names.count * 2)
+        let meanNonRootWeight:Float = (totalEdgeWeight - totalEdgeWeightFromRoot) / Float(edgeCount - edges[root]!.count)
         // Compute sampling weights prior to gender renormalization.
         for (neighbor:UInt64, weight:Float) in self.edges[node]! {
             if neighbor == root || withNodesTraversed[neighbor] != nil {
                 continue
             }
-            let neighborScore:Float = sampleWeightForScore(weight - meanEdgeWeight)
+            let neighborScore:Float = sampleWeightForScore(weight - meanNonRootWeight)
             possibleNextNodes.append((neighbor, neighborScore))
+            originalWeights.append(weight - meanNonRootWeight)
             let gender:Gender = genderFromID(neighbor)
             if currentGender == Gender.Undetermined || gender == Gender.Undetermined {
                 continue
@@ -389,20 +408,25 @@ public class SocialGraph {
             }
         }
         if currentGender != Gender.Undetermined {
-            // Compute gender-renormalized weights.
+            // Apply gender renormalization.
             let newSameGenderScoreSum:Float = (sameGenderScoreSum + differentGenderScoreSum) / Float(1 + kGenderBiasRatio)
             let newDifferentGenderScoreSum:Float = kGenderBiasRatio * newSameGenderScoreSum
             for index in 0..<possibleNextNodes.count {
                 let (neighbor:UInt64, weight:Float) = possibleNextNodes[index]
                 let gender:Gender = genderFromID(neighbor)
-                if gender == Gender.Undetermined {
-                    continue
-                } else if gender == currentGender {
-                    possibleNextNodes[index].1 = weight * newSameGenderScoreSum / sameGenderScoreSum
-                } else {
-                    possibleNextNodes[index].1 = weight * newDifferentGenderScoreSum / differentGenderScoreSum
+                if gender != Gender.Undetermined {
+                    if gender == currentGender {
+                        possibleNextNodes[index].1 *= newSameGenderScoreSum / sameGenderScoreSum
+                    } else {
+                        possibleNextNodes[index].1 *= newDifferentGenderScoreSum / differentGenderScoreSum
+                    }
                 }
             }
+        }
+        // Apply random walk multipliers.
+        for index in 0..<possibleNextNodes.count {
+            let (neighbor:UInt64, weight:Float) = possibleNextNodes[index]
+            possibleNextNodes[index].1 *= walkWeightMultiplierForNode(neighbor)
         }
         if kShowRandomWalkDebugOutput {
             if withNodesTraversed.count == 0 {
@@ -416,9 +440,27 @@ public class SocialGraph {
                 for (id:UInt64, weight:Float) in possibleNextNodes {
                     total += weight
                 }
-                for (id:UInt64, weight:Float) in possibleNextNodes {
-                    let percentageAsString:String = String(format: "%.2f", Double(100.0 * (weight/total)))
-                    println("        \(names[id]!): \(percentageAsString)% (w=\(weight))")
+                for index:Int in 0..<possibleNextNodes.count {
+                    let (neighbor:UInt64, weight:Float) = possibleNextNodes[index]
+                    let percentage:Double = Double(100.0 * (weight/total))
+                    var percentageAsString:String
+                    if percentage < 10.0 {
+                        percentageAsString = String(format:"%.3f", percentage)
+                    } else if percentage < 100.0 {
+                        percentageAsString = String(format:"%.2f", percentage)
+                    } else {
+                        percentageAsString = String(format:"%.1f", percentage)
+                    }
+                    let multiplierAsString = String(format:"%.2f", walkWeightMultiplierForNode(neighbor))
+                    let weightAsString:String = String(format:"%.2f", originalWeights[index])
+                    var nameAsPaddedString:String = names[neighbor]!
+                    if nameAsPaddedString.utf16Count < 30 {
+                        for index in nameAsPaddedString.utf16Count..<30 {
+                            nameAsPaddedString += " "
+                        }
+                    }
+                    print("        ")
+                    println("\(percentageAsString)% \(nameAsPaddedString) \(multiplierAsString) \(weightAsString)")
                 }
             }
         }
@@ -455,6 +497,25 @@ public class SocialGraph {
         }
         friendList.removeAtIndex(maxFriendIndex)
         return nextFriend
+    }
+    
+    /**
+     * Computes the walk weight multiplier for a node. By default, this is 1 (no change).
+     */
+    private func walkWeightMultiplierForNode(id:UInt64) -> Float {
+        if walkWeightMultipliers[id] == nil {
+            return 1
+        }
+        return walkWeightMultipliers[id]! + 1
+    }
+    
+    /**
+     * Decay all existing walk weight multipliers.
+     */
+    private func decayWalkWeightMultipliers() {
+        for (node:UInt64, multiplier:Float) in walkWeightMultipliers {
+            walkWeightMultipliers[node] = multiplier < 0.025 ? nil : kWalkWeightMultiplierDecayRate * multiplier
+        }
     }
     
     /**
@@ -662,9 +723,14 @@ public class SocialGraph {
     var names:[UInt64:String]
     var genders:[String:Gender]
 
-    // Edge-based metadata for future heuristics.
+    // Edge-based metadata for computing heuristics.
     var totalEdgeWeight:Float
     var edgeCount:Int
+    var totalEdgeWeightFromRoot:Float
+    
+    // Match graph used to improve heuristics.
+    var matches:MatchGraph?
+    var walkWeightMultipliers:[UInt64:Float]
     
     // Miscellaneous state variables.
     var isCurrentlyUpdatingGender:Bool

@@ -58,9 +58,13 @@ let kCommentLikeScore:Float = 0.4
 let kSamplingWeightLimit:Float = 10
 let kRandomSampleCount:Int = 9
 let kMaxGraphDataQueries:Int = 4
+let kSigmoidExponentialBase:Float = 3.5
+let kScaleFactorForExportingRootEdges:Float = 0.2
 // Make it this much more likely to land on someone of the opposite gender.
-let kGenderBiasRatio:Float = 8.0
-let kSigmoidExponentialBase:Float = 3.0
+let kGenderBiasRatio:Float = 6.0
+// Constants for multipliers determining walk weight bonuses for nodes the user selects.
+let kWalkWeightMultiplierBoost:Float = 1.0
+let kWalkWeightMultiplierDecayRate:Float = 0.5
 
 /* Parse configuration */
 let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
