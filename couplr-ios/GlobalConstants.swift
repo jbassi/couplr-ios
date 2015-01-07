@@ -101,4 +101,4 @@ let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 
 /* Debugging outputs */
 let kShowRandomWalkDebugOutput:Bool = false
-let kOutputLogMessages:Bool = false
+let kOutputLogMessages:Bool = true

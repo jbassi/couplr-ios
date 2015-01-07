@@ -44,6 +44,7 @@ public class SocialGraphController {
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
+                    MatchGraphController.sharedInstance.socialGraphDidLoad()
                     log("Initialized base graph from \(statusCount) comments.")
                     log("Num. nodes = \(graph.names.count), num. edges = \(graph.edgeCount)", withIndent:1)
                     self.graph?.updateGenders()

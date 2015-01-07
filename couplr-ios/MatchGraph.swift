@@ -47,6 +47,18 @@ public class MatchList {
         return false
     }
     
+    /**
+     * Returns a dictionary mapping each title id in this list of
+     * matches to the corresponding number of votes for that title.
+     */
+    public func numVotesByTitleId() -> [Int:Int] {
+        var result:[Int:Int] = [Int:Int]()
+        for (titleId:Int, voterList:[UInt64]) in matchesByTitle {
+            result[titleId] = voterList.count
+        }
+        return result
+    }
+    
     // Maps a title ID to a list of users who voted for that match.
     var matchesByTitle:[Int:[UInt64]]
 }
@@ -59,6 +71,7 @@ public class MatchGraph {
         self.matches = [UInt64:[UInt64:MatchList]]()
         self.titles = [Int:MatchTitle]()
         self.graph = nil
+        self.fetchedIdHistory = [UInt64]()
     }
     
     /**
@@ -99,10 +112,49 @@ public class MatchGraph {
     }
     
     /**
-     * Loads all matches relevant to a given user id.
+     * For a given user, a dictionary that contains, as keys, all other users
+     * to which the given user has been matched. The value corresponding to
+     * each key (the other user) is another dictionary mapping title id to
+     * the number of votes for that title.
+     *
+     * For example, suppose we call matchesForUserId(A) and receive
+     * [B:[3:1, 0:4]]. Then A has matches only with B, consisting of 1 vote
+     * for the title with ID 3 and 4 votes for the title with ID 0.
+     *
+     * This queries the current state of the graph, and does not assume that
+     * the matches were previously loaded for the given userId. In order to
+     * ensure that matches for the userId were loaded, use a callback with
+     * MatchGraph::fetchMatchesForId.
      */
-    public func fetchMatchesForId(id:UInt64) {
-        let predicate:NSPredicate = NSPredicate(format:"firstId = \(id) OR secondId = \(id)")!
+    public func numMatchesByTitleForUserId(userId:UInt64) -> [UInt64:[Int:Int]] {
+        var result:[UInt64:[Int:Int]] = [UInt64:[Int:Int]]()
+        if matches[userId] != nil {
+            for (matchedUser:UInt64, matchList:MatchList) in matches[userId]! {
+                result[matchedUser] = matchList.numVotesByTitleId()
+            }
+        }
+        return result
+    }
+    
+    /**
+     * Loads all matches relevant to a given user id. Takes an optional callback
+     * function that is called when the results are received. In the case that the
+     * id has already been fetched, immediately invokes the callback and returns.
+     * Otherwise, invokes the callback after the response arrives and the graph update
+     * finishes. The callback takes a Bool parameter indicating whether or not an
+     * error occurred when receiving the data.
+     */
+    public func fetchMatchesForId(userId:UInt64, callback:((didError:Bool)->Void)? = nil) {
+        log("Requesting match records for user \(userId)", withFlag:"!")
+        // Do not re-fetch matches.
+        if find(fetchedIdHistory, userId) != nil {
+            log("Matches for user \(userId) already loaded.", withIndent:1)
+            if callback != nil {
+                callback!(didError:false)
+            }
+            return
+        }
+        let predicate:NSPredicate = NSPredicate(format:"firstId = \(userId) OR secondId = \(userId)")!
         var query = PFQuery(className:"MatchData", predicate:predicate)
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -115,6 +167,17 @@ public class MatchGraph {
                     let titleId:Int = matchData["titleId"] as Int
                     self.tryToUpdateDirectedEdge(first, to:second, voter:voter, titleId:titleId)
                     self.tryToUpdateDirectedEdge(second, to:first, voter:voter, titleId:titleId)
+                }
+                // Consider a match fetched only after the response arrives.
+                self.fetchedIdHistory.append(userId)
+                log("Received and updated matches for user \(userId).", withIndent:1)
+                if callback != nil {
+                    callback!(didError:false)
+                }
+            } else {
+                log("Error \(error!.description) occurred when loading \(userId)'s matches.", withIndent:1, withFlag:"-")
+                if callback != nil {
+                    callback!(didError:true)
                 }
             }
         }
@@ -154,4 +217,5 @@ public class MatchGraph {
     var matches:[UInt64:[UInt64:MatchList]]
     var titles:[Int:MatchTitle]
     var graph:SocialGraph?
+    var fetchedIdHistory:[UInt64]
 }

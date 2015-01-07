@@ -20,15 +20,14 @@ class LoginViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         continueButton.hidden = true
         loginView.delegate = self
         loginView.readPermissions = ["user_friends", "user_status"]
+        MatchGraphController.sharedInstance.appDidLoad()
     }
 
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-
         var settings: CouplrSettingsManager = CouplrSettingsManager.sharedInstance
         if (viewDidAppear) {
             viewIsVisible = true;
@@ -44,7 +43,6 @@ class LoginViewController: UIViewController {
             }
             viewDidAppear = true
         }
-        MatchGraphController.sharedInstance.appDidLoad()
     }
 
     override func viewWillDisappear(animated: Bool) {

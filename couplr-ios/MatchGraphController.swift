@@ -24,18 +24,25 @@ public class MatchGraphController {
         matches?.fetchMatchTitles()
     }
     
-    func socialGraphDidInitialize() {
-        matches?.graph = SocialGraphController.sharedInstance.graph
+    func socialGraphDidLoad() {
+        if matches == nil {
+            matches = MatchGraph()
+        }
+        matches!.graph = SocialGraphController.sharedInstance.graph
+        matches!.fetchMatchesForId(matches!.graph!.root)
     }
     
-    func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int, var andRootUser:UInt64 = 0) {
-        if andRootUser == 0 {
-            if SocialGraphController.sharedInstance.graph == nil {
-                log("MatchGraphController::userDidMatch expected a valid root user.", withFlag:"-")
-                return
-            }
-            andRootUser = SocialGraphController.sharedInstance.graph!.root
+    /**
+     * Notifies the MatchGraph that the root user performed a match.
+     * Will assume that the SocialGraph has already been initialized,
+     * so the root user is graph!.root.
+     */
+    func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int) {
+        if SocialGraphController.sharedInstance.graph == nil {
+            log("MatchGraphController::userDidMatch expected a valid root user.", withFlag:"-")
+            return
         }
-        matches?.userDidMatch(firstId, toSecondId:toSecondId, withTitleId:withTitleId, andRootUser:andRootUser)
+        let root:UInt64 = SocialGraphController.sharedInstance.graph!.root
+        matches?.userDidMatch(firstId, toSecondId:toSecondId, withTitleId:withTitleId, andRootUser:root)
     }
 }
