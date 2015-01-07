@@ -43,7 +43,7 @@ class PickerView: UIPickerView {
     }
     
     required init(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: aDecoder)
     }
     
     // MARK: - Animation Functions
@@ -54,8 +54,10 @@ class PickerView: UIPickerView {
             
             UIView.animateWithDuration(kPickerShowAnimationDuration, delay: 0, usingSpringWithDamping: kPickerShowSpringDamping, initialSpringVelocity: kPickerSpringVelocity, options: UIViewAnimationOptions(0), animations: {
                 self.frame.origin.y = round((self.superview!.frame.size.height - self.frame.size.height) / 2)
+            }, completion: nil)
+            UIView.animateWithDuration(kPickerShowAnimationDuration, animations: {
                 self.transparentLayer.backgroundColor = kPickerTransparentLayerShowColor
-                }, completion: nil)
+            }, completion: nil)
         }
     }
     
@@ -64,7 +66,8 @@ class PickerView: UIPickerView {
             UIView.animateWithDuration(kPickerHideAnimationDuration, delay: 0, usingSpringWithDamping: kPickerHideSpringDamping, initialSpringVelocity: kPickerSpringVelocity, options: UIViewAnimationOptions(0), animations: {
                 self.frame.origin.y = self.superview!.frame.size.height + self.frame.size.height
                 self.transparentLayer.backgroundColor = kPickerTransparentLayerHideColor
-                }, completion: { (value:Bool) in self.transparentLayer.removeFromSuperview()
+                }, completion: { (completed:Bool) in
+                    self.transparentLayer.removeFromSuperview()
             })
         }
     }
