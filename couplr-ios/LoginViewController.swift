@@ -44,6 +44,7 @@ class LoginViewController: UIViewController {
             }
             viewDidAppear = true
         }
+        MatchGraphController.sharedInstance.appDidLoad()
     }
 
     override func viewWillDisappear(animated: Bool) {

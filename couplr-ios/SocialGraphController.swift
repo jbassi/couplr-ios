@@ -16,7 +16,6 @@ public class SocialGraphController {
     
     weak var delegate: SocialGraphControllerDelegate?
     var graph: SocialGraph?
-    var matches: MatchGraph?
     
     class var sharedInstance: SocialGraphController {
         struct SocialGraphSingleton {
@@ -27,8 +26,6 @@ public class SocialGraphController {
     
     public func initializeGraph() {
         log("Requesting user statuses...", withFlag:"!")
-        matches = MatchGraph()
-        matches?.fetchMatchTitles()
         FBRequestConnection.startWithGraphPath(
             "me/statuses?limit=100",
             completionHandler: { (connection, result, error) -> Void in
@@ -46,7 +43,6 @@ public class SocialGraphController {
                     }
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
-                    self.matches?.graph = graph
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
                     log("Initialized base graph from \(statusCount) comments.")
                     log("Num. nodes = \(graph.names.count), num. edges = \(graph.edgeCount)", withIndent:1)

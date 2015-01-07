@@ -66,6 +66,7 @@ public class MatchGraph {
      * function.
      */
     public func fetchMatchTitles() {
+        log("Requesting match titles...", withFlag:"!")
         var query = PFQuery(className:"MatchTitle")
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -75,6 +76,7 @@ public class MatchGraph {
                 let picture:String = title["picture"]! as String
                 self.titles[titleId] = MatchTitle(id:titleId, text:text, picture:picture)
             }
+            log("Received \(objects.count) titles.", withIndent:1)
         }
     }
     
@@ -123,11 +125,7 @@ public class MatchGraph {
      * added and the social graph exists, notifies the social graph about the
      * new match.
      */
-    public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int, andRootUser:UInt64 = 0) {
-        if andRootUser == 0 && graph == nil {
-            log("MatchGraph::userDidMatch expected self.graph to exist. Cannot register match.", withFlag:"-")
-            return
-        }
+    public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int, andRootUser:UInt64) {
         var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:toSecondId, voter:andRootUser, titleId:withTitleId)
         didUpdate = didUpdate && tryToUpdateDirectedEdge(toSecondId, to:firstId, voter:andRootUser , titleId:withTitleId)
         if !didUpdate {
