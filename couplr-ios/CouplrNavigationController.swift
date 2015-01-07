@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import QuartzCore
 
 class CouplrNavigationController: UINavigationController {
     
@@ -17,6 +18,8 @@ class CouplrNavigationController: UINavigationController {
     var pageViewController: UIPageViewController?
     var pageScrollView: UIScrollView?
     var currentPageIndex: NSInteger = 0
+    let matchViewButton = UIButton()
+    let profileViewButton = UIButton()
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
@@ -49,8 +52,8 @@ class CouplrNavigationController: UINavigationController {
         customNavigationBar.frame = CGRectMake(0, view.frame.size.height-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight)
         
         let buttonWidth = view.frame.width / 2
-        let matchViewButton = UIButton(frame: CGRectMake(0, 0, buttonWidth, kCouplrNavigationBarButtonHeight))
-        let profileViewButton = UIButton(frame: CGRectMake(buttonWidth, 0, buttonWidth, kCouplrNavigationBarButtonHeight))
+        matchViewButton.frame = CGRectMake(0, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
+        profileViewButton.frame = CGRectMake(buttonWidth, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
         
         matchViewButton.backgroundColor = UIColor.grayColor()
         profileViewButton.backgroundColor = UIColor.grayColor()
@@ -59,7 +62,9 @@ class CouplrNavigationController: UINavigationController {
         profileViewButton.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
         
         matchViewButton.setTitle(kMatchViewButtonTitle, forState: .Normal)
+        matchViewButton.titleLabel?.font = kCouplrNavigationButtonBoldFont
         profileViewButton.setTitle(kProfileViewButtonTitle, forState: .Normal)
+        profileViewButton.titleLabel?.font = kCouplrNavigationButtonFont
         
         matchViewButton.tag = kMatchViewButtonTag
         profileViewButton.tag = kProfileViewButtonTag
@@ -76,6 +81,7 @@ class CouplrNavigationController: UINavigationController {
         navigationSelectionBar.frame = CGRectMake(0, 0, selectionBarWidth, kCouplrNavigationBarSelectionIndicatorHeight)
         navigationSelectionBar.backgroundColor = UIColor.greenColor()
         navigationSelectionBar.alpha = 0.8
+        navigationSelectionBar.layer.cornerRadius = kCouplrNavigationBarSelectionIndicatorCornerRadius
         customNavigationBar.addSubview(navigationSelectionBar)
     }
     
@@ -93,12 +99,16 @@ class CouplrNavigationController: UINavigationController {
             pageViewController!.setViewControllers([viewControllerArray[1]], direction: .Forward, animated: true, completion: {(completed:Bool) in
                 if completed {
                     self.currentPageIndex = 1
+                    self.matchViewButton.titleLabel?.font = kCouplrNavigationButtonFont
+                    self.profileViewButton.titleLabel?.font = kCouplrNavigationButtonBoldFont
                 }
             })
         } else if button.tag == kMatchViewButtonTag {
             pageViewController!.setViewControllers([viewControllerArray[0]], direction: .Reverse, animated: true, completion: {(completed:Bool) in
                 if completed {
                     self.currentPageIndex = 0
+                    self.matchViewButton.titleLabel?.font = kCouplrNavigationButtonBoldFont
+                    self.profileViewButton.titleLabel?.font = kCouplrNavigationButtonFont
                 }
             })
         }
@@ -146,6 +156,13 @@ extension CouplrNavigationController: UIPageViewControllerDelegate, UIPageViewCo
     func pageViewController(pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [AnyObject], transitionCompleted completed: Bool) {
         if completed {
             currentPageIndex = indexOfViewController(pageViewController.viewControllers.last as UIViewController)
+            if currentPageIndex == 0 {
+                self.matchViewButton.titleLabel?.font = kCouplrNavigationButtonBoldFont
+                self.profileViewButton.titleLabel?.font = kCouplrNavigationButtonFont
+            } else if currentPageIndex == 1 {
+                self.matchViewButton.titleLabel?.font = kCouplrNavigationButtonFont
+                self.profileViewButton.titleLabel?.font = kCouplrNavigationButtonBoldFont
+            }
         }
     }
     

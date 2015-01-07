@@ -20,9 +20,12 @@ let kMatchViewButtonTag = 1000
 let kProfileViewButtonTag = 1001
 let kMatchViewButtonTitle = "Matches"
 let kProfileViewButtonTitle = "Profile"
+let kCouplrNavigationButtonFont: UIFont = UIFont.systemFontOfSize(18.0)
+let kCouplrNavigationButtonBoldFont: UIFont = UIFont.boldSystemFontOfSize(18.0)
 let kCouplrNavigationBarHeight: CGFloat = 50.0
 let kCouplrNavigationBarButtonHeight: CGFloat = 50.0
-let kCouplrNavigationBarSelectionIndicatorHeight: CGFloat = 7.0
+let kCouplrNavigationBarSelectionIndicatorHeight: CGFloat = 4.0
+let kCouplrNavigationBarSelectionIndicatorCornerRadius: CGFloat = 2.5
 
 /* Storyboard View Names */
 let kStoryboardName = "Main"
@@ -101,4 +104,4 @@ let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 
 /* Debugging outputs */
 let kShowRandomWalkDebugOutput:Bool = false
-let kOutputLogMessages:Bool = true
+let kOutputLogMessages:Bool = false
