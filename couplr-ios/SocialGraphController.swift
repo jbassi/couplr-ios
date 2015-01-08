@@ -45,8 +45,7 @@ public class SocialGraphController {
                     self.graph = graph
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
                     MatchGraphController.sharedInstance.socialGraphDidLoad()
-                    log("Initialized base graph from \(statusCount) comments.")
-                    log("Num. nodes = \(graph.names.count), num. edges = \(graph.edgeCount)", withIndent:1)
+                    log("Initialized base graph (\(graph.names.count) nodes \(graph.edgeCount) edges) from \(statusCount) comments.", withIndent:1)
                     self.graph?.updateGenders()
                     self.graph?.updateCommentLikes(builder.commentsWithLikesForAuthor, andSaveGraphData:true)
                 }

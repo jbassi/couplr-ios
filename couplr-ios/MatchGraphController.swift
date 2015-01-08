@@ -20,7 +20,9 @@ public class MatchGraphController {
     }
     
     func appDidLoad() {
-        matches = MatchGraph()
+        if matches == nil {
+            matches = MatchGraph()
+        }
         matches?.fetchMatchTitles()
     }
     
@@ -30,6 +32,7 @@ public class MatchGraphController {
         }
         matches!.graph = SocialGraphController.sharedInstance.graph
         matches!.fetchMatchesForId(matches!.graph!.root)
+        matches!.fetchRootUserMatchHistory()
     }
     
     /**
@@ -38,11 +41,6 @@ public class MatchGraphController {
      * so the root user is graph!.root.
      */
     func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int) {
-        if SocialGraphController.sharedInstance.graph == nil {
-            log("MatchGraphController::userDidMatch expected a valid root user.", withFlag:"-")
-            return
-        }
-        let root:UInt64 = SocialGraphController.sharedInstance.graph!.root
-        matches?.userDidMatch(firstId, toSecondId:toSecondId, withTitleId:withTitleId, andRootUser:root)
+        matches?.userDidMatch(firstId, toSecondId:toSecondId, withTitleId:withTitleId)
     }
 }

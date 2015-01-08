@@ -267,16 +267,18 @@ public class SocialGraph {
             }
             graphData["names"] = nameDictionary
             graphData["edges"] = edgeArray
-            log("Saving graph with \(nameDictionary.count) nodes, \(edgeArray.count) edges.", withFlag:"!", withIndent:1)
+            log("Saving graph with \(nameDictionary.count) nodes, \(edgeArray.count) edges.", withFlag:"!")
             graphData.saveInBackgroundWithBlock({
                 (succeeded:Bool, error:NSError?) -> Void in
                 if succeeded && error == nil {
                     log("Successfully saved graph to Parse.", withIndent:1, withFlag:"+")
-                    self.updateGraphData()
-                } else if error != nil {
-                    log("An error occured while saving to Parse.", withIndent:1, withFlag:"-")
+                    self.updateGraphDataFromFriends()
                 } else {
-                    log("Unknown error occurred while saving to Parse.", withIndent:1, withFlag:"?")
+                    if error == nil {
+                        log("Failed to save graph to Parse.", withIndent:1, withFlag:"-")
+                    } else {
+                        log("Error \"\(error!.description)\" occurred while saving to Parse.", withIndent:1, withFlag:"-")
+                    }
                 }
             })
         })
@@ -328,7 +330,7 @@ public class SocialGraph {
      * graph data from Parse. Only keeps one active request at a time, and makes a maximum
      * of maxNumFriends requests before stopping.
      */
-    public func updateGraphData(maxNumFriends:Int = kMaxGraphDataQueries) {
+    public func updateGraphDataFromFriends(maxNumFriends:Int = kMaxGraphDataQueries) {
         log("Fetching friends list...", withFlag:"!")
         let request:FBRequest = FBRequest.requestForMyFriends()
         request.startWithCompletionHandler{(connection:FBRequestConnection!, result:AnyObject!, error:NSError!) -> Void in

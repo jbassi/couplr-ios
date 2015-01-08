@@ -72,24 +72,37 @@ public class MatchGraph {
         self.titles = [Int:MatchTitle]()
         self.graph = nil
         self.fetchedIdHistory = [UInt64]()
+        self.didFetchUserMatchHistory = false
+        self.currentlyFlushingMatches = false
+        self.unregisteredMatches = [(UInt64, UInt64, Int)]()
     }
     
     /**
      * Loads match titles from Parse and passes them to a given callback
      * function.
      */
-    public func fetchMatchTitles() {
+    public func fetchMatchTitles(callback:((didError:Bool)->Void)? = nil) {
         log("Requesting match titles...", withFlag:"!")
         var query = PFQuery(className:"MatchTitle")
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
-            for title:AnyObject in objects {
-                let titleId:Int = title["titleId"]! as Int
-                let text:String = title["text"]! as String
-                let picture:String = title["picture"]! as String
-                self.titles[titleId] = MatchTitle(id:titleId, text:text, picture:picture)
+            if error == nil {
+                for title:AnyObject in objects {
+                    let titleId:Int = title["titleId"]! as Int
+                    let text:String = title["text"]! as String
+                    let picture:String = title["picture"]! as String
+                    self.titles[titleId] = MatchTitle(id:titleId, text:text, picture:picture)
+                }
+                log("Received \(objects.count) titles.", withIndent:1)
+                if callback != nil {
+                    callback!(didError:false)
+                }
+            } else {
+                log("Error \"\(error!.description)\" while retrieving titles.", withIndent:1, withFlag:"-")
+                if callback != nil {
+                    callback!(didError:true)
+                }
             }
-            log("Received \(objects.count) titles.", withIndent:1)
         }
     }
     
@@ -170,7 +183,7 @@ public class MatchGraph {
                 }
                 // Consider a match fetched only after the response arrives.
                 self.fetchedIdHistory.append(userId)
-                log("Received and updated matches for user \(userId).", withIndent:1)
+                log("Received and updated \(objects.count) matches for user \(userId).", withIndent:1)
                 if callback != nil {
                     callback!(didError:false)
                 }
@@ -183,17 +196,119 @@ public class MatchGraph {
         }
     }
     
+    public func fetchRootUserMatchHistory(callback:((didError:Bool) -> Void)? = nil) {
+        let rootUser:UInt64 = rootUserFromGraph()
+        if rootUser == 0 {
+            log("Warning: MatchGraph::fetchRootUserMatchHistory called before social graph was initialized.", withFlag:"-")
+            return
+        }
+        if didFetchUserMatchHistory {
+            log("Request for user history denied. Already fetched root user history.", withFlag:"?")
+            return
+        }
+        log("Requesting match history for current user.", withFlag:"!")
+        let predicate:NSPredicate = NSPredicate(format:"voterId = \(rootUser)")!
+        var query = PFQuery(className:"MatchData", predicate:predicate)
+        query.findObjectsInBackgroundWithBlock {
+            (objects:[AnyObject]!, error:NSError?) -> Void in
+            if error == nil {
+                for index:Int in 0..<objects.count {
+                    let matchData:AnyObject! = objects[index]
+                    let first:UInt64 = uint64FromAnyObject(matchData["firstId"])
+                    let second:UInt64 = uint64FromAnyObject(matchData["secondId"])
+                    let titleId:Int = matchData["titleId"] as Int
+                    self.tryToUpdateDirectedEdge(first, to:second, voter:rootUser, titleId:titleId)
+                    self.tryToUpdateDirectedEdge(second, to:first, voter:rootUser, titleId:titleId)
+                }
+                self.didFetchUserMatchHistory = true
+                log("User voted on \(objects.count) matches.", withIndent:1)
+                if callback != nil {
+                    callback!(didError:false)
+                }
+            } else {
+                log("Error \"\(error!.description)\" while fetching user match history.", withIndent:1, withFlag:"-")
+                if callback != nil {
+                    callback!(didError:true)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Saves all unregistered matches to Parse. Should be invoked when the app
+     * is about to close, but can also be invoked periodically to prevent matches
+     * from disappearing in the case of a crash.
+     */
+    public func flushUnregisteredMatches(maxNumAttempts:Int = 1) {
+        if maxNumAttempts <= 0 {
+            log("Warning: failed to save unregistered matches (maximum attempts reached).", withFlag:"-")
+            return
+        }
+        let rootUser:UInt64 = rootUserFromGraph()
+        if rootUser == 0 {
+            log("Warning: MatchGraph::flushUnregisteredMatches called before social graph was initialized.", withFlag:"-")
+            return
+        }
+        if currentlyFlushingMatches {
+            log("Warning: already attempting to flush unregistered matches.", withFlag:"-")
+            return
+        }
+        currentlyFlushingMatches = true
+        log("Saving \(unregisteredMatches.count) matches to Parse...")
+        var newMatches:[PFObject] = [PFObject]()
+        for (firstId:UInt64, secondId:UInt64, titleId:Int) in unregisteredMatches {
+            var newMatch:PFObject = PFObject(className:"MatchData")
+            newMatch["firstId"] = NSNumber(unsignedLongLong:firstId)
+            newMatch["secondId"] = NSNumber(unsignedLongLong:secondId)
+            newMatch["voterId"] = NSNumber(unsignedLongLong:rootUser)
+            newMatch["titleId"] = titleId
+            newMatches.append(newMatch)
+        }
+        PFObject.saveAllInBackground(newMatches, block: {
+            (succeeded:Bool, error:NSError?) -> Void in
+            if succeeded && error == nil {
+                log("Successfully saved \(self.unregisteredMatches.count) matches to Parse.", withIndent:1)
+                self.unregisteredMatches.removeAll()
+                self.currentlyFlushingMatches = false
+            } else {
+                if error == nil {
+                    log("Failed to successfully save to Parse.", withIndent:1, withFlag:"-")
+                } else {
+                    log("Error \"\(error!.description)\" occurred while saving matches to Parse.", withIndent:1, withFlag:"-")
+                }
+                self.flushUnregisteredMatches(maxNumAttempts:maxNumAttempts - 1)
+            }
+        })
+    }
+    
     /**
      * Attempts to add a new match to the graph. If the match is successfully
      * added and the social graph exists, notifies the social graph about the
      * new match.
      */
-    public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int, andRootUser:UInt64) {
-        var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:toSecondId, voter:andRootUser, titleId:withTitleId)
-        didUpdate = didUpdate && tryToUpdateDirectedEdge(toSecondId, to:firstId, voter:andRootUser , titleId:withTitleId)
+    public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int) {
+        if firstId == toSecondId {
+            log("User voted \(firstId) with him/herself!", withFlag:"-")
+            return
+        }
+        if !didFetchUserMatchHistory {
+            log("Warning: Cannot register votes until we have the user's vote history!", withFlag:"-")
+        }
+        let rootUser:UInt64 = rootUserFromGraph()
+        if rootUser == 0 {
+            log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag:"-")
+            return
+        }
+        var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:toSecondId, voter:rootUser, titleId:withTitleId)
+        didUpdate = didUpdate && tryToUpdateDirectedEdge(toSecondId, to:firstId, voter:rootUser , titleId:withTitleId)
         if !didUpdate {
             log("User already voted on [\(firstId), \(toSecondId)] with title \"\(titles[withTitleId])\"")
             return
+        }
+        if firstId < toSecondId {
+            unregisteredMatches.append((firstId, toSecondId, withTitleId))
+        } else {
+            unregisteredMatches.append((toSecondId, firstId, withTitleId))
         }
         graph?.userDidMatch(firstId, toSecondId:toSecondId)
     }
@@ -214,8 +329,22 @@ public class MatchGraph {
         return matches[from]![to]!.updateMatch(titleId, voter:voter)
     }
     
+    /**
+     * Grabs the root user ID from the graph. If the graph has not been loaded, returns
+     * a default error value of 0.
+     */
+    private func rootUserFromGraph() -> UInt64 {
+        if graph == nil {
+            return 0
+        }
+        return graph!.root
+    }
+    
     var matches:[UInt64:[UInt64:MatchList]]
     var titles:[Int:MatchTitle]
     var graph:SocialGraph?
     var fetchedIdHistory:[UInt64]
+    var didFetchUserMatchHistory:Bool
+    var currentlyFlushingMatches:Bool
+    var unregisteredMatches:[(UInt64, UInt64, Int)]
 }
