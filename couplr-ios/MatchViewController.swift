@@ -14,8 +14,8 @@ class MatchViewController: UIViewController {
     @IBOutlet weak var matchTitleLabel: UIButton!
     @IBOutlet weak var collectionView: UICollectionView!
     
-    var testData = ["One Night Stand", "Prom King And Queen", "Friendzoned Forever", "Zombie Apocalypse Survivors", "Married But Not Married", "Whipped", "Met At Band Camp", "Partners In Crime", "Met At Chess Club", "Opposites Attract", "PDA Overload", "Met At A Frat Party", "Met At Church", "Overly Attached", "One True Paring"]
-    var selectedTitle: String?
+    var titles:[MatchTitle] = []
+    var selectedTitle:MatchTitle? = nil
 
     var connectionData: NSMutableData = NSMutableData()
     var connection: NSURLConnection?
@@ -34,9 +34,19 @@ class MatchViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.allowsMultipleSelection = true
         socialGraphController.delegate = self
-        socialGraphController.initializeGraph()
         showLoadingScreen()
-        matchTitleLabel.setTitle(testData[0], forState: UIControlState.Normal)
+        // TODO Query titles and statuses simultaneously and retry when failing.
+        MatchGraphController.sharedInstance.matches = MatchGraph()
+        MatchGraphController.sharedInstance.matches!.fetchMatchTitles({
+            (didError:Bool) -> Void in
+            if !didError {
+                self.socialGraphController.initializeGraph()
+                for (id:Int, title:MatchTitle) in MatchGraphController.sharedInstance.matches!.titles {
+                    self.titles.append(title)
+                }
+                self.matchTitleLabel.setTitle(self.titles[0].text, forState: UIControlState.Normal)
+            }
+        })
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -102,15 +112,16 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     }
 
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return testData.count
+        return titles.count
     }
 
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
-        return testData[row]
+        return titles[row].text
     }
 
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        matchTitleLabel.setTitle(testData[row], forState: UIControlState.Normal)
+        matchTitleLabel.setTitle(titles[row].text, forState: UIControlState.Normal)
+        selectedTitle = titles[row]
     }
     
 }

@@ -19,13 +19,6 @@ public class MatchGraphController {
         return MatchGraphSingleton.instance
     }
     
-    public func appDidLoad() {
-        if matches == nil {
-            matches = MatchGraph()
-        }
-        matches?.fetchMatchTitles()
-    }
-    
     /**
      * Before the app closes, attempt to flush the unregistered matches
      * to Parse.

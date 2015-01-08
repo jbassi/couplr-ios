@@ -23,7 +23,6 @@ class LoginViewController: UIViewController {
         continueButton.hidden = true
         loginView.delegate = self
         loginView.readPermissions = ["user_friends", "user_status"]
-        MatchGraphController.sharedInstance.appDidLoad()
     }
 
     override func viewDidAppear(animated: Bool) {

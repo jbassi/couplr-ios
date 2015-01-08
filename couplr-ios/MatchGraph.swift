@@ -130,9 +130,9 @@ public class MatchGraph {
      * each key (the other user) is another dictionary mapping title id to
      * the number of votes for that title.
      *
-     * For example, suppose we call matchesForUserId(A) and receive
-     * [B:[3:1, 0:4]]. Then A has matches only with B, consisting of 1 vote
-     * for the title with ID 3 and 4 votes for the title with ID 0.
+     * For example, suppose we call numMatchesByUserIdAndTitleFor(A) and
+     * receive [B:[3:1, 0:4]]. Then A has matches only with B, consisting
+     * of 1 vote for the title with ID 3 and 4 votes for the title with ID 0.
      *
      * This queries the current state of the graph, and does not assume that
      * the matches were previously loaded for the given userId. In order to
