@@ -36,7 +36,7 @@ public class MatchGraphController {
         if matches == nil {
             matches = MatchGraph()
         }
-        matches!.fetchMatchesForId(SocialGraphController.sharedInstance.graph!.root)
+        matches!.fetchMatchesForId(SocialGraphController.sharedInstance.rootId())
         matches!.fetchRootUserVoteHistory()
     }
     
@@ -57,6 +57,31 @@ public class MatchGraphController {
                 callback(self.matches?.numMatchesByUserIdAndTitleFor(id))
             }
         })
+    }
+    
+    /**
+     * Wraps an invocation to MatchGraph::fetchMatchTitles, requiring a
+     * callback.
+     *
+     * TODO Implement "reliability" features here, i.e. resending queries
+     * to Parse up to a maximum number of attempts.
+     */
+    public func fetchMatchTitles(callback:((didError:Bool)->Void)) {
+        if matches == nil {
+            callback(didError:true)
+        } else {
+            matches!.fetchMatchTitles(callback:callback)
+        }
+    }
+    
+    /**
+     * Returns an array of all the titles.
+     */
+    public func titleList() -> [MatchTitle] {
+        if matches == nil {
+            return []
+        }
+        return matches!.titleList
     }
     
     /**

@@ -69,7 +69,8 @@ public class MatchList {
 public class MatchGraph {
     public init() {
         self.matches = [UInt64:[UInt64:MatchList]]()
-        self.titles = [Int:MatchTitle]()
+        self.titlesById = [Int:MatchTitle]()
+        self.titleList = [MatchTitle]()
         self.fetchedIdHistory = [UInt64]()
         self.didFetchUserMatchHistory = false
         self.currentlyFlushingMatches = false
@@ -91,8 +92,14 @@ public class MatchGraph {
                     let titleId:Int = title["titleId"]! as Int
                     let text:String = title["text"]! as String
                     let picture:String = title["picture"]! as String
-                    self.titles[titleId] = MatchTitle(id:titleId, text:text, picture:picture)
+                    self.titlesById[titleId] = MatchTitle(id:titleId, text:text, picture:picture)
                 }
+                for title:MatchTitle in self.titlesById.values {
+                    self.titleList.append(title)
+                }
+                self.titleList = sorted(self.titleList, {(first:MatchTitle, second:MatchTitle) -> Bool in
+                    return first.id < second.id
+                })
                 log("Received \(objects.count) titles.", withIndent:1)
                 if callback != nil {
                     callback!(didError:false)
@@ -116,7 +123,7 @@ public class MatchGraph {
             result += "    \(node)'s matches:\n"
             for (neighbor:UInt64, matchList:MatchList) in neighbors {
                 for (titleId:Int, voters:[UInt64]) in matchList.matchesByTitle {
-                    result += "        with \(neighbor) (\(voters.count) votes): \(titles[titleId]!.text)\n"
+                    result += "        with \(neighbor) (\(voters.count) votes): \(titlesById[titleId]!.text)\n"
                 }
             }
             result += "\n"
@@ -258,9 +265,9 @@ public class MatchGraph {
         var newMatches:[PFObject] = [PFObject]()
         for (firstId:UInt64, secondId:UInt64, titleId:Int) in unregisteredMatches {
             var newMatch:PFObject = PFObject(className:"MatchData")
-            newMatch["firstId"] = NSNumber(unsignedLongLong:firstId)
-            newMatch["secondId"] = NSNumber(unsignedLongLong:secondId)
-            newMatch["voterId"] = NSNumber(unsignedLongLong:rootUser)
+            newMatch["firstId"] = numberFromUInt64(firstId)
+            newMatch["secondId"] = numberFromUInt64(secondId)
+            newMatch["voterId"] = numberFromUInt64(rootUser)
             newMatch["titleId"] = titleId
             newMatches.append(newMatch)
         }
@@ -305,14 +312,14 @@ public class MatchGraph {
         var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:toSecondId, voter:rootUser, titleId:withTitleId)
         didUpdate = didUpdate && tryToUpdateDirectedEdge(toSecondId, to:firstId, voter:rootUser , titleId:withTitleId)
         if !didUpdate {
-            return log("User already voted on [\(firstId), \(toSecondId)] with title \"\(titles[withTitleId])\"")
+            return log("User already voted on [\(firstId), \(toSecondId)] with title \"\(titlesById[withTitleId])\"")
         }
         if firstId < toSecondId {
             unregisteredMatches.append((firstId, toSecondId, withTitleId))
         } else {
             unregisteredMatches.append((toSecondId, firstId, withTitleId))
         }
-        SocialGraphController.sharedInstance.graph!.userDidMatch(firstId, toSecondId:toSecondId)
+        SocialGraphController.sharedInstance.userDidMatch(firstId, toSecondId:toSecondId)
     }
     
     /**
@@ -339,7 +346,7 @@ public class MatchGraph {
         if SocialGraphController.sharedInstance.graph == nil {
             return 0
         }
-        return SocialGraphController.sharedInstance.graph!.root
+        return SocialGraphController.sharedInstance.rootId()
     }
     
     /**
@@ -359,16 +366,17 @@ public class MatchGraph {
             var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:secondId, voter:rootUser, titleId:titleId)
             didUpdate = didUpdate && tryToUpdateDirectedEdge(secondId, to:firstId, voter:rootUser , titleId:titleId)
             if !didUpdate {
-                return log("User already voted on [\(firstId), \(secondId)] with title \"\(titles[titleId])\"")
+                return log("User already voted on [\(firstId), \(secondId)] with title \"\(titlesById[titleId])\"")
             }
-            log("Appending buffered match [\(firstId), \(secondId)] with title \"\(titles[titleId])\" to unregistered matches.")
+            log("Appending buffered match [\(firstId), \(secondId)] with title \"\(titlesById[titleId])\" to unregistered matches.")
             unregisteredMatches.append((firstId, secondId, titleId))
         }
         matchesBeforeUserHistoryLoaded.removeAll()
     }
     
     var matches:[UInt64:[UInt64:MatchList]]
-    var titles:[Int:MatchTitle]
+    var titlesById:[Int:MatchTitle]
+    var titleList:[MatchTitle]
     var fetchedIdHistory:[UInt64]
     var didFetchUserMatchHistory:Bool
     var currentlyFlushingMatches:Bool

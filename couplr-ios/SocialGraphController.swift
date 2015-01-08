@@ -24,10 +24,17 @@ public class SocialGraphController {
         return SocialGraphSingleton.instance
     }
     
-    public func initializeGraph() {
+    /**
+     * Begins the graph initialization process, querying Facebook for
+     * the user's statuses. Upon a successful response, notifies the
+     * match graph controller as well as the match view controller, and
+     * also calls on the graph to request a gender update and query
+     * Facebook again for comment likes.
+     */
+    public func initializeGraph(maxNumStatuses:Int = kMaxNumStatuses) {
         log("Requesting user statuses...", withFlag:"!")
         FBRequestConnection.startWithGraphPath(
-            "me/statuses?limit=100",
+            "me/statuses?limit=\(maxNumStatuses)",
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let statusData:AnyObject! = result["data"]!
@@ -51,6 +58,66 @@ public class SocialGraphController {
                 }
             } as FBRequestHandler
         )
+    }
+    
+    /**
+     * Make the graph update its current random walk sample.
+     *
+     * TODO Implement sample history and prevent the user from
+     * encountering repetitive samples here.
+     */
+    public func updateRandomSample() {
+        graph?.updateRandomSample()
+    }
+    
+    /**
+     * Returns the current sample as a list of IDs, or an empty
+     * list if the graph has not been initialized yet.
+     */
+    public func currentSample() -> [UInt64] {
+        if graph == nil {
+            return [UInt64]()
+        }
+        return graph!.currentSample
+    }
+    
+    /**
+     * Given an ID, returns the corresponding full name.
+     * If the name is longer than a given maximum, truncates parts
+     * of the name until it fits. Starts by making the middle name
+     * (if it exists) a middle initial, and then the last name an
+     * initial.
+     */
+    public func nameFromId(id:UInt64, maxStringLength:Int = kMaxNameDisplayLength) -> String {
+        if graph == nil || graph!.names[id] == nil {
+            return ""
+        }
+        var name:String = graph!.names[id]!
+        if name.utf16Count > maxStringLength {
+            name = shortenFullName(name, true, false)
+        }
+        if name.utf16Count > maxStringLength {
+            name = shortenFullName(name, true, true)
+        }
+        return name
+    }
+    
+    /**
+     * Notifies the graph that the user performed a match.
+     */
+    public func userDidMatch(firstId:UInt64, toSecondId:UInt64) {
+        graph?.userDidMatch(firstId, toSecondId:toSecondId)
+    }
+    
+    /**
+     * Returns the root user's id, or 0 if the graph has not
+     * been initialized yet.
+     */
+    public func rootId() -> UInt64 {
+        if graph == nil {
+            return 0
+        }
+        return graph!.root
     }
     
     private func updateFromStatus(status:AnyObject!, withRootID:UInt64!, inout withBuilder:GraphBuilder) -> Void {

@@ -64,6 +64,7 @@ let kProfileViewControllerTableViewCellWidth: CGFloat = 40.0
 let kProfileViewControllerMaximumNumberOfMatches = 99
 let kProfileViewControllerMaximumNumberOfMatchesString = "99+"
 let kProfileViewControllerDetailViewHeight: CGFloat = 150
+let kMaxNameDisplayLength:Int = 25
 
 /* ProfileDetailView Constants */
 let kProfileDetailViewProfilePictureRatio: CGFloat = 0.70
@@ -88,6 +89,7 @@ let kLoadingViewTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, a
 
 /* Social graph constants */
 let kUnconnectedEdgeWeight:Float = -1000.0
+let kMaxNumStatuses:Int = 100
 // Like and comment scores
 let kCommentRootScore:Float = 0.8
 let kCommentPrevScore:Float = 0.1

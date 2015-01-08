@@ -24,6 +24,10 @@ func parseArrayFromJSONData(inputData: NSData) -> Array<NSDictionary> {
     return boardsDictionary
 }
 
+func numberFromUInt64(value:UInt64) -> NSNumber {
+    return NSNumber(unsignedLongLong:value)
+}
+
 func profilePictureURLFromID(id:UInt64, withWidth:Int = 200, withHeight:Int = 200) -> String {
     return "\(kFBGraphURLPrefix)\(id)/picture?width=\(withWidth)&height=\(withHeight)"
 }
@@ -99,6 +103,32 @@ func weightedRandomSample(elements:[(UInt64, Float)]) -> UInt64 {
         }
     }
     return result
+}
+
+/**
+ * Returns shortened versions of a full name, using initials instead
+ * of the full word.
+ */
+func shortenFullName(name:String, useMiddleInitial:Bool, useLastInitial:Bool) -> String {
+    var words:[String] = split(name) {$0 == " "}
+    if useMiddleInitial && words.count > 2 {
+        if words.count > 3 || words[1].utf16Count > 2 {
+            let char:Character = words[1][words[1].startIndex]
+            words[1] = String(char).uppercaseString + "."
+        }
+        for index in 2..<words.count - 1 {
+            words[index] = ""
+        }
+    }
+    if useLastInitial {
+        var lastNameString:String = words.last!
+        if lastNameString.utf16Count > 2 {
+            let char:Character = lastNameString[lastNameString.startIndex]
+            lastNameString = String(char).uppercaseString + "."
+        }
+        words[words.count - 1] = lastNameString
+    }
+    return " ".join(words)
 }
 
 /**

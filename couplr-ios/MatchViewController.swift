@@ -14,19 +14,17 @@ class MatchViewController: UIViewController {
     @IBOutlet weak var matchTitleLabel: UIButton!
     @IBOutlet weak var collectionView: UICollectionView!
     
-    var titles:[MatchTitle] = []
     var selectedTitle:MatchTitle? = nil
 
     var connectionData: NSMutableData = NSMutableData()
     var connection: NSURLConnection?
     var userPictures: [UInt64:String]?
-    var randomPeople: [UInt64:String]?
-    var randomPeopleArray = Array<UInt64>()
     var socialGraphLoaded: Bool = false
-    var selectedUsers = Array<UInt64>()
+    var selectedUsers:[UInt64] = [UInt64]()
     var loadingView: LoadingView?
     
     let socialGraphController = SocialGraphController.sharedInstance
+    let matchGraphController = MatchGraphController.sharedInstance
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,15 +34,13 @@ class MatchViewController: UIViewController {
         socialGraphController.delegate = self
         showLoadingScreen()
         // TODO Query titles and statuses simultaneously and retry when failing.
-        MatchGraphController.sharedInstance.matches = MatchGraph()
-        MatchGraphController.sharedInstance.matches!.fetchMatchTitles({
+        matchGraphController.matches = MatchGraph()
+        matchGraphController.fetchMatchTitles({
             (didError:Bool) -> Void in
             if !didError {
                 self.socialGraphController.initializeGraph()
-                for (id:Int, title:MatchTitle) in MatchGraphController.sharedInstance.matches!.titles {
-                    self.titles.append(title)
-                }
-                self.matchTitleLabel.setTitle(self.titles[0].text, forState: UIControlState.Normal)
+                let titleList:[MatchTitle] = self.matchGraphController.titleList()
+                self.matchTitleLabel.setTitle(titleList[0].text, forState: UIControlState.Normal)
             }
         })
     }
@@ -77,19 +73,9 @@ class MatchViewController: UIViewController {
     
     @IBAction func shufflePeople() {
         if socialGraphLoaded {
-            randomPeople = socialGraphController.graph!.randomSample()
-            randomPeopleDictionaryToArray()
+            socialGraphController.updateRandomSample()
             selectedUsers.removeAll(keepCapacity: true)
             collectionView.reloadData()
-        }
-    }
-    
-    func randomPeopleDictionaryToArray() {
-        if randomPeople != nil {
-            randomPeopleArray.removeAll(keepCapacity: true)
-            for (id, name) in randomPeople! {
-                randomPeopleArray.append(id)
-            }
         }
     }
     
@@ -112,14 +98,15 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     }
 
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return titles.count
+        return matchGraphController.titleList().count
     }
 
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
-        return titles[row].text
+        return matchGraphController.titleList()[row].text
     }
 
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        let titles:[MatchTitle] = matchGraphController.titleList()
         matchTitleLabel.setTitle(titles[row].text, forState: UIControlState.Normal)
         selectedTitle = titles[row]
     }
@@ -137,8 +124,9 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as ProfilePictureCollectionViewCell
         
-        if randomPeopleArray.count > 0 {
-            let userID = randomPeopleArray[indexPath.row]
+        let randomSample:[UInt64] = socialGraphController.currentSample()
+        if randomSample.count > 0 {
+            let userID = randomSample[indexPath.row]
             cell.imageView.performRequestWith(profilePictureURLFromID(userID))
         }
         return cell
@@ -147,8 +135,9 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         if selectedUsers.count < 2 {
             let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
-            cell.userName = randomPeople![randomPeopleArray[indexPath.row]]!
-            selectedUsers.append(randomPeopleArray[indexPath.row])
+            let randomSample:[UInt64] = socialGraphController.currentSample()
+            cell.userName = socialGraphController.nameFromId(randomSample[indexPath.row])
+            selectedUsers.append(randomSample[indexPath.row])
             collectionView.selectItemAtIndexPath(indexPath, animated: false, scrollPosition: .None)
         } else {
             collectionView.deselectItemAtIndexPath(indexPath, animated: false)
@@ -157,7 +146,8 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
-        if let index = find(selectedUsers, randomPeopleArray[indexPath.row]) {
+        let randomSample:[UInt64] = socialGraphController.currentSample()
+        if let index = find(selectedUsers, randomSample[indexPath.row]) {
              selectedUsers.removeAtIndex(index)
         }
         collectionView.deselectItemAtIndexPath(indexPath, animated: false)
@@ -172,8 +162,7 @@ extension MatchViewController: SocialGraphControllerDelegate {
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph) {
         socialGraphLoaded = true
         dismissLoadingScreen()
-        randomPeople = socialGraphController.graph!.randomSample()
-        randomPeopleDictionaryToArray()
+        socialGraphController.updateRandomSample()
         collectionView.reloadData()
     }    
 }

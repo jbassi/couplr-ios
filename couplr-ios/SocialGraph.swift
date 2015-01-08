@@ -60,6 +60,7 @@ public class SocialGraph {
         self.isCurrentlyUpdatingGender = false
         self.shouldReupdateGender = false
         self.walkWeightMultipliers = [UInt64:Float]()
+        self.currentSample = [UInt64]()
         updateFirstNames()
     }
     
@@ -231,7 +232,7 @@ public class SocialGraph {
      */
     public func saveGraphData(minWeight:Float = kCommentPrevScore) {
         var query:PFQuery = PFQuery(className:"GraphData")
-        query.whereKey("rootId", equalTo:NSNumber(unsignedLongLong:root))
+        query.whereKey("rootId", equalTo:numberFromUInt64(root))
         log("Searching for objectId of \(root)'s graph data...", withFlag:"!")
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -242,18 +243,18 @@ public class SocialGraph {
             } else {
                 log("No existing objectId found.", withIndent:1, withFlag:"?")
             }
-            graphData["rootId"] = NSNumber(unsignedLongLong:self.root)
+            graphData["rootId"] = numberFromUInt64(self.root)
             var edgeArray:[[NSNumber]] = [[NSNumber]]()
             var nameDictionary:[NSString:NSString] = [NSString:NSString]()
             for (node:UInt64, neighbors:[UInt64:Float]) in self.edges {
-                let nodeNum:NSNumber = NSNumber(unsignedLongLong:node)
+                let nodeNum:NSNumber = numberFromUInt64(node)
                 let nodeAsString:NSString = nodeNum.stringValue
                 for (neighbor:UInt64, var weight:Float) in neighbors {
                     if node == self.root || neighbor == self.root {
                         weight *= kScaleFactorForExportingRootEdges
                     }
                     if node < neighbor && weight > minWeight {
-                        let neighborNum:NSNumber = NSNumber(unsignedLongLong:neighbor)
+                        let neighborNum:NSNumber = numberFromUInt64(neighbor)
                         let neighborAsString:NSString = neighborNum.stringValue
                         edgeArray.append([nodeNum, neighborNum, weight])
                         if nameDictionary[nodeAsString] == nil {
@@ -359,25 +360,32 @@ public class SocialGraph {
      * Samples some number of users by performing a weighted random walk on the
      * graph starting at the root user.
      */
-    public func randomSample(size:Int = kRandomSampleCount) -> [UInt64:String] {
-        var sample:[UInt64:String] = [UInt64:String]()
+    public func updateRandomSample(size:Int = kRandomSampleCount, andDecayMultipliers:Bool = true) {
+        currentSample.removeAll(keepCapacity:true)
+        var sample:NSMutableSet = NSMutableSet()
         var nextStep:UInt64 = root
         while sample.count < size {
             nextStep = takeRandomStepFrom(nextStep, withNodesTraversed:sample)
             if nextStep == 0 {
                 nextStep = sampleRandomNode(sample)
             }
-            sample[nextStep] = names[nextStep]!
+            sample.addObject(numberFromUInt64(nextStep))
+        }
+        for idAsObject:AnyObject in sample {
+            let id:UInt64 = (idAsObject as NSNumber).unsignedLongLongValue
+            currentSample.append(id)
         }
         if kShowRandomWalkDebugOutput {
             println("    Done. Final random walk result...")
-            for (id:UInt64, name:String) in sample {
-                println("        \(name) (\(id))")
+            for idAsObject:AnyObject in sample {
+                let id:UInt64 = (idAsObject as NSNumber).unsignedLongLongValue
+                println("        \(names[id]!) (\(id))")
             }
             println()
         }
-        decayWalkWeightMultipliers()
-        return sample
+        if andDecayMultipliers {
+            decayWalkWeightMultipliers()
+        }
     }
     
     /**
@@ -385,7 +393,7 @@ public class SocialGraph {
      * to a new neighboring node that does not already appear in the list of previous
      * nodes and is not the root. If there is no such node, returns 0.
      */
-    private func takeRandomStepFrom(node:UInt64, withNodesTraversed:[UInt64:String]) -> UInt64 {
+    private func takeRandomStepFrom(node:UInt64, withNodesTraversed:NSMutableSet) -> UInt64 {
         var possibleNextNodes:[(UInt64, Float)] = [(UInt64, Float)]()
         var originalWeights:[Float] = [Float]() // Debugging purposes.
         let currentGender:Gender = node == root ? Gender.Undetermined : genderFromID(node)
@@ -394,7 +402,7 @@ public class SocialGraph {
         let meanNonRootWeight:Float = (totalEdgeWeight - totalEdgeWeightFromRoot) / Float(edgeCount - edges[root]!.count)
         // Compute sampling weights prior to gender renormalization.
         for (neighbor:UInt64, weight:Float) in self.edges[node]! {
-            if neighbor == root || withNodesTraversed[neighbor] != nil {
+            if neighbor == root || withNodesTraversed.containsObject(numberFromUInt64(neighbor)) {
                 continue
             }
             let neighborScore:Float = sampleWeightForScore(weight - meanNonRootWeight)
@@ -534,7 +542,7 @@ public class SocialGraph {
         }
         log("Pulling the social graph of root id \(id)...", withFlag:"!")
         var query:PFQuery = PFQuery(className:"GraphData")
-        query.whereKey("rootId", equalTo: NSNumber(unsignedLongLong:id))
+        query.whereKey("rootId", equalTo: numberFromUInt64(id))
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
             if error != nil || objects.count < 1 {
@@ -672,10 +680,10 @@ public class SocialGraph {
      * Randomly samples a node in the graph.
      * TODO Add gendered bias.
      */
-    private func sampleRandomNode(withNodesTraversed:[UInt64:String], excludeRoot:Bool = true) -> UInt64 {
+    private func sampleRandomNode(withNodesTraversed:NSMutableSet, excludeRoot:Bool = true) -> UInt64 {
         var possibleNextNodes:[UInt64] = [UInt64]()
         for (neighbor:UInt64, temp:String) in self.names {
-            if withNodesTraversed[neighbor] != nil || neighbor == root {
+            if withNodesTraversed.containsObject(numberFromUInt64(neighbor)) || neighbor == root {
                 continue
             }
             possibleNextNodes.append(neighbor)
@@ -724,6 +732,7 @@ public class SocialGraph {
     var edges:[UInt64:[UInt64:Float]]
     var names:[UInt64:String]
     var genders:[String:Gender]
+    var currentSample:[UInt64]
 
     // Edge-based metadata for computing heuristics.
     var totalEdgeWeight:Float
