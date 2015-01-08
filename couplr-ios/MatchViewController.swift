@@ -24,6 +24,7 @@ class MatchViewController: UIViewController {
     var randomPeopleArray = Array<UInt64>()
     var socialGraphLoaded: Bool = false
     var selectedUsers = Array<UInt64>()
+    var loadingView: LoadingView?
     
     let socialGraphController = SocialGraphController.sharedInstance
     
@@ -34,6 +35,7 @@ class MatchViewController: UIViewController {
         collectionView.allowsMultipleSelection = true
         socialGraphController.delegate = self
         socialGraphController.initializeGraph()
+        showLoadingScreen()
         matchTitleLabel.setTitle(testData[0], forState: UIControlState.Normal)
     }
     
@@ -80,7 +82,15 @@ class MatchViewController: UIViewController {
             }
         }
     }
-
+    
+    func showLoadingScreen() {
+        loadingView = LoadingView.createLoadingScreenInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
+    }
+    
+    func dismissLoadingScreen() {
+        loadingView?.hideAnimated(true)
+    }
+    
 }
 
 // MARK: - UIPickerViewDelegate and UIPickerViewDataSource Methods
@@ -150,6 +160,7 @@ extension MatchViewController: SocialGraphControllerDelegate {
     
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph) {
         socialGraphLoaded = true
+        dismissLoadingScreen()
         randomPeople = socialGraphController.graph!.randomSample()
         randomPeopleDictionaryToArray()
         collectionView.reloadData()

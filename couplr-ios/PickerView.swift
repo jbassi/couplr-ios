@@ -25,11 +25,11 @@ class PickerView: UIPickerView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        transparentLayer.frame = UIScreen.mainScreen().bounds
+        transparentLayer.frame = frame
         transparentLayer.backgroundColor = kPickerTransparentLayerBackgroundColor
         transparentLayer.alpha = 0
         
-        blurView.frame = UIScreen.mainScreen().bounds
+        blurView.frame = frame
         blurView.blurEnabled = true
         blurView.tintColor = UIColor.clearColor()
         blurView.blurRadius = kPickerViewBlurViewBlurRadius
@@ -81,6 +81,7 @@ class PickerView: UIPickerView {
                 }, completion: { (completed:Bool) in
                     self.blurView.removeFromSuperview()
                     self.transparentLayer.removeFromSuperview()
+                    self.removeFromSuperview()
             })
         }
     }

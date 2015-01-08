@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F0EB6EB1A5E16B300E2A25B /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0EB6EA1A5E16B300E2A25B /* LoadingView.swift */; };
 		0F1B9EE319C4DD7A00CD64FD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1B9EE219C4DD7A00CD64FD /* AppDelegate.swift */; };
 		0F1B9EEA19C4DD7A00CD64FD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0F1B9EE819C4DD7A00CD64FD /* Main.storyboard */; };
 		0F1B9EEC19C4DD7A00CD64FD /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0F1B9EEB19C4DD7A00CD64FD /* Images.xcassets */; };
@@ -60,6 +61,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0F0EB6EA1A5E16B300E2A25B /* LoadingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		0F1B9EDD19C4DD7A00CD64FD /* couplr-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "couplr-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F1B9EE119C4DD7A00CD64FD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0F1B9EE219C4DD7A00CD64FD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -283,6 +285,7 @@
 				0FFBA3031A562D4E00A95F66 /* CouplrNavigationController.swift */,
 				0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */,
 				0FE7AAF41A5C5D9000398B0E /* ProfileViewControllerTableViewCell.swift */,
+				0F0EB6EA1A5E16B300E2A25B /* LoadingView.swift */,
 			);
 			name = "Generic Views";
 			sourceTree = "<group>";
@@ -409,6 +412,7 @@
 				F43D50731A536CC2000E09CE /* GraphBuilder.swift in Sources */,
 				F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */,
 				0F24FB401A53BD5C00201C31 /* SocialGraphController.swift in Sources */,
+				0F0EB6EB1A5E16B300E2A25B /* LoadingView.swift in Sources */,
 				0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */,
 				0F37CA2219C53954007A6951 /* ProfileViewController.swift in Sources */,
 				0FA10B3F1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift in Sources */,

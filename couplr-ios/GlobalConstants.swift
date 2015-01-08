@@ -46,6 +46,13 @@ let kPickerShowSpringDamping: CGFloat = 0.7
 let kPickerHideSpringDamping: CGFloat = 0.5
 let kPickerSpringVelocity: CGFloat = 0.5
 
+/* LoadingView Constants */
+let kLoadingViewBlurViewBlurRadius: CGFloat = 20.0
+let kLoadingViewShowAnimationDuration: NSTimeInterval = 0.5
+let kLoadingViewHideAnimationDuration: NSTimeInterval = 0.4
+let kLoadingLabelShowAnimationDuration: NSTimeInterval = 1.0
+let kLoadingLabelHideAnimationDuration: NSTimeInterval = 0.1
+
 /* ProfilePictureCollectionViewCell Constants */
 let kProfilePictureCollectionViewCellHideAnimationDuration = 0.2
 
@@ -75,6 +82,9 @@ let kMatchViewControllerCollectionViewNumberOfRows: Int = 9
 
 /* PickerView Colors */
 let kPickerTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, alpha: 0.6)
+
+/* LoadingView Colors */
+let kLoadingViewTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, alpha: 0.7)
 
 /* Social graph constants */
 let kUnconnectedEdgeWeight:Float = -1000.0
