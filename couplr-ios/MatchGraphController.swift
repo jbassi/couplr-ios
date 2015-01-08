@@ -19,20 +19,51 @@ public class MatchGraphController {
         return MatchGraphSingleton.instance
     }
     
-    func appDidLoad() {
+    public func appDidLoad() {
         if matches == nil {
             matches = MatchGraph()
         }
         matches?.fetchMatchTitles()
     }
     
-    func socialGraphDidLoad() {
+    /**
+     * Before the app closes, attempt to flush the unregistered matches
+     * to Parse.
+     */
+    public func appWillClose() {
+        matches?.flushUnregisteredMatches(maxNumAttempts:kMaxNumMatchSaveAttempts)
+    }
+    
+    /**
+     * Once the social graph loads, we know the root user. Use this
+     * to fetch the matches the user's voting history and the matches
+     * the user is involved in.
+     */
+    public func socialGraphDidLoad() {
         if matches == nil {
             matches = MatchGraph()
         }
-        matches!.graph = SocialGraphController.sharedInstance.graph
-        matches!.fetchMatchesForId(matches!.graph!.root)
-        matches!.fetchRootUserMatchHistory()
+        matches!.fetchMatchesForId(SocialGraphController.sharedInstance.graph!.root)
+        matches!.fetchRootUserVoteHistory()
+    }
+    
+    /**
+     * Query all matches for a given match ID and update the graph
+     * accordingly. Invoke the callback function using a dictionary
+     * mapping each user the given id is matched with to another
+     * dictionary mapping title id to vote count.
+     *
+     * If the request failed, the resulting argument will be nil.
+     */
+    public func doAfterLoadingMatchesForId(id:UInt64, callback:([UInt64:[Int:Int]]?) -> Void) {
+        matches?.fetchMatchesForId(id, callback: {
+            (didError:Bool) -> Void in
+            if didError {
+                callback(nil)
+            } else {
+                callback(self.matches?.numMatchesByUserIdAndTitleFor(id))
+            }
+        })
     }
     
     /**
@@ -40,7 +71,7 @@ public class MatchGraphController {
      * Will assume that the SocialGraph has already been initialized,
      * so the root user is graph!.root.
      */
-    func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int) {
+    public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int) {
         matches?.userDidMatch(firstId, toSecondId:toSecondId, withTitleId:withTitleId)
     }
 }

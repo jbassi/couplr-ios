@@ -70,11 +70,11 @@ public class MatchGraph {
     public init() {
         self.matches = [UInt64:[UInt64:MatchList]]()
         self.titles = [Int:MatchTitle]()
-        self.graph = nil
         self.fetchedIdHistory = [UInt64]()
         self.didFetchUserMatchHistory = false
         self.currentlyFlushingMatches = false
         self.unregisteredMatches = [(UInt64, UInt64, Int)]()
+        self.matchesBeforeUserHistoryLoaded = [(UInt64, UInt64, Int)]()
     }
     
     /**
@@ -139,7 +139,7 @@ public class MatchGraph {
      * ensure that matches for the userId were loaded, use a callback with
      * MatchGraph::fetchMatchesForId.
      */
-    public func numMatchesByTitleForUserId(userId:UInt64) -> [UInt64:[Int:Int]] {
+    public func numMatchesByUserIdAndTitleFor(userId:UInt64) -> [UInt64:[Int:Int]] {
         var result:[UInt64:[Int:Int]] = [UInt64:[Int:Int]]()
         if matches[userId] != nil {
             for (matchedUser:UInt64, matchList:MatchList) in matches[userId]! {
@@ -161,11 +161,10 @@ public class MatchGraph {
         log("Requesting match records for user \(userId)", withFlag:"!")
         // Do not re-fetch matches.
         if find(fetchedIdHistory, userId) != nil {
-            log("Matches for user \(userId) already loaded.", withIndent:1)
             if callback != nil {
                 callback!(didError:false)
             }
-            return
+            return log("Matches for user \(userId) already loaded.", withIndent:1)
         }
         let predicate:NSPredicate = NSPredicate(format:"firstId = \(userId) OR secondId = \(userId)")!
         var query = PFQuery(className:"MatchData", predicate:predicate)
@@ -196,15 +195,18 @@ public class MatchGraph {
         }
     }
     
-    public func fetchRootUserMatchHistory(callback:((didError:Bool) -> Void)? = nil) {
+    /**
+     * Queries Parse for the matches the user has voted on, updating the graph
+     * correspondingly, and running a given callback function upon receiving a
+     * response.
+     */
+    public func fetchRootUserVoteHistory(callback:((didError:Bool) -> Void)? = nil) {
         let rootUser:UInt64 = rootUserFromGraph()
         if rootUser == 0 {
-            log("Warning: MatchGraph::fetchRootUserMatchHistory called before social graph was initialized.", withFlag:"-")
-            return
+            return log("Warning: MatchGraph::fetchRootUserMatchHistory called before social graph was initialized.", withFlag:"-")
         }
         if didFetchUserMatchHistory {
-            log("Request for user history denied. Already fetched root user history.", withFlag:"?")
-            return
+            return log("Request for user history denied. Already fetched root user history.", withFlag:"?")
         }
         log("Requesting match history for current user.", withFlag:"!")
         let predicate:NSPredicate = NSPredicate(format:"voterId = \(rootUser)")!
@@ -221,6 +223,7 @@ public class MatchGraph {
                     self.tryToUpdateDirectedEdge(second, to:first, voter:rootUser, titleId:titleId)
                 }
                 self.didFetchUserMatchHistory = true
+                self.checkMatchesBeforeUserHistoryLoaded()
                 log("User voted on \(objects.count) matches.", withIndent:1)
                 if callback != nil {
                     callback!(didError:false)
@@ -241,17 +244,14 @@ public class MatchGraph {
      */
     public func flushUnregisteredMatches(maxNumAttempts:Int = 1) {
         if maxNumAttempts <= 0 {
-            log("Warning: failed to save unregistered matches (maximum attempts reached).", withFlag:"-")
-            return
+            return log("Warning: failed to save unregistered matches (maximum attempts reached).", withFlag:"-")
         }
         let rootUser:UInt64 = rootUserFromGraph()
         if rootUser == 0 {
-            log("Warning: MatchGraph::flushUnregisteredMatches called before social graph was initialized.", withFlag:"-")
-            return
+            return log("Warning: MatchGraph::flushUnregisteredMatches called before social graph was initialized.", withFlag:"-")
         }
         if currentlyFlushingMatches {
-            log("Warning: already attempting to flush unregistered matches.", withFlag:"-")
-            return
+            return log("Warning: already attempting to flush unregistered matches.", withFlag:"-")
         }
         currentlyFlushingMatches = true
         log("Saving \(unregisteredMatches.count) matches to Parse...")
@@ -288,29 +288,31 @@ public class MatchGraph {
      */
     public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int) {
         if firstId == toSecondId {
-            log("User voted \(firstId) with him/herself!", withFlag:"-")
-            return
+            return log("User voted \(firstId) with him/herself!", withFlag:"-")
         }
         if !didFetchUserMatchHistory {
-            log("Warning: Cannot register votes until we have the user's vote history!", withFlag:"-")
+            if firstId < toSecondId {
+                matchesBeforeUserHistoryLoaded.append((firstId, toSecondId, withTitleId))
+            } else {
+                matchesBeforeUserHistoryLoaded.append((toSecondId, firstId, withTitleId))
+            }
+            return
         }
         let rootUser:UInt64 = rootUserFromGraph()
         if rootUser == 0 {
-            log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag:"-")
-            return
+            return log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag:"-")
         }
         var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:toSecondId, voter:rootUser, titleId:withTitleId)
         didUpdate = didUpdate && tryToUpdateDirectedEdge(toSecondId, to:firstId, voter:rootUser , titleId:withTitleId)
         if !didUpdate {
-            log("User already voted on [\(firstId), \(toSecondId)] with title \"\(titles[withTitleId])\"")
-            return
+            return log("User already voted on [\(firstId), \(toSecondId)] with title \"\(titles[withTitleId])\"")
         }
         if firstId < toSecondId {
             unregisteredMatches.append((firstId, toSecondId, withTitleId))
         } else {
             unregisteredMatches.append((toSecondId, firstId, withTitleId))
         }
-        graph?.userDidMatch(firstId, toSecondId:toSecondId)
+        SocialGraphController.sharedInstance.graph!.userDidMatch(firstId, toSecondId:toSecondId)
     }
     
     /**
@@ -334,17 +336,42 @@ public class MatchGraph {
      * a default error value of 0.
      */
     private func rootUserFromGraph() -> UInt64 {
-        if graph == nil {
+        if SocialGraphController.sharedInstance.graph == nil {
             return 0
         }
-        return graph!.root
+        return SocialGraphController.sharedInstance.graph!.root
+    }
+    
+    /**
+     * Walks through the list of user-supplied matches before the user's match history
+     * was loaded and appends valid matches (i.e. those the user has not already voted
+     * on) to the list of registered matches.
+     *
+     * This allows users to supply matches before the response containing the user's match
+     * history arrives.
+     */
+    private func checkMatchesBeforeUserHistoryLoaded() {
+        let rootUser:UInt64 = rootUserFromGraph()
+        if rootUser == 0 {
+            return log("Warning: MatchGraph::checkMatchesBeforeUserHistoryLoaded called before social graph was initialized.", withFlag:"-")
+        }
+        for (firstId:UInt64, secondId:UInt64, titleId:Int) in matchesBeforeUserHistoryLoaded {
+            var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:secondId, voter:rootUser, titleId:titleId)
+            didUpdate = didUpdate && tryToUpdateDirectedEdge(secondId, to:firstId, voter:rootUser , titleId:titleId)
+            if !didUpdate {
+                return log("User already voted on [\(firstId), \(secondId)] with title \"\(titles[titleId])\"")
+            }
+            log("Appending buffered match [\(firstId), \(secondId)] with title \"\(titles[titleId])\" to unregistered matches.")
+            unregisteredMatches.append((firstId, secondId, titleId))
+        }
+        matchesBeforeUserHistoryLoaded.removeAll()
     }
     
     var matches:[UInt64:[UInt64:MatchList]]
     var titles:[Int:MatchTitle]
-    var graph:SocialGraph?
     var fetchedIdHistory:[UInt64]
     var didFetchUserMatchHistory:Bool
     var currentlyFlushingMatches:Bool
     var unregisteredMatches:[(UInt64, UInt64, Int)]
+    var matchesBeforeUserHistoryLoaded:[(UInt64, UInt64, Int)]
 }

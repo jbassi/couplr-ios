@@ -94,9 +94,10 @@ let kGenderBiasRatio:Float = 6.0
 let kWalkWeightMultiplierBoost:Float = 1.0
 let kWalkWeightMultiplierDecayRate:Float = 0.5
 
-/* Parse configuration */
+/* Parse-related constants */
 let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
 let kParseClientKey:String = "3qw7fEgFDKJgCT1hPSii3JhF0NZHo1fCym3of2Wh"
+let kMaxNumMatchSaveAttempts:Int = 3
 
 /* URL request prefixes */
 let kGenderizeURLPrefix:String = "http://api.genderize.io?"
