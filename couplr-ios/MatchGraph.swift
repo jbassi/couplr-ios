@@ -173,7 +173,7 @@ public class MatchGraph {
             }
             return log("Matches for user \(userId) already loaded.", withIndent:1)
         }
-        let predicate:NSPredicate = NSPredicate(format:"firstId = \(userId) OR secondId = \(userId)")!
+        let predicate:NSPredicate = NSPredicate(format:"firstId = \"\(userId)\" OR secondId = \"\(userId)\"")!
         var query = PFQuery(className:"MatchData", predicate:predicate)
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -216,7 +216,7 @@ public class MatchGraph {
             return log("Request for user history denied. Already fetched root user history.", withFlag:"?")
         }
         log("Requesting match history for current user.", withFlag:"!")
-        let predicate:NSPredicate = NSPredicate(format:"voterId = \(rootUser)")!
+        let predicate:NSPredicate = NSPredicate(format:"voterId = \"\(rootUser)\"")!
         var query = PFQuery(className:"MatchData", predicate:predicate)
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -249,10 +249,7 @@ public class MatchGraph {
      * is about to close, but can also be invoked periodically to prevent matches
      * from disappearing in the case of a crash.
      */
-    public func flushUnregisteredMatches(maxNumAttempts:Int = 1) {
-        if maxNumAttempts <= 0 {
-            return log("Warning: failed to save unregistered matches (maximum attempts reached).", withFlag:"-")
-        }
+    public func flushUnregisteredMatches() {
         let rootUser:UInt64 = rootUserFromGraph()
         if rootUser == 0 {
             return log("Warning: MatchGraph::flushUnregisteredMatches called before social graph was initialized.", withFlag:"-")
@@ -265,27 +262,14 @@ public class MatchGraph {
         var newMatches:[PFObject] = [PFObject]()
         for (firstId:UInt64, secondId:UInt64, titleId:Int) in unregisteredMatches {
             var newMatch:PFObject = PFObject(className:"MatchData")
-            newMatch["firstId"] = numberFromUInt64(firstId)
-            newMatch["secondId"] = numberFromUInt64(secondId)
-            newMatch["voterId"] = numberFromUInt64(rootUser)
+            newMatch["firstId"] = firstId.description
+            newMatch["secondId"] = secondId.description
+            newMatch["voterId"] = rootUser.description
             newMatch["titleId"] = titleId
             newMatches.append(newMatch)
         }
-        PFObject.saveAllInBackground(newMatches, block: {
-            (succeeded:Bool, error:NSError?) -> Void in
-            if succeeded && error == nil {
-                log("Successfully saved \(self.unregisteredMatches.count) matches to Parse.", withIndent:1)
-                self.unregisteredMatches.removeAll()
-                self.currentlyFlushingMatches = false
-            } else {
-                if error == nil {
-                    log("Failed to successfully save to Parse.", withIndent:1, withFlag:"-")
-                } else {
-                    log("Error \"\(error!.description)\" occurred while saving matches to Parse.", withIndent:1, withFlag:"-")
-                }
-                self.flushUnregisteredMatches(maxNumAttempts:maxNumAttempts - 1)
-            }
-        })
+        PFObject.saveAll(newMatches)
+        log("Successfully saved \(self.unregisteredMatches.count) matches to Parse.", withIndent:1)
     }
     
     /**
@@ -312,7 +296,7 @@ public class MatchGraph {
         var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:toSecondId, voter:rootUser, titleId:withTitleId)
         didUpdate = didUpdate && tryToUpdateDirectedEdge(toSecondId, to:firstId, voter:rootUser , titleId:withTitleId)
         if !didUpdate {
-            return log("User already voted on [\(firstId), \(toSecondId)] with title \"\(titlesById[withTitleId])\"")
+            return log("User already voted on [\(firstId), \(toSecondId)] with title \"\(titlesById[withTitleId]!.text)\"")
         }
         if firstId < toSecondId {
             unregisteredMatches.append((firstId, toSecondId, withTitleId))
@@ -366,7 +350,7 @@ public class MatchGraph {
             var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to:secondId, voter:rootUser, titleId:titleId)
             didUpdate = didUpdate && tryToUpdateDirectedEdge(secondId, to:firstId, voter:rootUser , titleId:titleId)
             if !didUpdate {
-                return log("User already voted on [\(firstId), \(secondId)] with title \"\(titlesById[titleId])\"")
+                return log("User already voted on [\(firstId), \(secondId)] with title \"\(titlesById[titleId]!.text)\"")
             }
             log("Appending buffered match [\(firstId), \(secondId)] with title \"\(titlesById[titleId])\" to unregistered matches.")
             unregisteredMatches.append((firstId, secondId, titleId))

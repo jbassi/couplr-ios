@@ -24,10 +24,6 @@ func parseArrayFromJSONData(inputData: NSData) -> Array<NSDictionary> {
     return boardsDictionary
 }
 
-func numberFromUInt64(value:UInt64) -> NSNumber {
-    return NSNumber(unsignedLongLong:value)
-}
-
 func profilePictureURLFromID(id:UInt64, withWidth:Int = 200, withHeight:Int = 200) -> String {
     return "\(kFBGraphURLPrefix)\(id)/picture?width=\(withWidth)&height=\(withHeight)"
 }
@@ -56,6 +52,16 @@ func sampleWithoutReplacement(var list:[UInt64], count:Int) -> [UInt64] {
 func uint64FromAnyObject(anyObject:AnyObject!) -> UInt64 {
     let numNSStr:NSString = NSString(string:anyObject.description)
     return UInt64(numNSStr.longLongValue)
+}
+
+/**
+ * Extracts a Float from an AnyObject.
+ * 
+ * TODO This is also a hack.
+ */
+func floatFromAnyObject(anyObject:AnyObject!) -> Float {
+    let floatNSStr:NSString = NSString(string:anyObject.description)
+    return floatNSStr.floatValue
 }
 
 /**

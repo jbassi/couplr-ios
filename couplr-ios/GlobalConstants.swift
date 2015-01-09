@@ -100,6 +100,7 @@ let kRandomSampleCount:Int = 9
 let kMaxGraphDataQueries:Int = 4
 let kSigmoidExponentialBase:Float = 3.5
 let kScaleFactorForExportingRootEdges:Float = 0.2
+let kMutualFriendsThreshold:Int = 2
 // Make it this much more likely to land on someone of the opposite gender.
 let kGenderBiasRatio:Float = 6.0
 // Constants for multipliers determining walk weight bonuses for nodes the user selects.
@@ -109,7 +110,6 @@ let kWalkWeightMultiplierDecayRate:Float = 0.5
 /* Parse-related constants */
 let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
 let kParseClientKey:String = "3qw7fEgFDKJgCT1hPSii3JhF0NZHo1fCym3of2Wh"
-let kMaxNumMatchSaveAttempts:Int = 3
 
 /* URL request prefixes */
 let kGenderizeURLPrefix:String = "http://api.genderize.io?"

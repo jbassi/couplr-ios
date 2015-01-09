@@ -24,7 +24,7 @@ public class MatchGraphController {
      * to Parse.
      */
     public func appWillClose() {
-        matches?.flushUnregisteredMatches(maxNumAttempts:kMaxNumMatchSaveAttempts)
+        matches?.flushUnregisteredMatches()
     }
     
     /**

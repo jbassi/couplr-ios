@@ -232,7 +232,7 @@ public class SocialGraph {
      */
     public func saveGraphData(minWeight:Float = kCommentPrevScore) {
         var query:PFQuery = PFQuery(className:"GraphData")
-        query.whereKey("rootId", equalTo:numberFromUInt64(root))
+        query.whereKey("rootId", equalTo:root.description)
         log("Searching for objectId of \(root)'s graph data...", withFlag:"!")
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -243,25 +243,21 @@ public class SocialGraph {
             } else {
                 log("No existing objectId found.", withIndent:1, withFlag:"?")
             }
-            graphData["rootId"] = numberFromUInt64(self.root)
-            var edgeArray:[[NSNumber]] = [[NSNumber]]()
+            graphData["rootId"] = self.root.description
+            var edgeArray:[[NSString]] = [[NSString]]()
             var nameDictionary:[NSString:NSString] = [NSString:NSString]()
             for (node:UInt64, neighbors:[UInt64:Float]) in self.edges {
-                let nodeNum:NSNumber = numberFromUInt64(node)
-                let nodeAsString:NSString = nodeNum.stringValue
                 for (neighbor:UInt64, var weight:Float) in neighbors {
                     if node == self.root || neighbor == self.root {
                         weight *= kScaleFactorForExportingRootEdges
                     }
                     if node < neighbor && weight > minWeight {
-                        let neighborNum:NSNumber = numberFromUInt64(neighbor)
-                        let neighborAsString:NSString = neighborNum.stringValue
-                        edgeArray.append([nodeNum, neighborNum, weight])
-                        if nameDictionary[nodeAsString] == nil {
-                            nameDictionary[nodeAsString] = self.names[node]
+                        edgeArray.append([node.description, neighbor.description, weight.description])
+                        if nameDictionary[node.description] == nil {
+                            nameDictionary[node.description] = self.names[node]
                         }
-                        if nameDictionary[neighborAsString] == nil {
-                            nameDictionary[neighborAsString] = self.names[neighbor]
+                        if nameDictionary[neighbor.description] == nil {
+                            nameDictionary[neighbor.description] = self.names[neighbor]
                         }
                     }
                 }
@@ -369,16 +365,16 @@ public class SocialGraph {
             if nextStep == 0 {
                 nextStep = sampleRandomNode(sample)
             }
-            sample.addObject(numberFromUInt64(nextStep))
+            sample.addObject(nextStep.description)
         }
         for idAsObject:AnyObject in sample {
-            let id:UInt64 = (idAsObject as NSNumber).unsignedLongLongValue
+            let id:UInt64 = uint64FromAnyObject(idAsObject)
             currentSample.append(id)
         }
         if kShowRandomWalkDebugOutput {
             println("    Done. Final random walk result...")
             for idAsObject:AnyObject in sample {
-                let id:UInt64 = (idAsObject as NSNumber).unsignedLongLongValue
+                let id:UInt64 = uint64FromAnyObject(idAsObject)
                 println("        \(names[id]!) (\(id))")
             }
             println()
@@ -402,7 +398,7 @@ public class SocialGraph {
         let meanNonRootWeight:Float = (totalEdgeWeight - totalEdgeWeightFromRoot) / Float(edgeCount - edges[root]!.count)
         // Compute sampling weights prior to gender renormalization.
         for (neighbor:UInt64, weight:Float) in self.edges[node]! {
-            if neighbor == root || withNodesTraversed.containsObject(numberFromUInt64(neighbor)) {
+            if neighbor == root || withNodesTraversed.containsObject(neighbor.description) {
                 continue
             }
             let neighborScore:Float = sampleWeightForScore(weight - meanNonRootWeight)
@@ -536,13 +532,13 @@ public class SocialGraph {
     private func fetchAndUpdateGraphDataForFriends(inout idList:[UInt64], numFriendsQueried:Int = 0) {
         let id:UInt64 = popNextHighestConnectedFriend(&idList)
         if numFriendsQueried > kMaxGraphDataQueries || id == 0 {
-            log("Done. No more friends to query.")
+            log("Done. No more friends to query.", withIndent:1)
             updateGenders()
             return
         }
         log("Pulling the social graph of root id \(id)...", withFlag:"!")
         var query:PFQuery = PFQuery(className:"GraphData")
-        query.whereKey("rootId", equalTo: numberFromUInt64(id))
+        query.whereKey("rootId", equalTo:id.description)
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
             if error != nil || objects.count < 1 {
@@ -564,7 +560,7 @@ public class SocialGraph {
                 let edge:AnyObject! = newEdges[index]!
                 let src:UInt64 = uint64FromAnyObject(edge[0])
                 let dst:UInt64 = uint64FromAnyObject(edge[1])
-                let weight:Float = Float(edge[2] as NSNumber)
+                let weight:Float = floatFromAnyObject(edge[2])
                 if newEdgeMap[src] == nil {
                     newEdgeMap[src] = [UInt64:Float]()
                 }
@@ -588,7 +584,7 @@ public class SocialGraph {
                         mutualFriendCount++
                     }
                 }
-                if mutualFriendCount >= 2 {
+                if mutualFriendCount >= kMutualFriendsThreshold {
                     newNodeList.append(node)
                 }
             }
@@ -683,7 +679,7 @@ public class SocialGraph {
     private func sampleRandomNode(withNodesTraversed:NSMutableSet, excludeRoot:Bool = true) -> UInt64 {
         var possibleNextNodes:[UInt64] = [UInt64]()
         for (neighbor:UInt64, temp:String) in self.names {
-            if withNodesTraversed.containsObject(numberFromUInt64(neighbor)) || neighbor == root {
+            if withNodesTraversed.containsObject(neighbor.description) || neighbor == root {
                 continue
             }
             possibleNextNodes.append(neighbor)

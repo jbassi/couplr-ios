@@ -15,12 +15,13 @@ class MatchViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     
     var selectedTitle:MatchTitle? = nil
+    var selectedUsers:[UInt64] = [UInt64]()
+    var selectedIndices:[NSIndexPath] = [NSIndexPath]()
 
     var connectionData: NSMutableData = NSMutableData()
     var connection: NSURLConnection?
     var userPictures: [UInt64:String]?
     var socialGraphLoaded: Bool = false
-    var selectedUsers:[UInt64] = [UInt64]()
     var loadingView: LoadingView?
     
     let socialGraphController = SocialGraphController.sharedInstance
@@ -41,6 +42,7 @@ class MatchViewController: UIViewController {
                 self.socialGraphController.initializeGraph()
                 let titleList:[MatchTitle] = self.matchGraphController.titleList()
                 self.matchTitleLabel.setTitle(titleList[0].text, forState: UIControlState.Normal)
+                self.selectedTitle = titleList[0]
             }
         })
     }
@@ -138,9 +140,20 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
             let randomSample:[UInt64] = socialGraphController.currentSample()
             cell.userName = socialGraphController.nameFromId(randomSample[indexPath.row])
             selectedUsers.append(randomSample[indexPath.row])
+            selectedIndices.append(indexPath)
             collectionView.selectItemAtIndexPath(indexPath, animated: false, scrollPosition: .None)
+            if selectedUsers.count == 2 && selectedTitle != nil {
+                matchGraphController.userDidMatch(selectedUsers[0], toSecondId: selectedUsers[1], withTitleId:selectedTitle!.id)
+                log("Matching \(socialGraphController.nameFromId(selectedUsers[0])) with \(socialGraphController.nameFromId(selectedUsers[1])) for \"\(selectedTitle!.text)\"", withFlag:"~")
+                selectedUsers.removeAll(keepCapacity:true)
+                for index:NSIndexPath in selectedIndices {
+                    collectionView.deselectItemAtIndexPath(index, animated:false)
+                }
+                selectedIndices.removeAll(keepCapacity:true)
+            }
         } else {
             collectionView.deselectItemAtIndexPath(indexPath, animated: false)
+            
         }
     }
     
