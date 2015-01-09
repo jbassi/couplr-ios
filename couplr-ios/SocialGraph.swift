@@ -519,8 +519,15 @@ public class SocialGraph {
      * Decay all existing walk weight multipliers.
      */
     private func decayWalkWeightMultipliers() {
+        var nodesToRemove:[UInt64] = []
         for (node:UInt64, multiplier:Float) in walkWeightMultipliers {
-            walkWeightMultipliers[node] = multiplier < 0.025 ? nil : kWalkWeightMultiplierDecayRate * multiplier
+            walkWeightMultipliers[node] = kWalkWeightMultiplierDecayRate * multiplier
+            if multiplier < 0.025 {
+                nodesToRemove.append(node)
+            }
+        }
+        for node:UInt64 in nodesToRemove {
+            walkWeightMultipliers[node] = nil
         }
     }
     

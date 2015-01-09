@@ -77,8 +77,17 @@ class MatchViewController: UIViewController {
         if socialGraphLoaded {
             socialGraphController.updateRandomSample()
             selectedUsers.removeAll(keepCapacity: true)
+            selectedIndices.removeAll(keepCapacity: true)
             collectionView.reloadData()
         }
+    }
+    
+    func shuffleTitle() {
+        let titleList:[MatchTitle] = matchGraphController.titleList()
+        let randomIndex:Int = randomInt(titleList.count)
+        selectedTitle = titleList[randomIndex]
+        matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
+        
     }
     
     func showLoadingScreen() {
@@ -109,8 +118,8 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
 
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         let titles:[MatchTitle] = matchGraphController.titleList()
-        matchTitleLabel.setTitle(titles[row].text, forState: UIControlState.Normal)
         selectedTitle = titles[row]
+        matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
     }
     
 }
@@ -150,10 +159,11 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
                     collectionView.deselectItemAtIndexPath(index, animated:false)
                 }
                 selectedIndices.removeAll(keepCapacity:true)
+                shufflePeople()
+                shuffleTitle()
             }
         } else {
             collectionView.deselectItemAtIndexPath(indexPath, animated: false)
-            
         }
     }
     
@@ -161,6 +171,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
         let randomSample:[UInt64] = socialGraphController.currentSample()
         if let index = find(selectedUsers, randomSample[indexPath.row]) {
+             selectedIndices.removeAtIndex(index)
              selectedUsers.removeAtIndex(index)
         }
         collectionView.deselectItemAtIndexPath(indexPath, animated: false)
