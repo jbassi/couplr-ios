@@ -154,3 +154,35 @@ func log(message:String, withIndent:Int = 0, withNewline:Bool = true, withFlag:C
         print("[\(withFlag)]\(spacing)\(message)")
     }
 }
+
+/**
+ * Serialize an unsigned long long as a binary string in UTF8.
+ */
+func binaryStringFromUInt64(value:UInt64) -> String {
+    var result:[Character] = []
+    var temp:UInt64 = value
+    result.reserveCapacity(8)
+    for index in 0..<8 {
+        let num:Int = Int(value & 0xFF)
+        result.append(Character(UnicodeScalar(num)))
+        temp = temp >> 8
+    }
+    return "".join(result.map({String($0)}))
+}
+
+/**
+ * Deserialize a UTF8 string as an unsigned long long.
+ */
+func uint64FromBinaryString(string:String) -> UInt64 {
+    let values = string.unicodeScalars
+    var cursor = values.endIndex.predecessor()
+    var result:UInt64 = 0
+    for i in 0..<8 {
+        let chr = values[cursor]
+        result = (result << 8) + UInt64(chr.value)
+        if i != 7 {
+            cursor = cursor.predecessor()
+        }
+    }
+    return result
+}
