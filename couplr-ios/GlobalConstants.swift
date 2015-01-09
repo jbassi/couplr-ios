@@ -90,6 +90,7 @@ let kLoadingViewTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, a
 /* Social graph constants */
 let kUnconnectedEdgeWeight:Float = -1000.0
 let kMaxNumStatuses:Int = 100
+let kMaxNumCommentsWithLikes:Int = 150
 // Like and comment scores
 let kCommentRootScore:Float = 0.8
 let kCommentPrevScore:Float = 0.1
@@ -117,4 +118,4 @@ let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 
 /* Debugging outputs */
 let kShowRandomWalkDebugOutput:Bool = false
-let kOutputLogMessages:Bool = false
+let kOutputLogMessages:Bool = true

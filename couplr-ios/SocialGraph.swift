@@ -141,7 +141,7 @@ public class SocialGraph {
                 }
                 let (males:Int, females:Int, undetermined:Int) = self.overallGenderCount()
                 log("Gender response received (\(jsonData.count) predictions).", withIndent:1)
-                log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent:1)
+                log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent:1, withNewline:true)
             }
             self.isCurrentlyUpdatingGender = false
             if self.shouldReupdateGender {
@@ -162,68 +162,6 @@ public class SocialGraph {
             getRequestToURL(requestURL, addGenders)
         }
     }
-
-    /**
-     * Given a set of IDs indicating comments with likes, queries the Facebook
-     * API for the list of friends who liked the comments and updates the graph
-     * data with the corresponding information.
-     */
-    public func updateCommentLikes(commentsWithLikes:[String:UInt64], andSaveGraphData:Bool) {
-        log("Requesting \(commentsWithLikes.count) liked comments...", withFlag:"!")
-        var remainingCommentsWithLikes:[String:UInt64] = [String:UInt64]()
-        let handler:(AnyObject?, AnyObject?, AnyObject?)->() = { (connection, result, error) -> Void in
-            if error == nil {
-                let responseCount:Int = result!.count
-                var totalLikeCount:Int = 0;
-                for index in 0..<responseCount {
-                    let responseBody:String! = result![index]!["body"]! as? String!
-                    let responseJSON:JSON! = JSON.parse(responseBody)
-                    let commentID:String = responseJSON["id"].description
-                    var commentAuthor:UInt64? = commentsWithLikes[commentID]
-                    if commentAuthor == nil {
-                        continue
-                    }
-                    let likesArray:JSON = responseJSON["likes"]["data"]
-                    for index in 0..<likesArray.length {
-                        let likeJSON:JSON = likesArray[index]
-                        let id:UInt64 = uint64FromAnyObject(likeJSON["id"].asString!)
-                        let name:String = likeJSON["name"].asString!
-                        if commentAuthor == id {
-                            continue
-                        }
-                        if self.names[id] == nil {
-                            // Introduce a new node to the graph.
-                            self.updateNodeWithID(id, andName: name)
-                        }
-                        totalLikeCount++
-                        self.connectNode(commentAuthor!, toNode:id, withWeight:kCommentLikeScore)
-                    }
-                }
-                log("Loaded \(totalLikeCount) comment likes.", withIndent:1)
-                if remainingCommentsWithLikes.count > 0 {
-                    log("\(remainingCommentsWithLikes.count) remaining comments. Continuing query...", withIndent:1)
-                    self.updateCommentLikes(remainingCommentsWithLikes, andSaveGraphData:andSaveGraphData)
-                } else if andSaveGraphData {
-                    self.saveGraphData()
-                }
-            }
-        }
-        var requests:[[String:String]] = []
-        for (id:String, author:UInt64) in commentsWithLikes {
-            if requests.count >= kMaxAllowedBatchRequestSize {
-                remainingCommentsWithLikes[id] = author
-            } else {
-                let graphPath:String = "\(id)?fields=likes"
-                let dictionary:NSDictionary = NSDictionary()
-                requests.append(["method":"GET", "relative_url":graphPath])
-            }
-        }
-        var encodingError:NSError? = nil
-        let jsonData:NSData? = NSJSONSerialization.dataWithJSONObject(requests, options: nil, error: &encodingError)
-        var jsonString:NSString = NSString(data:jsonData!, encoding:NSUTF8StringEncoding)!
-        let params:NSDictionary = NSDictionary(dictionary: ["batch": jsonString])
-        FBRequestConnection.startWithGraphPath("", parameters: params, HTTPMethod:"POST", completionHandler:handler)
-    }
     
     /**
      * Asynchronously upload a subset of the graph to the Parse database. Only
@@ -239,9 +177,9 @@ public class SocialGraph {
             var graphData:PFObject = PFObject(className:"GraphData")
             if objects.count > 0 {
                 graphData.objectId = objects[0].objectId
-                log("Found objectId: \(graphData.objectId)", withIndent:1)
+                log("Found objectId: \(graphData.objectId)", withIndent:1, withNewline:true)
             } else {
-                log("No existing objectId found.", withIndent:1, withFlag:"?")
+                log("No existing objectId found.", withIndent:1, withFlag:"?", withNewline:true)
             }
             graphData["rootId"] = self.root.description
             var edgeArray:[[NSString]] = [[NSString]]()
@@ -268,13 +206,13 @@ public class SocialGraph {
             graphData.saveInBackgroundWithBlock({
                 (succeeded:Bool, error:NSError?) -> Void in
                 if succeeded && error == nil {
-                    log("Successfully saved graph to Parse.", withIndent:1, withFlag:"+")
+                    log("Successfully saved graph to Parse.", withIndent:1, withNewline:true)
                     self.updateGraphDataFromFriends()
                 } else {
                     if error == nil {
-                        log("Failed to save graph to Parse.", withIndent:1, withFlag:"-")
+                        log("Failed to save graph to Parse.", withIndent:1, withFlag:"-", withNewline:true)
                     } else {
-                        log("Error \"\(error!.description)\" occurred while saving to Parse.", withIndent:1, withFlag:"-")
+                        log("Error \"\(error!.description)\" occurred while saving to Parse.", withIndent:1, withFlag:"-", withNewline:true)
                     }
                 }
             })
@@ -338,7 +276,7 @@ public class SocialGraph {
                     let friendObject:AnyObject! = friendsData[index]!
                     couplrFriends.append(uint64FromAnyObject(friendObject["id"]))
                 }
-                log("Found \(couplrFriends.count) friend(s).", withIndent:1)
+                log("Found \(couplrFriends.count) friend(s).", withIndent:1, withNewline:true)
                 self.fetchAndUpdateGraphDataForFriends(&couplrFriends)
             }
         }
@@ -539,7 +477,7 @@ public class SocialGraph {
     private func fetchAndUpdateGraphDataForFriends(inout idList:[UInt64], numFriendsQueried:Int = 0) {
         let id:UInt64 = popNextHighestConnectedFriend(&idList)
         if numFriendsQueried > kMaxGraphDataQueries || id == 0 {
-            log("Done. No more friends to query.", withIndent:1)
+            log("Done. No more friends to query.", withIndent:1, withNewline:true)
             updateGenders()
             return
         }
@@ -610,7 +548,7 @@ public class SocialGraph {
                 }
             }
             log("Finished updating graph for root id \(id).", withIndent:1)
-            log("\(newNodeList.count) nodes added; \(edgeUpdateCount) edges updated.", withIndent:1)
+            log("\(newNodeList.count) nodes added; \(edgeUpdateCount) edges updated.", withIndent:1, withNewline:true)
             self.fetchAndUpdateGraphDataForFriends(&idList, numFriendsQueried: numFriendsQueried + 1)
         })
     }

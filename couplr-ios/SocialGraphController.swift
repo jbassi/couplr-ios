@@ -13,17 +13,17 @@ protocol SocialGraphControllerDelegate: class {
 }
 
 public class SocialGraphController {
-    
+
     weak var delegate: SocialGraphControllerDelegate?
     var graph: SocialGraph?
-    
+
     class var sharedInstance: SocialGraphController {
         struct SocialGraphSingleton {
             static let instance = SocialGraphController()
         }
         return SocialGraphSingleton.instance
     }
-    
+
     /**
      * Begins the graph initialization process, querying Facebook for
      * the user's statuses. Upon a successful response, notifies the
@@ -34,32 +34,34 @@ public class SocialGraphController {
     public func initializeGraph(maxNumStatuses:Int = kMaxNumStatuses) {
         log("Requesting user statuses...", withFlag:"!")
         FBRequestConnection.startWithGraphPath(
-            "me/statuses?limit=\(maxNumStatuses)",
+            "me/statuses?limit=\(maxNumStatuses)&fields=from,likes,comments.fields(from,likes)",
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let statusData:AnyObject! = result["data"]!
                     let statusCount:Int = statusData.count
                     let firstStatusFromObject:AnyObject! = statusData[0]!["from"]!
                     let firstStatusFromObjectName:AnyObject! = firstStatusFromObject["name"]!
-                    let rootUserID:UInt64! = uint64FromAnyObject(firstStatusFromObject["id"]!)
+                    let rootUserId:UInt64! = uint64FromAnyObject(firstStatusFromObject["id"]!)
                     let rootUserName:String! = firstStatusFromObjectName.description!
-                    var builder:GraphBuilder = GraphBuilder(forRootUserID:rootUserID, withName: rootUserName)
+                    var builder:GraphBuilder = GraphBuilder(forRootUserId:rootUserId, withName:rootUserName)
                     for index in 0..<statusCount {
                         let status:AnyObject! = statusData[index]!
-                        self.updateFromStatus(status, withRootID: rootUserID, withBuilder: &builder)
+                        self.updateFromStatus(status, withRootId: rootUserId, withBuilder: &builder)
                     }
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
                     MatchGraphController.sharedInstance.socialGraphDidLoad()
-                    log("Initialized base graph (\(graph.names.count) nodes \(graph.edgeCount) edges) from \(statusCount) comments.", withIndent:1)
-                    self.graph?.updateGenders()
-                    self.graph?.updateCommentLikes(builder.commentsWithLikesForAuthor, andSaveGraphData:true)
+                    log("Initialized base graph (\(graph.names.count) nodes \(graph.edgeCount) edges \(graph.totalEdgeWeight) weight) from \(statusCount) comments.", withIndent:1, withNewline:true)
+                    self.graph!.updateGenders()
+                    self.graph!.saveGraphData()
+                } else {
+                    log("Critical error: \"\(error.description)\" when loading comments!", withFlag:"-", withNewline:true)
                 }
             } as FBRequestHandler
         )
     }
-    
+
     /**
      * Make the graph update its current random walk sample.
      *
@@ -69,7 +71,7 @@ public class SocialGraphController {
     public func updateRandomSample() {
         graph?.updateRandomSample()
     }
-    
+
     /**
      * Returns the current sample as a list of IDs, or an empty
      * list if the graph has not been initialized yet.
@@ -80,7 +82,7 @@ public class SocialGraphController {
         }
         return graph!.currentSample
     }
-    
+
     /**
      * Given an ID, returns the corresponding full name.
      * If the name is longer than a given maximum, truncates parts
@@ -101,14 +103,14 @@ public class SocialGraphController {
         }
         return name
     }
-    
+
     /**
      * Notifies the graph that the user performed a match.
      */
     public func userDidMatch(firstId:UInt64, toSecondId:UInt64) {
         graph?.userDidMatch(firstId, toSecondId:toSecondId)
     }
-    
+
     /**
      * Returns the root user's id, or 0 if the graph has not
      * been initialized yet.
@@ -119,28 +121,36 @@ public class SocialGraphController {
         }
         return graph!.root
     }
-    
-    private func updateFromStatus(status:AnyObject!, withRootID:UInt64!, inout withBuilder:GraphBuilder) -> Void {
+
+    private func updateFromStatus(status:AnyObject!, withRootId:UInt64!, inout withBuilder:GraphBuilder) -> Void {
         var allComments:AnyObject? = status["comments"]
-        var previousThreadID:UInt64 = withRootID;
+        var previousThreadId:UInt64 = withRootId;
         if allComments != nil {
             let commentData:AnyObject! = allComments!["data"]!
             for index in 0..<commentData.count {
                 let comment:AnyObject! = commentData[index]!
                 // Add scores for the author of the comment.
                 let from:AnyObject! = comment["from"]!
-                let fromID:UInt64 = uint64FromAnyObject(from["id"]!)
+                let fromId:UInt64 = uint64FromAnyObject(from["id"]!)
                 let fromNameObject:AnyObject! = from["name"]!
-                withBuilder.updateNameMappingForID(fromID, toName: fromNameObject.description!)
-                withBuilder.updateForEdgePair(EdgePair(first:withRootID, second:fromID), withWeight:kCommentRootScore)
-                withBuilder.updateForEdgePair(EdgePair(first:previousThreadID, second:fromID), withWeight:kCommentPrevScore)
-                // Check if the comment has any likes.
-                if let commentIDObject:AnyObject? = comment["id"] {
-                    if uint64FromAnyObject(comment["like_count"]!) > 0 {
-                        withBuilder.updateCommentsWithLikes(commentIDObject!.description!, forAuthorID:fromID)
-                    }
+                withBuilder.updateNameMappingForId(fromId, toName: fromNameObject.description!)
+                withBuilder.updateForEdgePair(EdgePair(first:withRootId, second:fromId), withWeight:kCommentRootScore)
+                withBuilder.updateForEdgePair(EdgePair(first:previousThreadId, second:fromId), withWeight:kCommentPrevScore)
+                previousThreadId = fromId
+                // Add comment like data if it exists.
+                let commentLikes:AnyObject? = comment["likes"]
+                if commentLikes == nil {
+                    continue
                 }
-                previousThreadID = fromID
+                let commentLikeData:AnyObject! = commentLikes!["data"]!
+                for index in 0..<commentLikeData.count {
+                    let commentLike:AnyObject! = commentLikeData[index]
+                    let commentLikeId:UInt64 = uint64FromAnyObject(commentLike["id"])
+                    let commentLikeNameObject:AnyObject! = commentLike["name"]!
+                    let commentLikeName:String = commentLikeNameObject.description
+                    withBuilder.updateNameMappingForId(commentLikeId, toName:commentLikeName)
+                    withBuilder.updateForEdgePair(EdgePair(first:commentLikeId, second:fromId), withWeight:kCommentLikeScore)
+                }
             }
         }
         var allLikes:AnyObject? = status["likes"]
@@ -148,10 +158,10 @@ public class SocialGraphController {
             let likeData:AnyObject! = allLikes!["data"]!
             for index in 0..<likeData.count {
                 let like:AnyObject! = likeData[index]!
-                let fromID:UInt64 = uint64FromAnyObject(like["id"]!)
+                let fromId:UInt64 = uint64FromAnyObject(like["id"]!)
                 let fromNameObject:AnyObject! = like["name"]
-                withBuilder.updateNameMappingForID(fromID, toName: fromNameObject.description!)
-                withBuilder.updateForEdgePair(EdgePair(first:withRootID, second:fromID), withWeight: kLikeRootScore)
+                withBuilder.updateNameMappingForId(fromId, toName: fromNameObject.description!)
+                withBuilder.updateForEdgePair(EdgePair(first:withRootId, second:fromId), withWeight: kLikeRootScore)
             }
         }
     }

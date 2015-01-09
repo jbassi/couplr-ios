@@ -100,12 +100,12 @@ public class MatchGraph {
                 self.titleList = sorted(self.titleList, {(first:MatchTitle, second:MatchTitle) -> Bool in
                     return first.id < second.id
                 })
-                log("Received \(objects.count) titles.", withIndent:1)
+                log("Received \(objects.count) titles.", withIndent:1, withNewline:true)
                 if callback != nil {
                     callback!(didError:false)
                 }
             } else {
-                log("Error \"\(error!.description)\" while retrieving titles.", withIndent:1, withFlag:"-")
+                log("Error \"\(error!.description)\" while retrieving titles.", withIndent:1, withFlag:"-", withNewline:true)
                 if callback != nil {
                     callback!(didError:true)
                 }
@@ -171,7 +171,7 @@ public class MatchGraph {
             if callback != nil {
                 callback!(didError:false)
             }
-            return log("Matches for user \(userId) already loaded.", withIndent:1)
+            return log("Matches for user \(userId) already loaded.", withIndent:1, withNewline:true)
         }
         let predicate:NSPredicate = NSPredicate(format:"firstId = \"\(userId)\" OR secondId = \"\(userId)\"")!
         var query = PFQuery(className:"MatchData", predicate:predicate)
@@ -189,12 +189,12 @@ public class MatchGraph {
                 }
                 // Consider a match fetched only after the response arrives.
                 self.fetchedIdHistory.append(userId)
-                log("Received and updated \(objects.count) matches for user \(userId).", withIndent:1)
+                log("Received and updated \(objects.count) matches for user \(userId).", withIndent:1, withNewline:true)
                 if callback != nil {
                     callback!(didError:false)
                 }
             } else {
-                log("Error \(error!.description) occurred when loading \(userId)'s matches.", withIndent:1, withFlag:"-")
+                log("Error \(error!.description) occurred when loading \(userId)'s matches.", withIndent:1, withFlag:"-", withNewline:true)
                 if callback != nil {
                     callback!(didError:true)
                 }
@@ -231,12 +231,12 @@ public class MatchGraph {
                 }
                 self.didFetchUserMatchHistory = true
                 self.checkMatchesBeforeUserHistoryLoaded()
-                log("User voted on \(objects.count) matches.", withIndent:1)
+                log("User voted on \(objects.count) matches.", withIndent:1, withNewline:true)
                 if callback != nil {
                     callback!(didError:false)
                 }
             } else {
-                log("Error \"\(error!.description)\" while fetching user match history.", withIndent:1, withFlag:"-")
+                log("Error \"\(error!.description)\" while fetching user match history.", withIndent:1, withFlag:"-", withNewline:true)
                 if callback != nil {
                     callback!(didError:true)
                 }

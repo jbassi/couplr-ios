@@ -140,7 +140,7 @@ func shortenFullName(name:String, useMiddleInitial:Bool, useLastInitial:Bool) ->
 /**
  * Prints log messages for debugging.
  */
-func log(message:String, withIndent:Int = 0, withNewline:Bool = true, withFlag:Character = "+") {
+func log(message:String, withIndent:Int = 0, withNewline:Bool = false, withFlag:Character = "+") {
     if !kOutputLogMessages {
         return
     }
@@ -149,9 +149,9 @@ func log(message:String, withIndent:Int = 0, withNewline:Bool = true, withFlag:C
         spacing += "    "
     }
     if withNewline {
-        println("[\(withFlag)]\(spacing)\(message)")
+        println("[\(withFlag)]\(spacing)\(message)\n")
     } else {
-        print("[\(withFlag)]\(spacing)\(message)")
+        println("[\(withFlag)]\(spacing)\(message)")
     }
 }
 

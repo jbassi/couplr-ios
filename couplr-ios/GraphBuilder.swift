@@ -35,15 +35,14 @@ public func ==(a: EdgePair, b: EdgePair) -> Bool {
 }
 
 public class GraphBuilder {
-    init(forRootUserID:UInt64, withName:String) {
+    init(forRootUserId:UInt64, withName:String) {
         self.edges = [EdgePair:Float]()
-        self.names = [forRootUserID:withName]
-        self.rootID = forRootUserID
-        self.commentsWithLikesForAuthor = [String:UInt64]()
+        self.names = [forRootUserId:withName]
+        self.rootId = forRootUserId
     }
     
     public func buildSocialGraph() -> SocialGraph {
-        let graph:SocialGraph = SocialGraph(root:self.rootID, names:self.names)
+        let graph:SocialGraph = SocialGraph(root:self.rootId, names:self.names)
         for (pair:EdgePair, weight:Float) in self.edges {
             graph.connectNode(pair.first, toNode: pair.second, withWeight: weight)
         }
@@ -51,10 +50,10 @@ public class GraphBuilder {
     }
     
     public func updateRootUserID(id:UInt64) {
-        self.rootID = id
+        self.rootId = id
     }
     
-    public func updateNameMappingForID(id:UInt64, toName:String) {
+    public func updateNameMappingForId(id:UInt64, toName:String) {
         self.names[id] = toName
     }
     
@@ -77,12 +76,7 @@ public class GraphBuilder {
         return true
     }
     
-    public func updateCommentsWithLikes(id:String, forAuthorID:UInt64) {
-        commentsWithLikesForAuthor[id] = forAuthorID
-    }
-    
     var edges:[EdgePair:Float]
     var names:[UInt64:String]
-    var rootID:UInt64
-    var commentsWithLikesForAuthor:[String:UInt64]
+    var rootId:UInt64
 }
