@@ -172,7 +172,7 @@ public class SocialGraph {
      */
     public func saveGraphData(minWeight:Float = kMinExportEdgeWeight, andLoadFriendGraphs:Bool = true) {
         var query:PFQuery = PFQuery(className:"GraphData")
-        query.whereKey("rootId", equalTo:root.description)
+        query.whereKey("rootId", equalTo:base64StringFromUInt64(root))
         log("Searching for objectId of \(root)'s graph data...", withFlag:"!")
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -183,7 +183,7 @@ public class SocialGraph {
             } else {
                 log("No existing objectId found.", withIndent:1, withFlag:"?", withNewline:true)
             }
-            graphData["rootId"] = self.root.description
+            graphData["rootId"] = base64StringFromUInt64(self.root)
             var edgeArray:[[NSString]] = [[NSString]]()
             var nameDictionary:[NSString:NSString] = [NSString:NSString]()
             for (node:UInt64, neighbors:[UInt64:Float]) in self.edges {
@@ -193,12 +193,14 @@ public class SocialGraph {
                     }
                     if node < neighbor && weight > minWeight {
                         let weightAsTruncatedString:String = String(format:"%.2f", weight)
-                        edgeArray.append([node.description, neighbor.description, weightAsTruncatedString])
-                        if nameDictionary[node.description] == nil {
-                            nameDictionary[node.description] = self.names[node]
+                        let base64Node:String = base64StringFromUInt64(node)
+                        let base64Neighbor:String = base64StringFromUInt64(neighbor)
+                        edgeArray.append([base64Node, base64Neighbor, weightAsTruncatedString])
+                        if nameDictionary[base64Node] == nil {
+                            nameDictionary[base64Node] = self.names[node]
                         }
-                        if nameDictionary[neighbor.description] == nil {
-                            nameDictionary[neighbor.description] = self.names[neighbor]
+                        if nameDictionary[base64Neighbor] == nil {
+                            nameDictionary[base64Neighbor] = self.names[neighbor]
                         }
                     }
                 }
@@ -548,7 +550,7 @@ public class SocialGraph {
         }
         log("Pulling the social graph of root id \(id)...", withFlag:"!")
         var query:PFQuery = PFQuery(className:"GraphData")
-        query.whereKey("rootId", equalTo:id.description)
+        query.whereKey("rootId", equalTo:base64StringFromUInt64(id))
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
             if error != nil || objects.count < 1 {
@@ -560,7 +562,7 @@ public class SocialGraph {
             let newNamesObject:AnyObject! = graphData["names"]
             var newNames:[UInt64:String] = [UInt64:String]()
             for nodeAsObject:AnyObject in newNamesObject.allKeys {
-                let node:UInt64 = uint64FromAnyObject(nodeAsObject)
+                let node:UInt64 = uint64FromAnyObject(nodeAsObject, base64:true)
                 newNames[node] = newNamesObject[nodeAsObject.description] as? String
             }
             let newEdges:AnyObject! = graphData["edges"]
@@ -568,8 +570,8 @@ public class SocialGraph {
             var newEdgeMap:[UInt64:[UInt64:Float]] = [UInt64:[UInt64:Float]]()
             for index in 0..<newEdges.count {
                 let edge:AnyObject! = newEdges[index]!
-                let src:UInt64 = uint64FromAnyObject(edge[0])
-                let dst:UInt64 = uint64FromAnyObject(edge[1])
+                let src:UInt64 = uint64FromAnyObject(edge[0], base64:true)
+                let dst:UInt64 = uint64FromAnyObject(edge[1], base64:true)
                 let weight:Float = floatFromAnyObject(edge[2])
                 if newEdgeMap[src] == nil {
                     newEdgeMap[src] = [UInt64:Float]()

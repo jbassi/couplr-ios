@@ -174,16 +174,16 @@ public class MatchGraph {
             }
             return log("Matches for user \(userId) already loaded.", withIndent:1, withNewline:true)
         }
-        let predicate:NSPredicate = NSPredicate(format:"firstId = \"\(userId)\" OR secondId = \"\(userId)\"")!
+        let predicate:NSPredicate = NSPredicate(format:"firstId = \"\(base64StringFromUInt64(userId))\" OR secondId = \"\(base64StringFromUInt64(userId))\"")!
         var query = PFQuery(className:"MatchData", predicate:predicate)
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
             if error == nil {
                 for index in 0..<objects.count {
                     let matchData:AnyObject! = objects[index]
-                    let first:UInt64 = uint64FromAnyObject(matchData["firstId"])
-                    let second:UInt64 = uint64FromAnyObject(matchData["secondId"])
-                    let voter:UInt64 = uint64FromAnyObject(matchData["voterId"])
+                    let first:UInt64 = uint64FromAnyObject(matchData["firstId"], base64:true)
+                    let second:UInt64 = uint64FromAnyObject(matchData["secondId"], base64:true)
+                    let voter:UInt64 = uint64FromAnyObject(matchData["voterId"], base64:true)
                     let titleId:Int = matchData["titleId"] as Int
                     self.tryToUpdateDirectedEdge(first, to:second, voter:voter, titleId:titleId)
                     self.tryToUpdateDirectedEdge(second, to:first, voter:voter, titleId:titleId)
@@ -217,15 +217,15 @@ public class MatchGraph {
             return log("Request for user history denied. Already fetched root user history.", withFlag:"?")
         }
         log("Requesting match history for current user.", withFlag:"!")
-        let predicate:NSPredicate = NSPredicate(format:"voterId = \"\(rootUser)\"")!
+        let predicate:NSPredicate = NSPredicate(format:"voterId = \"\(base64StringFromUInt64(rootUser))\"")!
         var query = PFQuery(className:"MatchData", predicate:predicate)
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
             if error == nil {
                 for index:Int in 0..<objects.count {
                     let matchData:AnyObject! = objects[index]
-                    let first:UInt64 = uint64FromAnyObject(matchData["firstId"])
-                    let second:UInt64 = uint64FromAnyObject(matchData["secondId"])
+                    let first:UInt64 = uint64FromAnyObject(matchData["firstId"], base64:true)
+                    let second:UInt64 = uint64FromAnyObject(matchData["secondId"], base64:true)
                     let titleId:Int = matchData["titleId"] as Int
                     self.tryToUpdateDirectedEdge(first, to:second, voter:rootUser, titleId:titleId)
                     self.tryToUpdateDirectedEdge(second, to:first, voter:rootUser, titleId:titleId)
@@ -264,9 +264,9 @@ public class MatchGraph {
         var newMatches:[PFObject] = [PFObject]()
         for (firstId:UInt64, secondId:UInt64, titleId:Int) in unregisteredMatches {
             var newMatch:PFObject = PFObject(className:"MatchData")
-            newMatch["firstId"] = firstId.description
-            newMatch["secondId"] = secondId.description
-            newMatch["voterId"] = rootUser.description
+            newMatch["firstId"] = base64StringFromUInt64(firstId)
+            newMatch["secondId"] = base64StringFromUInt64(secondId)
+            newMatch["voterId"] = base64StringFromUInt64(rootUser)
             newMatch["titleId"] = titleId
             newMatches.append(newMatch)
         }

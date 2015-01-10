@@ -63,8 +63,10 @@ public class SocialGraphController {
     }
     
     /**
-     * Notifies this controller that the match graph finished
-     * loading the root user's match history.
+     * Notifies this controller that the match graph finished loading
+     * the root user's match history. When both the vote history and
+     * photo data are loaded, adds edges from the user's matches to
+     * the graph and exports the results to Parse.
      */
     public func didLoadVoteHistoryOrPhotoData() {
         dispatch_semaphore_wait(graphSerializationSemaphore, DISPATCH_TIME_FOREVER)

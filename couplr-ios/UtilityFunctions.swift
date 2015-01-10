@@ -49,7 +49,10 @@ func sampleWithoutReplacement(var list:[UInt64], count:Int) -> [UInt64] {
  *
  * TODO This is god-awful, we'll need to find a safer way to implement this.
  */
-func uint64FromAnyObject(anyObject:AnyObject!) -> UInt64 {
+func uint64FromAnyObject(anyObject:AnyObject!, base64:Bool = false) -> UInt64 {
+    if base64 {
+        return uint64FromBase64String(anyObject.description)
+    }
     let numNSStr:NSString = NSString(string:anyObject.description)
     return UInt64(numNSStr.longLongValue)
 }
@@ -179,31 +182,34 @@ func currentTimeInSeconds() -> Double {
 }
 
 /**
- * Serialize an unsigned long long as a binary string in UTF8.
+ * Serialize an unsigned long long as a base 64 string.
+ *
+ * TODO Last time I tried all 256, Parse didn't seem to store
+ * the data properly. Try this again sometime?
  */
-func binaryStringFromUInt64(value:UInt64) -> String {
+func base64StringFromUInt64(value:UInt64) -> String {
     var result:[Character] = []
     var temp:UInt64 = value
-    result.reserveCapacity(8)
-    for index in 0..<8 {
-        let num:Int = Int(value & 0xFF)
-        result.append(Character(UnicodeScalar(num)))
-        temp = temp >> 8
+    result.reserveCapacity(11)
+    for index in 0..<11 {
+        let num:Int = Int(temp & 0x3F)
+        result.append(Character(UnicodeScalar(num + 48)))
+        temp = temp >> 6
     }
     return "".join(result.map({String($0)}))
 }
 
 /**
- * Deserialize a UTF8 string as an unsigned long long.
+ * Deserialize a string as an unsigned long long.
  */
-func uint64FromBinaryString(string:String) -> UInt64 {
+func uint64FromBase64String(string:String) -> UInt64 {
     let values = string.unicodeScalars
     var cursor = values.endIndex.predecessor()
     var result:UInt64 = 0
-    for i in 0..<8 {
+    for i in 0..<11 {
         let chr = values[cursor]
-        result = (result << 8) + UInt64(chr.value)
-        if i != 7 {
+        result = (result << 6) + UInt64(chr.value - 48)
+        if i != 10 {
             cursor = cursor.predecessor()
         }
     }
