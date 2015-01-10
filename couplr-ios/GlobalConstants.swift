@@ -109,11 +109,12 @@ let kRandomSampleCount:Int = 9                      // The number of people to r
 let kMaxGraphDataQueries:Int = 4                    // Max number of friends to query graph data from.
 let kMinExportEdgeWeight:Float = 0.2                // Only export edges with more than this weight.
 let kScaleFactorForExportingRootEdges:Float = 0.25  // Export root edges scaled by this number.
-let kMutualFriendsThreshold:Int = 3                 // Need this many mutual friends to pull a friend over to the user's graph.
+let kMutualFriendsThreshold:Int = 3                 // This many mutual friends to pull a friend over to the user's graph.
 
 let kGenderBiasRatio:Float = 4.0                    // Make it this much more likely to land on the opposite gender.
-let kWalkWeightMultiplierBoost:Float = 1.0          // The walk weight "bonus" for a node when the user selects a match.
-let kWalkWeightMultiplierDecayRate:Float = 0.5      // The decay rate for the walk weight bonus.
+let kWalkWeightUserMatchBoost:Float = 1.0           // The walk weight "bonus" for a node when the user selects a match.
+let kWalkWeightDecayRate:Float = 0.5                // The decay rate for the walk weight bonus.
+let kWalkWeightPenalty:Float = 0.6                  // Constant penalty per step to encourage choosing new nodes.
 
 /* Parse-related constants */
 let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
@@ -124,5 +125,5 @@ let kGenderizeURLPrefix:String = "http://api.genderize.io?"
 let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 
 /* Debugging outputs */
-let kShowRandomWalkDebugOutput:Bool = false
-let kOutputLogMessages:Bool = true
+let kShowRandomWalkDebugOutput:Bool = true
+let kOutputLogMessages:Bool = false

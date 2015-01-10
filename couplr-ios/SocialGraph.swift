@@ -353,15 +353,15 @@ public class SocialGraph {
      * Notifies the social graph that the user voted on a new match.
      */
     public func userDidMatch(firstId:UInt64, toSecondId:UInt64) {
-        walkWeightMultipliers[firstId] = kWalkWeightMultiplierBoost
-        walkWeightMultipliers[toSecondId] = kWalkWeightMultiplierBoost
+        walkWeightMultipliers[firstId] = walkWeightBonusForNode(firstId) + kWalkWeightUserMatchBoost
+        walkWeightMultipliers[toSecondId] = walkWeightBonusForNode(toSecondId) + kWalkWeightUserMatchBoost
     }
     
     /**
      * Samples some number of users by performing a weighted random walk on the
      * graph starting at the root user.
      */
-    public func updateRandomSample(size:Int = kRandomSampleCount, andDecayMultipliers:Bool = true) {
+    public func updateRandomSample(size:Int = kRandomSampleCount) {
         currentSample.removeAll(keepCapacity:true)
         var sample:NSMutableSet = NSMutableSet()
         var nextStep:UInt64 = root
@@ -384,9 +384,7 @@ public class SocialGraph {
             }
             println()
         }
-        if andDecayMultipliers {
-            decayWalkWeightMultipliers()
-        }
+        updateWalkWeightMultipliersAfterRandomSample()
     }
     
     /**
@@ -437,7 +435,7 @@ public class SocialGraph {
         // Apply random walk multipliers.
         for index in 0..<possibleNextNodes.count {
             let (neighbor:UInt64, weight:Float) = possibleNextNodes[index]
-            possibleNextNodes[index].1 *= walkWeightMultiplierForNode(neighbor)
+            possibleNextNodes[index].1 *= 1.0 + walkWeightBonusForNode(neighbor)
         }
         if kShowRandomWalkDebugOutput {
             if withNodesTraversed.count == 0 {
@@ -462,7 +460,7 @@ public class SocialGraph {
                     } else {
                         percentageAsString = String(format:"%.1f", percentage)
                     }
-                    let multiplierAsString = String(format:"%.2f", walkWeightMultiplierForNode(neighbor))
+                    let multiplierAsString = String(format:"%.2f", walkWeightBonusForNode(neighbor))
                     let weightAsString:String = String(format:"%.2f", originalWeights[index])
                     var nameAsPaddedString:String = names[neighbor]!
                     if nameAsPaddedString.utf16Count < 30 {
@@ -471,7 +469,17 @@ public class SocialGraph {
                         }
                     }
                     print("        ")
-                    println("\(percentageAsString)% \(nameAsPaddedString) \(multiplierAsString) \(weightAsString)")
+                    print("\(percentageAsString)% \(nameAsPaddedString)  ")
+                    if multiplierAsString[multiplierAsString.startIndex] == "-" {
+                        print("\(multiplierAsString)  ")
+                    } else {
+                        print(" \(multiplierAsString)  ")
+                    }
+                    if weightAsString[weightAsString.startIndex] == "-" {
+                        println("\(weightAsString)")
+                    } else {
+                        println(" \(weightAsString)")
+                    }
                 }
             }
         }
@@ -513,21 +521,28 @@ public class SocialGraph {
     /**
      * Computes the walk weight multiplier for a node. By default, this is 1 (no change).
      */
-    private func walkWeightMultiplierForNode(id:UInt64) -> Float {
+    private func walkWeightBonusForNode(id:UInt64) -> Float {
         if walkWeightMultipliers[id] == nil {
-            return 1
+            return 0
         }
-        return walkWeightMultipliers[id]! + 1
+        return walkWeightMultipliers[id]!
     }
     
     /**
-     * Decay all existing walk weight multipliers.
+     * Update walk weight multipliers. This means decaying all existing multipliers and
+     * applying a penalty to all nodes chosen in the current random sample.
      */
-    private func decayWalkWeightMultipliers() {
+    private func updateWalkWeightMultipliersAfterRandomSample() {
+        for (node:UInt64, multiplier:Float) in walkWeightMultipliers {
+            walkWeightMultipliers[node] = kWalkWeightDecayRate * multiplier
+        }
+        for node:UInt64 in currentSample {
+            walkWeightMultipliers[node] = walkWeightBonusForNode(node) - kWalkWeightPenalty
+        }
+        // Clean the walk weight multipliers dictionary.
         var nodesToRemove:[UInt64] = []
         for (node:UInt64, multiplier:Float) in walkWeightMultipliers {
-            walkWeightMultipliers[node] = kWalkWeightMultiplierDecayRate * multiplier
-            if multiplier < 0.025 {
+            if abs(multiplier) < 0.1 {
                 nodesToRemove.append(node)
             }
         }
