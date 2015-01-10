@@ -88,25 +88,31 @@ let kPickerTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, alpha:
 let kLoadingViewTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, alpha: 0.7)
 
 /* Social graph constants */
-let kUnconnectedEdgeWeight:Float = -1000.0
-let kMaxNumStatuses:Int = 100
-let kMaxNumCommentsWithLikes:Int = 150
-// Like and comment scores
-let kCommentRootScore:Float = 0.8
-let kCommentPrevScore:Float = 0.1
-let kLikeRootScore:Float = 0.2
-let kCommentLikeScore:Float = 0.4
-let kSamplingWeightLimit:Float = 10
-let kRandomSampleCount:Int = 9
-let kMaxGraphDataQueries:Int = 4
-let kSigmoidExponentialBase:Float = 3.5
-let kScaleFactorForExportingRootEdges:Float = 0.2
-let kMutualFriendsThreshold:Int = 2
-// Make it this much more likely to land on someone of the opposite gender.
-let kGenderBiasRatio:Float = 6.0
-// Constants for multipliers determining walk weight bonuses for nodes the user selects.
-let kWalkWeightMultiplierBoost:Float = 1.0
-let kWalkWeightMultiplierDecayRate:Float = 0.5
+let kUnconnectedEdgeWeight:Float = -1000.0          // The weight of an unconnected "edge".
+let kMaxNumStatuses:Int = 100                       // Number of statuses to query.
+let kMaxNumPhotos:Int = 100                         // Number of photos to query.
+let kMinGraphEdgeWeight:Float = 0.15                // The minimum edge weight threshold when cleaning the graph.
+// Like and comment scores.
+let kCommentRootScore:Float = 0.4                   // Score for commenting on the root user's status.
+let kCommentPrevScore:Float = 0.1                   // Score for being the next to comment on the root user's status.
+let kLikeRootScore:Float = 0.25                     // Score for a like on the root user's status.
+let kCommentLikeScore:Float = 0.4                   // Score for a like on someone's comment on the root user's status.
+// Constants for scoring photo data.
+let kMaxPairwisePhotoScore:Float = 1.5              // A base photo score for a picture containing only 2 people.
+let kMinPhotoPairwiseWeight:Float = 0.05            // Only add edges from photo data with at least this weight.
+
+let kSamplingWeightLimit:Float = 10                 // The coefficient for the sigmoid function.
+let kSigmoidExponentialBase:Float = 3.5             // The exponential base for the sigmoid function.
+let kRandomSampleCount:Int = 9                      // The number of people to randomly sample.
+
+let kMaxGraphDataQueries:Int = 4                    // Max number of friends to query graph data from.
+let kMinExportEdgeWeight:Float = 0.2                // Only export edges with at least this weight.
+let kScaleFactorForExportingRootEdges:Float = 0.25  // Export root edges scaled by this number.
+let kMutualFriendsThreshold:Int = 3                 // Need this many mutual friends to pull a friend over to the user's graph.
+
+let kGenderBiasRatio:Float = 4.0                    // Make it this much more likely to land on the opposite gender.
+let kWalkWeightMultiplierBoost:Float = 1.0          // The walk weight "bonus" for a node when the user selects a match.
+let kWalkWeightMultiplierDecayRate:Float = 0.5      // The decay rate for the walk weight bonus.
 
 /* Parse-related constants */
 let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
@@ -117,5 +123,5 @@ let kGenderizeURLPrefix:String = "http://api.genderize.io?"
 let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 
 /* Debugging outputs */
-let kShowRandomWalkDebugOutput:Bool = false
-let kOutputLogMessages:Bool = true
+let kShowRandomWalkDebugOutput:Bool = true
+let kOutputLogMessages:Bool = false

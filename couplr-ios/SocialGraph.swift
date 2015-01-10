@@ -102,12 +102,14 @@ public class SocialGraph {
      * gender mapping if the first name does not already appear, with an initial
      * value of Gender.Undetermined.
      */
-    public func updateNodeWithID(id:UInt64, andName:String) {
+    public func updateNodeWithId(id:UInt64, andName:String, andUpdateGender:Bool = true) {
         if names[id] == nil {
             names[id] = andName
             let firstName:String = firstNameFromFullName(andName)
-            if genders[firstName] == nil {
-                genders[firstName] = Gender.Undetermined
+            if andUpdateGender {
+                if genders[firstName] == nil {
+                    genders[firstName] = Gender.Undetermined
+                }
             }
         }
     }
@@ -165,10 +167,10 @@ public class SocialGraph {
     
     /**
      * Asynchronously upload a subset of the graph to the Parse database. Only
-     * include edges GREATER THAN a given threshold. By default, kCommentPrevScore
+     * include edges GREATER THAN a given threshold. By default, kMinExportEdgeWeight
      * is chosen to remove all links that may have occured due to error.
      */
-    public func saveGraphData(minWeight:Float = kCommentPrevScore) {
+    public func saveGraphData(minWeight:Float = kMinExportEdgeWeight) {
         var query:PFQuery = PFQuery(className:"GraphData")
         query.whereKey("rootId", equalTo:root.description)
         log("Searching for objectId of \(root)'s graph data...", withFlag:"!")
@@ -280,6 +282,68 @@ public class SocialGraph {
                 self.fetchAndUpdateGraphDataForFriends(&couplrFriends)
             }
         }
+    }
+    
+    /**
+     * Build the social graph using data from the user's photos.
+     */
+    public func updateGraphDataUsingPhotos(maxNumPhotos:Int = kMaxNumPhotos, andSaveGraph:Bool = true) {
+        log("Requesting data from photos...", withFlag:"!")
+        FBRequestConnection.startWithGraphPath("me/photos?limit=\(maxNumPhotos)&fields=from,tags.fields(id,name)",
+            completionHandler: { (connection, result, error) -> Void in
+                if error == nil {
+                    let oldEdgeCount = self.edgeCount
+                    let oldEdgeWeight = self.totalEdgeWeight
+                    let oldVertexCount = self.names.count
+                    var previousPhotoGroup:[UInt64:String] = [UInt64:String]()
+                    let allPhotos:AnyObject! = result["data"]!
+                    for i:Int in 0..<allPhotos.count {
+                        var photoGroup:[UInt64:String] = [UInt64:String]()
+                        let photoData:AnyObject! = allPhotos[i]!
+                        let (authorId:UInt64, authorName:String) = idAndNameFromObject(photoData["from"]!!)
+                        // Build a dictionary of all the people in this photo.
+                        photoGroup[authorId] = authorName
+                        let photoTags:AnyObject? = photoData["tags"]
+                        if photoTags == nil {
+                            continue
+                        }
+                        let photoTagsData:AnyObject! = photoTags!["data"]!
+                        for j:Int in 0..<photoTagsData.count {
+                            let photoTag:AnyObject! = photoTagsData[j]
+                            let (taggedId:UInt64, taggedName:String) = idAndNameFromObject(photoTag)
+                            if taggedId != 0 {
+                                photoGroup[taggedId] = taggedName
+                            }
+                        }
+                        if photoGroup.count <= 1 || photoGroup.count > 15 {
+                            continue
+                        }
+                        let dissimilarity:Float = 1.0 - self.similarityOfGroups(photoGroup, second:previousPhotoGroup)
+                        let pairwiseWeight:Float = dissimilarity * kMaxPairwisePhotoScore / Float(photoGroup.count - 1)
+                        if pairwiseWeight >= kMinPhotoPairwiseWeight {
+                            for (node:UInt64, name:String) in photoGroup {
+                                self.updateNodeWithId(node, andName:name, andUpdateGender:false)
+                            }
+                            // Create a fully connected clique using the tagged users.
+                            for src:UInt64 in photoGroup.keys {
+                                for dst:UInt64 in photoGroup.keys {
+                                    if src < dst {
+                                        self.connectNode(src, toNode:dst, withWeight:pairwiseWeight)
+                                    }
+                                }
+                            }
+                        }
+                        previousPhotoGroup = photoGroup
+                    }
+                    self.updateGraphForMinWeightThreshold()
+                    log("Received \(allPhotos.count) photos (+\(self.names.count - oldVertexCount) nodes, +\(self.edgeCount - oldEdgeCount) edges, +\(self.totalEdgeWeight - oldEdgeWeight)).", withIndent:1, withNewline:true)
+                    if andSaveGraph {
+                        self.saveGraphData()
+                    }
+                } else {
+                    log("Photos request failed with error \"\(error!.description)\"", withIndent:1, withFlag:"-", withNewline:true)
+                }
+        } as FBRequestHandler)
     }
     
     /**
@@ -535,7 +599,7 @@ public class SocialGraph {
             }
             // Update the graph to contain all the new nodes.
             for newNode:UInt64 in newNodeList {
-                self.updateNodeWithID(newNode, andName:newNames[newNode]!)
+                self.updateNodeWithId(newNode, andName:newNames[newNode]!)
             }
             // Add all new edges that connect two members of the original graph.
             var edgeUpdateCount:Int = 0
@@ -658,6 +722,9 @@ public class SocialGraph {
     private func removeEdgeFrom(node:UInt64, toNode:UInt64) {
         if edges[node] != nil && edges[node]![toNode] != nil {
             edges[node]![toNode] = nil
+            if edges[node]!.count == 0 {
+                edges[node] = nil
+            }
         }
     }
 
@@ -666,6 +733,68 @@ public class SocialGraph {
      */
     private func weightFrom(node:UInt64, toNode:UInt64) -> Float {
         return (edges[node] == nil || edges[node]![toNode] == nil) ? kUnconnectedEdgeWeight : edges[node]![toNode]!
+    }
+    
+    /**
+     * Computes how "similar" two groups of users are. Returns a
+     * float between 0 and 1, inclusive.
+     */
+    private func similarityOfGroups(first:[UInt64:String], second:[UInt64:String], andIgnoreRoot:Bool = true) -> Float {
+        var similarityCount:Float = 0
+        var totalCount:Float = 0
+        for node:UInt64 in first.keys {
+            if andIgnoreRoot && node == root {
+                continue
+            }
+            if second[node] != nil {
+                similarityCount++
+            }
+            totalCount++
+        }
+        for node:UInt64 in second.keys {
+            if andIgnoreRoot && node == root {
+                continue
+            }
+            if first[node] != nil {
+                similarityCount++
+            }
+            totalCount++
+        }
+        if totalCount == 0 {
+            return 1
+        }
+        return similarityCount / totalCount
+    }
+    
+    /**
+     * Iterate through all edges in the graph and remove edges
+     * that have a weight less than a minimum threshold.
+     */
+    private func updateGraphForMinWeightThreshold(minWeight:Float = kMinGraphEdgeWeight) {
+        var before = self.totalEdgeWeight
+        // Collect a list of undirected edges that should be removed.
+        var edgesToRemove:[(UInt64, UInt64)] = []
+        for (node:UInt64, neighbors:[UInt64:Float]) in edges {
+            for (neighbor:UInt64, weight:Float) in edges[node]! {
+                if node < neighbor && weight < kMinGraphEdgeWeight {
+                    edgesToRemove.append((node, neighbor))
+                }
+            }
+        }
+        // Remove the undirected edges.
+        for (src:UInt64, dst:UInt64) in edgesToRemove {
+            disconnectNode(src, fromNode:dst)
+        }
+        // Remove fully disconnected nodes.
+        var nodesToRemove:[UInt64] = []
+        for node:UInt64 in names.keys {
+            if edges[node] == nil {
+                nodesToRemove.append(node)
+            }
+        }
+        for node:UInt64 in nodesToRemove {
+            names[node] = nil
+        }
     }
     
     // Core app-related data.

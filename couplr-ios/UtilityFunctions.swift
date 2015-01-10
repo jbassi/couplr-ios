@@ -156,6 +156,29 @@ func log(message:String, withIndent:Int = 0, withNewline:Bool = false, withFlag:
 }
 
 /**
+ * Extracts a user ID and a name from an object that contains
+ * both (e.g. a Facebook "from" object).
+ */
+func idAndNameFromObject(object:AnyObject) -> (UInt64, String) {
+    let nameObject:AnyObject! = object["name"]!
+    let name:String = nameObject.description
+    let idObject:AnyObject? = object["id"]
+    if idObject != nil {
+        let id:UInt64 = uint64FromAnyObject(idObject!)
+        return (id, name)
+    }
+    return (0, name)
+}
+
+/**
+ * Fetches the current time in seconds since 1970.
+ */
+func currentTimeInSeconds() -> Double {
+    let t:NSDate = NSDate()
+    return t.timeIntervalSince1970
+}
+
+/**
  * Serialize an unsigned long long as a binary string in UTF8.
  */
 func binaryStringFromUInt64(value:UInt64) -> String {

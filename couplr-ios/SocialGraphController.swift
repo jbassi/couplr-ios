@@ -33,8 +33,7 @@ public class SocialGraphController {
      */
     public func initializeGraph(maxNumStatuses:Int = kMaxNumStatuses) {
         log("Requesting user statuses...", withFlag:"!")
-        FBRequestConnection.startWithGraphPath(
-            "me/statuses?limit=\(maxNumStatuses)&fields=from,likes,comments.fields(from,likes)",
+        FBRequestConnection.startWithGraphPath("me/statuses?limit=\(maxNumStatuses)&fields=from,likes,comments.fields(from,likes)",
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let statusData:AnyObject! = result["data"]!
@@ -46,7 +45,7 @@ public class SocialGraphController {
                     var builder:GraphBuilder = GraphBuilder(forRootUserId:rootUserId, withName:rootUserName)
                     for index in 0..<statusCount {
                         let status:AnyObject! = statusData[index]!
-                        self.updateFromStatus(status, withRootId: rootUserId, withBuilder: &builder)
+                        self.updateGraphBuilderFromStatus(status, withRootId:rootUserId, withBuilder:&builder)
                     }
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
@@ -54,12 +53,11 @@ public class SocialGraphController {
                     MatchGraphController.sharedInstance.socialGraphDidLoad()
                     log("Initialized base graph (\(graph.names.count) nodes \(graph.edgeCount) edges \(graph.totalEdgeWeight) weight) from \(statusCount) comments.", withIndent:1, withNewline:true)
                     self.graph!.updateGenders()
-                    self.graph!.saveGraphData()
+                    self.graph!.updateGraphDataUsingPhotos(andSaveGraph:true)
                 } else {
                     log("Critical error: \"\(error.description)\" when loading comments!", withFlag:"-", withNewline:true)
                 }
-            } as FBRequestHandler
-        )
+        } as FBRequestHandler)
     }
 
     /**
@@ -122,7 +120,7 @@ public class SocialGraphController {
         return graph!.root
     }
 
-    private func updateFromStatus(status:AnyObject!, withRootId:UInt64!, inout withBuilder:GraphBuilder) -> Void {
+    private func updateGraphBuilderFromStatus(status:AnyObject!, withRootId:UInt64!, inout withBuilder:GraphBuilder) -> Void {
         var allComments:AnyObject? = status["comments"]
         var previousThreadId:UInt64 = withRootId;
         if allComments != nil {
@@ -161,7 +159,7 @@ public class SocialGraphController {
                 let fromId:UInt64 = uint64FromAnyObject(like["id"]!)
                 let fromNameObject:AnyObject! = like["name"]
                 withBuilder.updateNameMappingForId(fromId, toName: fromNameObject.description!)
-                withBuilder.updateForEdgePair(EdgePair(first:withRootId, second:fromId), withWeight: kLikeRootScore)
+                withBuilder.updateForEdgePair(EdgePair(first:withRootId, second:fromId), withWeight:kLikeRootScore)
             }
         }
     }
