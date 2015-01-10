@@ -170,7 +170,7 @@ public class SocialGraph {
      * include edges GREATER THAN a given threshold. By default, kMinExportEdgeWeight
      * is chosen to remove all links that may have occured due to error.
      */
-    public func saveGraphData(minWeight:Float = kMinExportEdgeWeight) {
+    public func saveGraphData(minWeight:Float = kMinExportEdgeWeight, andLoadFriendGraphs:Bool = true) {
         var query:PFQuery = PFQuery(className:"GraphData")
         query.whereKey("rootId", equalTo:root.description)
         log("Searching for objectId of \(root)'s graph data...", withFlag:"!")
@@ -192,7 +192,8 @@ public class SocialGraph {
                         weight *= kScaleFactorForExportingRootEdges
                     }
                     if node < neighbor && weight > minWeight {
-                        edgeArray.append([node.description, neighbor.description, weight.description])
+                        let weightAsTruncatedString:String = String(format:"%.2f", weight)
+                        edgeArray.append([node.description, neighbor.description, weightAsTruncatedString])
                         if nameDictionary[node.description] == nil {
                             nameDictionary[node.description] = self.names[node]
                         }
@@ -209,7 +210,9 @@ public class SocialGraph {
                 (succeeded:Bool, error:NSError?) -> Void in
                 if succeeded && error == nil {
                     log("Successfully saved graph to Parse.", withIndent:1, withNewline:true)
-                    self.updateGraphDataFromFriends()
+                    if andLoadFriendGraphs {
+                        self.updateGraphDataFromFriends()
+                    }
                 } else {
                     if error == nil {
                         log("Failed to save graph to Parse.", withIndent:1, withFlag:"-", withNewline:true)
@@ -287,7 +290,7 @@ public class SocialGraph {
     /**
      * Build the social graph using data from the user's photos.
      */
-    public func updateGraphDataUsingPhotos(maxNumPhotos:Int = kMaxNumPhotos, andSaveGraph:Bool = true) {
+    public func updateGraphDataUsingPhotos(maxNumPhotos:Int = kMaxNumPhotos) {
         log("Requesting data from photos...", withFlag:"!")
         FBRequestConnection.startWithGraphPath("me/photos?limit=\(maxNumPhotos)&fields=from,tags.fields(id,name)",
             completionHandler: { (connection, result, error) -> Void in
@@ -336,10 +339,8 @@ public class SocialGraph {
                         previousPhotoGroup = photoGroup
                     }
                     self.updateGraphForMinWeightThreshold()
-                    log("Received \(allPhotos.count) photos (+\(self.names.count - oldVertexCount) nodes, +\(self.edgeCount - oldEdgeCount) edges, +\(self.totalEdgeWeight - oldEdgeWeight)).", withIndent:1, withNewline:true)
-                    if andSaveGraph {
-                        self.saveGraphData()
-                    }
+                    log("Received \(allPhotos.count) photos (+\(self.names.count - oldVertexCount) nodes, +\(self.edgeCount - oldEdgeCount) edges, +\(self.totalEdgeWeight - oldEdgeWeight) weight).", withIndent:1, withNewline:true)
+                    SocialGraphController.sharedInstance.didLoadVoteHistoryOrPhotoData()
                 } else {
                     log("Photos request failed with error \"\(error!.description)\"", withIndent:1, withFlag:"-", withNewline:true)
                 }

@@ -16,6 +16,8 @@ public class SocialGraphController {
 
     weak var delegate: SocialGraphControllerDelegate?
     var graph: SocialGraph?
+    var voteHistoryOrPhotoDataLoadProgress:Int = 0
+    var graphSerializationSemaphore = dispatch_semaphore_create(1)
 
     class var sharedInstance: SocialGraphController {
         struct SocialGraphSingleton {
@@ -51,13 +53,35 @@ public class SocialGraphController {
                     self.graph = graph
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
                     MatchGraphController.sharedInstance.socialGraphDidLoad()
-                    log("Initialized base graph (\(graph.names.count) nodes \(graph.edgeCount) edges \(graph.totalEdgeWeight) weight) from \(statusCount) comments.", withIndent:1, withNewline:true)
+                    log("Initialized base graph (\(graph.names.count) nodes \(graph.edgeCount) edges \(graph.totalEdgeWeight) weight) from \(statusCount) statuses.", withIndent:1, withNewline:true)
                     self.graph!.updateGenders()
-                    self.graph!.updateGraphDataUsingPhotos(andSaveGraph:true)
+                    self.graph!.updateGraphDataUsingPhotos()
                 } else {
                     log("Critical error: \"\(error.description)\" when loading comments!", withFlag:"-", withNewline:true)
                 }
         } as FBRequestHandler)
+    }
+    
+    /**
+     * Notifies this controller that the match graph finished
+     * loading the root user's match history.
+     */
+    public func didLoadVoteHistoryOrPhotoData() {
+        dispatch_semaphore_wait(graphSerializationSemaphore, DISPATCH_TIME_FOREVER)
+        voteHistoryOrPhotoDataLoadProgress++
+        if voteHistoryOrPhotoDataLoadProgress == 2 {
+            // Both vote history and photo data are finished loading.
+            let voteHistory:[(UInt64, UInt64, Int)] = MatchGraphController.sharedInstance.matches!.userVoteHistory
+            for (firstId:UInt64, secondId:UInt64, titleId:Int) in voteHistory {
+                // For each match the user makes, connect the matched nodes.
+                if graph!.names[firstId] != nil && graph!.names[secondId] != nil {
+                    graph!.connectNode(firstId, toNode:secondId, withWeight:kUserMatchVoteScore)
+                }
+            }
+            graph!.saveGraphData(andLoadFriendGraphs:true)
+            voteHistoryOrPhotoDataLoadProgress = 3
+        }
+        dispatch_semaphore_signal(graphSerializationSemaphore)
     }
 
     /**

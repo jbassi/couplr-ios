@@ -37,7 +37,10 @@ public class MatchGraphController {
             matches = MatchGraph()
         }
         matches!.fetchMatchesForId(SocialGraphController.sharedInstance.rootId())
-        matches!.fetchRootUserVoteHistory()
+        matches!.fetchRootUserVoteHistory {
+            (didError) -> Void in
+            SocialGraphController.sharedInstance.didLoadVoteHistoryOrPhotoData()
+        }
     }
     
     /**
@@ -82,6 +85,16 @@ public class MatchGraphController {
             return []
         }
         return matches!.titleList
+    }
+    
+    /**
+     * Wraps a call to the same method of MatchGraph.
+     */
+    public func numMatchesByUserIdAndTitleFor(id:UInt64) -> [UInt64:[Int:Int]] {
+        if matches == nil {
+            return [UInt64:[Int:Int]]()
+        }
+        return matches!.numMatchesByUserIdAndTitleFor(id)
     }
     
     /**

@@ -76,6 +76,7 @@ public class MatchGraph {
         self.currentlyFlushingMatches = false
         self.unregisteredMatches = [(UInt64, UInt64, Int)]()
         self.matchesBeforeUserHistoryLoaded = [(UInt64, UInt64, Int)]()
+        self.userVoteHistory = [(UInt64, UInt64, Int)]()
     }
     
     /**
@@ -228,6 +229,7 @@ public class MatchGraph {
                     let titleId:Int = matchData["titleId"] as Int
                     self.tryToUpdateDirectedEdge(first, to:second, voter:rootUser, titleId:titleId)
                     self.tryToUpdateDirectedEdge(second, to:first, voter:rootUser, titleId:titleId)
+                    self.userVoteHistory.append((first, second, titleId))
                 }
                 self.didFetchUserMatchHistory = true
                 self.checkMatchesBeforeUserHistoryLoaded()
@@ -366,4 +368,5 @@ public class MatchGraph {
     var currentlyFlushingMatches:Bool
     var unregisteredMatches:[(UInt64, UInt64, Int)]
     var matchesBeforeUserHistoryLoaded:[(UInt64, UInt64, Int)]
+    var userVoteHistory:[(UInt64, UInt64, Int)]
 }
