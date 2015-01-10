@@ -15,7 +15,7 @@ public class MatchTitle {
         self.text = text
         self.picture = picture
     }
-    
+
     var id:Int
     var text:String
     var picture:String
@@ -29,7 +29,7 @@ public class MatchList {
     public init() {
         self.matchesByTitle = [Int:[UInt64]]()
     }
-    
+
     /**
      * Adds a new match between two users. Returns true if the match
      * has been correctly added, otherwise returns false (e.g. if
@@ -46,7 +46,7 @@ public class MatchList {
         }
         return false
     }
-    
+
     /**
      * Returns a dictionary mapping each title id in this list of
      * matches to the corresponding number of votes for that title.
@@ -58,7 +58,7 @@ public class MatchList {
         }
         return result
     }
-    
+
     // Maps a title ID to a list of users who voted for that match.
     var matchesByTitle:[Int:[UInt64]]
 }
@@ -78,14 +78,14 @@ public class MatchGraph {
         self.matchesBeforeUserHistoryLoaded = [(UInt64, UInt64, Int)]()
         self.userVoteHistory = [(UInt64, UInt64, Int)]()
     }
-    
+
     /**
      * Loads match titles from Parse and passes them to a given callback
      * function.
      */
     public func fetchMatchTitles(callback:((didError:Bool)->Void)? = nil) {
-        log("Requesting match titles...", withFlag:"!")
-        var query = PFQuery(className:"MatchTitle")
+        log("Requesting match titles...", withFlag: "!")
+        var query = PFQuery(className: "MatchTitle")
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
             if error == nil {
@@ -93,27 +93,27 @@ public class MatchGraph {
                     let titleId:Int = title["titleId"]! as Int
                     let text:String = title["text"]! as String
                     let picture:String = title["picture"]! as String
-                    self.titlesById[titleId] = MatchTitle(id:titleId, text:text, picture:picture)
+                    self.titlesById[titleId] = MatchTitle(id: titleId, text: text, picture: picture)
                 }
                 for title:MatchTitle in self.titlesById.values {
                     self.titleList.append(title)
                 }
-                self.titleList = sorted(self.titleList, {(first:MatchTitle, second:MatchTitle) -> Bool in
+                self.titleList = sorted(self.titleList, {(first: MatchTitle, second: MatchTitle) -> Bool in
                     return first.id < second.id
                 })
-                log("Received \(objects.count) titles.", withIndent:1, withNewline:true)
+                log("Received \(objects.count) titles.", withIndent: 1, withNewline: true)
                 if callback != nil {
                     callback!(didError:false)
                 }
             } else {
-                log("Error \"\(error!.description)\" while retrieving titles.", withIndent:1, withFlag:"-", withNewline:true)
+                log("Error \"\(error!.description)\" while retrieving titles.", withIndent: 1, withFlag: "-", withNewline: true)
                 if callback != nil {
                     callback!(didError:true)
                 }
             }
         }
     }
-    
+
     /**
      * Returns a string representation of this MatchGraph for (mainly) debugging
      * purposes.
@@ -131,7 +131,7 @@ public class MatchGraph {
         }
         return result + "})\n"
     }
-    
+
     /**
      * For a given user, a dictionary that contains, as keys, all other users
      * to which the given user has been matched. The value corresponding to
@@ -156,7 +156,7 @@ public class MatchGraph {
         }
         return result
     }
-    
+
     /**
      * Loads all matches relevant to a given user id. Takes an optional callback
      * function that is called when the results are received. In the case that the
@@ -174,7 +174,7 @@ public class MatchGraph {
             }
             return log("Matches for user \(userId) already loaded.", withIndent:1, withNewline:true)
         }
-        let predicate:NSPredicate = NSPredicate(format:"firstId = \"\(base64StringFromUInt64(userId))\" OR secondId = \"\(base64StringFromUInt64(userId))\"")!
+        let predicate:NSPredicate = NSPredicate(format:"firstId = \"\(encodeBase64(userId))\" OR secondId = \"\(encodeBase64(userId))\"")!
         var query = PFQuery(className:"MatchData", predicate:predicate)
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -202,7 +202,7 @@ public class MatchGraph {
             }
         }
     }
-    
+
     /**
      * Queries Parse for the matches the user has voted on, updating the graph
      * correspondingly, and running a given callback function upon receiving a
@@ -217,7 +217,7 @@ public class MatchGraph {
             return log("Request for user history denied. Already fetched root user history.", withFlag:"?")
         }
         log("Requesting match history for current user.", withFlag:"!")
-        let predicate:NSPredicate = NSPredicate(format:"voterId = \"\(base64StringFromUInt64(rootUser))\"")!
+        let predicate:NSPredicate = NSPredicate(format:"voterId = \"\(encodeBase64(rootUser))\"")!
         var query = PFQuery(className:"MatchData", predicate:predicate)
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -245,7 +245,7 @@ public class MatchGraph {
             }
         }
     }
-    
+
     /**
      * Saves all unregistered matches to Parse. Should be invoked when the app
      * is about to close, but can also be invoked periodically to prevent matches
@@ -264,16 +264,16 @@ public class MatchGraph {
         var newMatches:[PFObject] = [PFObject]()
         for (firstId:UInt64, secondId:UInt64, titleId:Int) in unregisteredMatches {
             var newMatch:PFObject = PFObject(className:"MatchData")
-            newMatch["firstId"] = base64StringFromUInt64(firstId)
-            newMatch["secondId"] = base64StringFromUInt64(secondId)
-            newMatch["voterId"] = base64StringFromUInt64(rootUser)
+            newMatch["firstId"] = encodeBase64(firstId)
+            newMatch["secondId"] = encodeBase64(secondId)
+            newMatch["voterId"] = encodeBase64(rootUser)
             newMatch["titleId"] = titleId
             newMatches.append(newMatch)
         }
         PFObject.saveAll(newMatches)
         log("Successfully saved \(self.unregisteredMatches.count) matches to Parse.", withIndent:1)
     }
-    
+
     /**
      * Attempts to add a new match to the graph. If the match is successfully
      * added and the social graph exists, notifies the social graph about the
@@ -307,7 +307,7 @@ public class MatchGraph {
         }
         SocialGraphController.sharedInstance.userDidMatch(firstId, toSecondId:toSecondId)
     }
-    
+
     /**
      * Updates the graph going in one direction. Returns if the edge was successfully
      * added (i.e. the user did not already vote on the pair for the same title).
@@ -323,7 +323,7 @@ public class MatchGraph {
         }
         return matches[from]![to]!.updateMatch(titleId, voter:voter)
     }
-    
+
     /**
      * Grabs the root user ID from the graph. If the graph has not been loaded, returns
      * a default error value of 0.
@@ -334,7 +334,7 @@ public class MatchGraph {
         }
         return SocialGraphController.sharedInstance.rootId()
     }
-    
+
     /**
      * Walks through the list of user-supplied matches before the user's match history
      * was loaded and appends valid matches (i.e. those the user has not already voted
@@ -359,7 +359,7 @@ public class MatchGraph {
         }
         matchesBeforeUserHistoryLoaded.removeAll()
     }
-    
+
     var matches:[UInt64:[UInt64:MatchList]]
     var titlesById:[Int:MatchTitle]
     var titleList:[MatchTitle]

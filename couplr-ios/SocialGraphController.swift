@@ -18,6 +18,7 @@ public class SocialGraphController {
     var graph: SocialGraph?
     var voteHistoryOrPhotoDataLoadProgress:Int = 0
     var graphSerializationSemaphore = dispatch_semaphore_create(1)
+    var appBeginTime:Double = currentTimeInSeconds()
 
     class var sharedInstance: SocialGraphController {
         struct SocialGraphSingleton {
@@ -34,7 +35,7 @@ public class SocialGraphController {
      * Facebook again for comment likes.
      */
     public func initializeGraph(maxNumStatuses:Int = kMaxNumStatuses) {
-        log("Requesting user statuses...", withFlag:"!")
+        log("Requesting user statuses...", withFlag: "!")
         FBRequestConnection.startWithGraphPath("me/statuses?limit=\(maxNumStatuses)&fields=from,likes,comments.fields(from,likes)",
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
@@ -44,24 +45,26 @@ public class SocialGraphController {
                     let firstStatusFromObjectName:AnyObject! = firstStatusFromObject["name"]!
                     let rootUserId:UInt64! = uint64FromAnyObject(firstStatusFromObject["id"]!)
                     let rootUserName:String! = firstStatusFromObjectName.description!
-                    var builder:GraphBuilder = GraphBuilder(forRootUserId:rootUserId, withName:rootUserName)
+                    var builder:GraphBuilder = GraphBuilder(forRootUserId: rootUserId, withName: rootUserName)
                     for index in 0..<statusCount {
                         let status:AnyObject! = statusData[index]!
-                        self.updateGraphBuilderFromStatus(status, withRootId:rootUserId, withBuilder:&builder)
+                        self.updateGraphBuilderFromStatus(status, withRootId: rootUserId, withBuilder: &builder)
                     }
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
                     self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
                     MatchGraphController.sharedInstance.socialGraphDidLoad()
-                    log("Initialized base graph (\(graph.names.count) nodes \(graph.edgeCount) edges \(graph.totalEdgeWeight) weight) from \(statusCount) statuses.", withIndent:1, withNewline:true)
+                    log("Initialized base graph (\(graph.names.count) nodes \(graph.edgeCount) edges \(graph.totalEdgeWeight) weight) from \(statusCount) statuses.", withIndent: 1)
+                    let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.appBeginTime)
+                    log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
                     self.graph!.updateGenders()
                     self.graph!.updateGraphDataUsingPhotos()
                 } else {
-                    log("Critical error: \"\(error.description)\" when loading comments!", withFlag:"-", withNewline:true)
+                    log("Critical error: \"\(error.description)\" when loading comments!", withFlag: "-", withNewline: true)
                 }
         } as FBRequestHandler)
     }
-    
+
     /**
      * Notifies this controller that the match graph finished loading
      * the root user's match history. When both the vote history and
@@ -77,10 +80,11 @@ public class SocialGraphController {
             for (firstId:UInt64, secondId:UInt64, titleId:Int) in voteHistory {
                 // For each match the user makes, connect the matched nodes.
                 if graph!.names[firstId] != nil && graph!.names[secondId] != nil {
-                    graph!.connectNode(firstId, toNode:secondId, withWeight:kUserMatchVoteScore)
+                    graph!.connectNode(firstId, toNode: secondId, withWeight: kUserMatchVoteScore)
                 }
             }
-            graph!.saveGraphData(andLoadFriendGraphs:true)
+            graph!.saveGraphData(andLoadFriendGraphs: true)
+            // Prevent the graph from saving again under any condition.
             voteHistoryOrPhotoDataLoadProgress = 3
         }
         dispatch_semaphore_signal(graphSerializationSemaphore)
@@ -132,7 +136,7 @@ public class SocialGraphController {
      * Notifies the graph that the user performed a match.
      */
     public func userDidMatch(firstId:UInt64, toSecondId:UInt64) {
-        graph?.userDidMatch(firstId, toSecondId:toSecondId)
+        graph?.userDidMatch(firstId, toSecondId: toSecondId)
     }
 
     /**
@@ -158,8 +162,8 @@ public class SocialGraphController {
                 let fromId:UInt64 = uint64FromAnyObject(from["id"]!)
                 let fromNameObject:AnyObject! = from["name"]!
                 withBuilder.updateNameMappingForId(fromId, toName: fromNameObject.description!)
-                withBuilder.updateForEdgePair(EdgePair(first:withRootId, second:fromId), withWeight:kCommentRootScore)
-                withBuilder.updateForEdgePair(EdgePair(first:previousThreadId, second:fromId), withWeight:kCommentPrevScore)
+                withBuilder.updateForEdgePair(EdgePair(first: withRootId, second: fromId), withWeight: kCommentRootScore)
+                withBuilder.updateForEdgePair(EdgePair(first: previousThreadId, second: fromId), withWeight: kCommentPrevScore)
                 previousThreadId = fromId
                 // Add comment like data if it exists.
                 let commentLikes:AnyObject? = comment["likes"]
@@ -172,8 +176,8 @@ public class SocialGraphController {
                     let commentLikeId:UInt64 = uint64FromAnyObject(commentLike["id"])
                     let commentLikeNameObject:AnyObject! = commentLike["name"]!
                     let commentLikeName:String = commentLikeNameObject.description
-                    withBuilder.updateNameMappingForId(commentLikeId, toName:commentLikeName)
-                    withBuilder.updateForEdgePair(EdgePair(first:commentLikeId, second:fromId), withWeight:kCommentLikeScore)
+                    withBuilder.updateNameMappingForId(commentLikeId, toName: commentLikeName)
+                    withBuilder.updateForEdgePair(EdgePair(first: commentLikeId, second: fromId), withWeight: kCommentLikeScore)
                 }
             }
         }
@@ -185,7 +189,7 @@ public class SocialGraphController {
                 let fromId:UInt64 = uint64FromAnyObject(like["id"]!)
                 let fromNameObject:AnyObject! = like["name"]
                 withBuilder.updateNameMappingForId(fromId, toName: fromNameObject.description!)
-                withBuilder.updateForEdgePair(EdgePair(first:withRootId, second:fromId), withWeight:kLikeRootScore)
+                withBuilder.updateForEdgePair(EdgePair(first: withRootId, second: fromId), withWeight: kLikeRootScore)
             }
         }
     }

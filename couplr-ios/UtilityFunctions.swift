@@ -51,19 +51,19 @@ func sampleWithoutReplacement(var list:[UInt64], count:Int) -> [UInt64] {
  */
 func uint64FromAnyObject(anyObject:AnyObject!, base64:Bool = false) -> UInt64 {
     if base64 {
-        return uint64FromBase64String(anyObject.description)
+        return decodeBase64(anyObject.description)
     }
-    let numNSStr:NSString = NSString(string:anyObject.description)
+    let numNSStr:NSString = NSString(string: anyObject.description)
     return UInt64(numNSStr.longLongValue)
 }
 
 /**
  * Extracts a Float from an AnyObject.
- * 
+ *
  * TODO This is also a hack.
  */
 func floatFromAnyObject(anyObject:AnyObject!) -> Float {
-    let floatNSStr:NSString = NSString(string:anyObject.description)
+    let floatNSStr:NSString = NSString(string: anyObject.description)
     return floatNSStr.floatValue
 }
 
@@ -187,7 +187,7 @@ func currentTimeInSeconds() -> Double {
  * TODO Last time I tried all 256, Parse didn't seem to store
  * the data properly. Try this again sometime?
  */
-func base64StringFromUInt64(value:UInt64) -> String {
+func encodeBase64(value:UInt64) -> String {
     var result:[Character] = []
     var temp:UInt64 = value
     result.reserveCapacity(11)
@@ -202,7 +202,7 @@ func base64StringFromUInt64(value:UInt64) -> String {
 /**
  * Deserialize a string as an unsigned long long.
  */
-func uint64FromBase64String(string:String) -> UInt64 {
+func decodeBase64(string:String) -> UInt64 {
     let values = string.unicodeScalars
     var cursor = values.endIndex.predecessor()
     var result:UInt64 = 0

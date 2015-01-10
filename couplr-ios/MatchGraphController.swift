@@ -11,14 +11,14 @@ import UIKit
 public class MatchGraphController {
 
     var matches: MatchGraph?
-    
+
     class var sharedInstance: MatchGraphController {
         struct MatchGraphSingleton {
             static let instance = MatchGraphController()
         }
         return MatchGraphSingleton.instance
     }
-    
+
     /**
      * Before the app closes, attempt to flush the unregistered matches
      * to Parse.
@@ -26,7 +26,7 @@ public class MatchGraphController {
     public func appWillClose() {
         matches?.flushUnregisteredMatches()
     }
-    
+
     /**
      * Once the social graph loads, we know the root user. Use this
      * to fetch the matches the user's voting history and the matches
@@ -42,7 +42,7 @@ public class MatchGraphController {
             SocialGraphController.sharedInstance.didLoadVoteHistoryOrPhotoData()
         }
     }
-    
+
     /**
      * Query all matches for a given match ID and update the graph
      * accordingly. Invoke the callback function using a dictionary
@@ -61,7 +61,7 @@ public class MatchGraphController {
             }
         })
     }
-    
+
     /**
      * Wraps an invocation to MatchGraph::fetchMatchTitles, requiring a
      * callback.
@@ -71,12 +71,12 @@ public class MatchGraphController {
      */
     public func fetchMatchTitles(callback:((didError:Bool)->Void)) {
         if matches == nil {
-            callback(didError:true)
+            callback(didError: true)
         } else {
-            matches!.fetchMatchTitles(callback:callback)
+            matches!.fetchMatchTitles(callback: callback)
         }
     }
-    
+
     /**
      * Returns an array of all the titles.
      */
@@ -86,7 +86,7 @@ public class MatchGraphController {
         }
         return matches!.titleList
     }
-    
+
     /**
      * Wraps a call to the same method of MatchGraph.
      */
@@ -96,13 +96,13 @@ public class MatchGraphController {
         }
         return matches!.numMatchesByUserIdAndTitleFor(id)
     }
-    
+
     /**
      * Notifies the MatchGraph that the root user performed a match.
      * Will assume that the SocialGraph has already been initialized,
      * so the root user is graph!.root.
      */
     public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int) {
-        matches?.userDidMatch(firstId, toSecondId:toSecondId, withTitleId:withTitleId)
+        matches?.userDidMatch(firstId, toSecondId: toSecondId, withTitleId: withTitleId)
     }
 }

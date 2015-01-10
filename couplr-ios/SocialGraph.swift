@@ -63,7 +63,7 @@ public class SocialGraph {
         self.currentSample = [UInt64]()
         updateFirstNames()
     }
-    
+
     public var description:String {
         return toString()
     }
@@ -72,7 +72,7 @@ public class SocialGraph {
      * Returns the connection weight between two given nodes.
      */
     public subscript(node:UInt64, toNode:UInt64) -> Float {
-        return weightFrom(node, toNode:toNode)
+        return weightFrom(node, toNode: toNode)
     }
 
     /**
@@ -95,7 +95,7 @@ public class SocialGraph {
         out += "})"
         return out
     }
-    
+
     /**
      * Update the graph with a new node and name. Adds the new node to the name
      * mapping if it does not already appear. Also adds the first name to the
@@ -127,7 +127,7 @@ public class SocialGraph {
         if isCurrentlyUpdatingGender {
             shouldReupdateGender = true
         }
-        log("Requesting gender update...", withFlag:"!")
+        log("Requesting gender update...", withFlag: "!")
         isCurrentlyUpdatingGender = true
         updateFirstNames()
         let addGenders:(NSData?, NSURLResponse?, NSError?) -> Void = {
@@ -142,8 +142,8 @@ public class SocialGraph {
                     self.genders[firstName] = genderFromString(gender)
                 }
                 let (males:Int, females:Int, undetermined:Int) = self.overallGenderCount()
-                log("Gender response received (\(jsonData.count) predictions).", withIndent:1)
-                log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent:1, withNewline:true)
+                log("Gender response received (\(jsonData.count) predictions).", withIndent: 1)
+                log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent: 1, withNewline: true)
             }
             self.isCurrentlyUpdatingGender = false
             if self.shouldReupdateGender {
@@ -164,7 +164,7 @@ public class SocialGraph {
             getRequestToURL(requestURL, addGenders)
         }
     }
-    
+
     /**
      * Asynchronously upload a subset of the graph to the Parse database. Only
      * include edges GREATER THAN a given threshold. By default, kMinExportEdgeWeight
@@ -172,18 +172,18 @@ public class SocialGraph {
      */
     public func saveGraphData(minWeight:Float = kMinExportEdgeWeight, andLoadFriendGraphs:Bool = true) {
         var query:PFQuery = PFQuery(className:"GraphData")
-        query.whereKey("rootId", equalTo:base64StringFromUInt64(root))
-        log("Searching for objectId of \(root)'s graph data...", withFlag:"!")
+        query.whereKey("rootId", equalTo: encodeBase64(root))
+        log("Searching for objectId of \(root)'s graph data...", withFlag: "!")
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
-            var graphData:PFObject = PFObject(className:"GraphData")
+            var graphData:PFObject = PFObject(className: "GraphData")
             if objects.count > 0 {
                 graphData.objectId = objects[0].objectId
-                log("Found objectId: \(graphData.objectId)", withIndent:1, withNewline:true)
+                log("Found objectId: \(graphData.objectId)", withIndent: 1, withNewline: true)
             } else {
-                log("No existing objectId found.", withIndent:1, withFlag:"?", withNewline:true)
+                log("No existing objectId found.", withIndent: 1, withFlag: "?", withNewline: true)
             }
-            graphData["rootId"] = base64StringFromUInt64(self.root)
+            graphData["rootId"] = encodeBase64(self.root)
             var edgeArray:[[NSString]] = [[NSString]]()
             var nameDictionary:[NSString:NSString] = [NSString:NSString]()
             for (node:UInt64, neighbors:[UInt64:Float]) in self.edges {
@@ -192,9 +192,9 @@ public class SocialGraph {
                         weight *= kScaleFactorForExportingRootEdges
                     }
                     if node < neighbor && weight > minWeight {
-                        let weightAsTruncatedString:String = String(format:"%.2f", weight)
-                        let base64Node:String = base64StringFromUInt64(node)
-                        let base64Neighbor:String = base64StringFromUInt64(neighbor)
+                        let weightAsTruncatedString:String = String(format: "%.2f", weight)
+                        let base64Node:String = encodeBase64(node)
+                        let base64Neighbor:String = encodeBase64(neighbor)
                         edgeArray.append([base64Node, base64Neighbor, weightAsTruncatedString])
                         if nameDictionary[base64Node] == nil {
                             nameDictionary[base64Node] = self.names[node]
@@ -207,19 +207,19 @@ public class SocialGraph {
             }
             graphData["names"] = nameDictionary
             graphData["edges"] = edgeArray
-            log("Saving graph with \(nameDictionary.count) nodes, \(edgeArray.count) edges.", withFlag:"!")
+            log("Saving graph with \(nameDictionary.count) nodes, \(edgeArray.count) edges.", withFlag: "!")
             graphData.saveInBackgroundWithBlock({
                 (succeeded:Bool, error:NSError?) -> Void in
                 if succeeded && error == nil {
-                    log("Successfully saved graph to Parse.", withIndent:1, withNewline:true)
+                    log("Successfully saved graph to Parse.", withIndent: 1, withNewline: true)
                     if andLoadFriendGraphs {
                         self.updateGraphDataFromFriends()
                     }
                 } else {
                     if error == nil {
-                        log("Failed to save graph to Parse.", withIndent:1, withFlag:"-", withNewline:true)
+                        log("Failed to save graph to Parse.", withIndent: 1, withFlag: "-", withNewline: true)
                     } else {
-                        log("Error \"\(error!.description)\" occurred while saving to Parse.", withIndent:1, withFlag:"-", withNewline:true)
+                        log("Error \"\(error!.description)\" occurred while saving to Parse.", withIndent: 1, withFlag: "-", withNewline: true)
                     }
                 }
             })
@@ -232,15 +232,15 @@ public class SocialGraph {
      * enforce symmetry.
      */
     public func connectNode(node:UInt64, toNode:UInt64, withWeight:Float = 1) {
-        if !hasEdgeFromNode(node, to:toNode) {
+        if !hasEdgeFromNode(node, to: toNode) {
             edgeCount++
         }
         totalEdgeWeight += withWeight
         if node == root || toNode == root {
             totalEdgeWeightFromRoot += withWeight
         }
-        addEdgeFrom(node, toNode:toNode, withWeight:withWeight)
-        addEdgeFrom(toNode, toNode:node, withWeight:withWeight)
+        addEdgeFrom(node, toNode: toNode, withWeight: withWeight)
+        addEdgeFrom(toNode, toNode: node, withWeight: withWeight)
     }
 
     /**
@@ -255,25 +255,25 @@ public class SocialGraph {
             if node == root || fromNode == root {
                 totalEdgeWeightFromRoot -= currentEdgeWeight
             }
-            removeEdgeFrom(node, toNode:fromNode)
-            removeEdgeFrom(fromNode, toNode:node)
+            removeEdgeFrom(node, toNode: fromNode)
+            removeEdgeFrom(fromNode, toNode: node)
         }
     }
-    
+
     /**
      * Returns whether or not two nodes are connected. Assumes that all edges are undirected.
      */
     public func hasEdgeFromNode(node:UInt64, to:UInt64) -> Bool {
         return self[node, to] > kUnconnectedEdgeWeight
     }
-    
+
     /**
      * Queries the Facebook API for the user's friends, and uses the information to fetch
      * graph data from Parse. Only keeps one active request at a time, and makes a maximum
      * of maxNumFriends requests before stopping.
      */
     public func updateGraphDataFromFriends(maxNumFriends:Int = kMaxGraphDataQueries) {
-        log("Fetching friends list...", withFlag:"!")
+        log("Fetching friends list...", withFlag: "!")
         let request:FBRequest = FBRequest.requestForMyFriends()
         request.startWithCompletionHandler{(connection:FBRequestConnection!, result:AnyObject!, error:NSError!) -> Void in
             if error == nil {
@@ -283,17 +283,17 @@ public class SocialGraph {
                     let friendObject:AnyObject! = friendsData[index]!
                     couplrFriends.append(uint64FromAnyObject(friendObject["id"]))
                 }
-                log("Found \(couplrFriends.count) friend(s).", withIndent:1, withNewline:true)
+                log("Found \(couplrFriends.count) friend(s).", withIndent: 1, withNewline: true)
                 self.fetchAndUpdateGraphDataForFriends(&couplrFriends)
             }
         }
     }
-    
+
     /**
      * Build the social graph using data from the user's photos.
      */
     public func updateGraphDataUsingPhotos(maxNumPhotos:Int = kMaxNumPhotos) {
-        log("Requesting data from photos...", withFlag:"!")
+        log("Requesting data from photos...", withFlag: "!")
         FBRequestConnection.startWithGraphPath("me/photos?limit=\(maxNumPhotos)&fields=from,tags.fields(id,name)",
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
@@ -323,17 +323,17 @@ public class SocialGraph {
                         if photoGroup.count <= 1 || photoGroup.count > 15 {
                             continue
                         }
-                        let dissimilarity:Float = 1.0 - self.similarityOfGroups(photoGroup, second:previousPhotoGroup)
+                        let dissimilarity:Float = 1.0 - self.similarityOfGroups(photoGroup, second: previousPhotoGroup)
                         let pairwiseWeight:Float = dissimilarity * kMaxPairwisePhotoScore / Float(photoGroup.count - 1)
                         if pairwiseWeight >= kMinPhotoPairwiseWeight {
                             for (node:UInt64, name:String) in photoGroup {
-                                self.updateNodeWithId(node, andName:name, andUpdateGender:false)
+                                self.updateNodeWithId(node, andName: name, andUpdateGender: false)
                             }
                             // Create a fully connected clique using the tagged users.
                             for src:UInt64 in photoGroup.keys {
                                 for dst:UInt64 in photoGroup.keys {
                                     if src < dst {
-                                        self.connectNode(src, toNode:dst, withWeight:pairwiseWeight)
+                                        self.connectNode(src, toNode: dst, withWeight: pairwiseWeight)
                                     }
                                 }
                             }
@@ -344,11 +344,11 @@ public class SocialGraph {
                     log("Received \(allPhotos.count) photos (+\(self.names.count - oldVertexCount) nodes, +\(self.edgeCount - oldEdgeCount) edges, +\(self.totalEdgeWeight - oldEdgeWeight) weight).", withIndent:1, withNewline:true)
                     SocialGraphController.sharedInstance.didLoadVoteHistoryOrPhotoData()
                 } else {
-                    log("Photos request failed with error \"\(error!.description)\"", withIndent:1, withFlag:"-", withNewline:true)
+                    log("Photos request failed with error \"\(error!.description)\"", withIndent: 1, withFlag: "-", withNewline: true)
                 }
         } as FBRequestHandler)
     }
-    
+
     /**
      * Notifies the social graph that the user voted on a new match.
      */
@@ -356,17 +356,17 @@ public class SocialGraph {
         walkWeightMultipliers[firstId] = walkWeightBonusForNode(firstId) + kWalkWeightUserMatchBoost
         walkWeightMultipliers[toSecondId] = walkWeightBonusForNode(toSecondId) + kWalkWeightUserMatchBoost
     }
-    
+
     /**
      * Samples some number of users by performing a weighted random walk on the
      * graph starting at the root user.
      */
     public func updateRandomSample(size:Int = kRandomSampleCount) {
-        currentSample.removeAll(keepCapacity:true)
+        currentSample.removeAll(keepCapacity: true)
         var sample:NSMutableSet = NSMutableSet()
         var nextStep:UInt64 = root
         while sample.count < size {
-            nextStep = takeRandomStepFrom(nextStep, withNodesTraversed:sample)
+            nextStep = takeRandomStepFrom(nextStep, withNodesTraversed: sample)
             if nextStep == 0 {
                 nextStep = sampleRandomNode(sample)
             }
@@ -386,7 +386,7 @@ public class SocialGraph {
         }
         updateWalkWeightMultipliersAfterRandomSample()
     }
-    
+
     /**
      * Given a current node and a list of nodes previously traversed, randomly jumps
      * to a new neighboring node that does not already appear in the list of previous
@@ -394,11 +394,11 @@ public class SocialGraph {
      */
     private func takeRandomStepFrom(node:UInt64, withNodesTraversed:NSMutableSet) -> UInt64 {
         var possibleNextNodes:[(UInt64, Float)] = [(UInt64, Float)]()
-        var originalWeights:[Float] = [Float]() // Debugging purposes.
+        var originalNormalizedWeights:[Float] = [Float]() // Debugging purposes.
         let currentGender:Gender = node == root ? Gender.Undetermined : genderFromID(node)
         var sameGenderScoreSum:Float = 0
         var differentGenderScoreSum:Float = 0
-        let meanNonRootWeight:Float = (totalEdgeWeight - totalEdgeWeightFromRoot) / Float(edgeCount - edges[root]!.count)
+        let meanNonRootWeight:Float = baselineEdgeWeight()
         // Compute sampling weights prior to gender renormalization.
         for (neighbor:UInt64, weight:Float) in self.edges[node]! {
             if neighbor == root || withNodesTraversed.containsObject(neighbor.description) {
@@ -406,7 +406,7 @@ public class SocialGraph {
             }
             let neighborScore:Float = sampleWeightForScore(weight - meanNonRootWeight)
             possibleNextNodes.append((neighbor, neighborScore))
-            originalWeights.append(weight - meanNonRootWeight)
+            originalNormalizedWeights.append(weight - meanNonRootWeight)
             let gender:Gender = genderFromID(neighbor)
             if currentGender == Gender.Undetermined || gender == Gender.Undetermined {
                 continue
@@ -454,14 +454,14 @@ public class SocialGraph {
                     let percentage:Double = Double(100.0 * (weight/total))
                     var percentageAsString:String
                     if percentage < 10.0 {
-                        percentageAsString = String(format:"%.3f", percentage)
+                        percentageAsString = String(format: "%.3f", percentage)
                     } else if percentage < 100.0 {
-                        percentageAsString = String(format:"%.2f", percentage)
+                        percentageAsString = String(format: "%.2f", percentage)
                     } else {
-                        percentageAsString = String(format:"%.1f", percentage)
+                        percentageAsString = String(format: "%.1f", percentage)
                     }
-                    let multiplierAsString = String(format:"%.2f", walkWeightBonusForNode(neighbor))
-                    let weightAsString:String = String(format:"%.2f", originalWeights[index])
+                    let multiplierAsString = String(format: "%.2f", walkWeightBonusForNode(neighbor))
+                    let weightAsString:String = String(format: "%.2f", originalNormalizedWeights[index])
                     var nameAsPaddedString:String = names[neighbor]!
                     if nameAsPaddedString.utf16Count < 30 {
                         for index in nameAsPaddedString.utf16Count..<30 {
@@ -485,7 +485,7 @@ public class SocialGraph {
         }
         return weightedRandomSample(possibleNextNodes)
     }
-    
+
     /**
      * Given a list of friends, pops off the next highest connected friend and
      * returns the friend's id.
@@ -517,7 +517,7 @@ public class SocialGraph {
         friendList.removeAtIndex(maxFriendIndex)
         return nextFriend
     }
-    
+
     /**
      * Computes the walk weight multiplier for a node. By default, this is 1 (no change).
      */
@@ -527,7 +527,7 @@ public class SocialGraph {
         }
         return walkWeightMultipliers[id]!
     }
-    
+
     /**
      * Update walk weight multipliers. This means decaying all existing multipliers and
      * applying a penalty to all nodes chosen in the current random sample.
@@ -537,7 +537,12 @@ public class SocialGraph {
             walkWeightMultipliers[node] = kWalkWeightDecayRate * multiplier
         }
         for node:UInt64 in currentSample {
-            walkWeightMultipliers[node] = walkWeightBonusForNode(node) - kWalkWeightPenalty
+            let newWeight:Float = walkWeightBonusForNode(node) - kWalkWeightPenalty
+            if newWeight <= -1.0 {
+                walkWeightMultipliers[node] = -0.9
+            } else {
+                walkWeightMultipliers[node] = newWeight
+            }
         }
         // Clean the walk weight multipliers dictionary.
         var nodesToRemove:[UInt64] = []
@@ -550,7 +555,7 @@ public class SocialGraph {
             walkWeightMultipliers[node] = nil
         }
     }
-    
+
     /**
      * Makes a request to Parse for the graph rooted at the user given by id. If the graph
      * data exists, updates the graph using the new graph data, introducing new nodes and
@@ -559,17 +564,24 @@ public class SocialGraph {
     private func fetchAndUpdateGraphDataForFriends(inout idList:[UInt64], numFriendsQueried:Int = 0) {
         let id:UInt64 = popNextHighestConnectedFriend(&idList)
         if numFriendsQueried > kMaxGraphDataQueries || id == 0 {
-            log("Done. No more friends to query.", withIndent:1, withNewline:true)
+            log("Done. No more friends to query.", withIndent: 1)
+            log("Graph construction finished! Showing statistics...", withIndent: 1)
+            log("Vertex count: \(names.count)", withIndent: 2)
+            log("Edge count: \(edgeCount)", withIndent: 2)
+            log("Total weight: \(totalEdgeWeight)", withIndent: 2)
+            log("Weight baseline: \(baselineEdgeWeight())", withIndent: 2)
+            let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.appBeginTime)
+            log("Time since startup: \(timeString) sec", withIndent: 2, withNewline: true)
             updateGenders()
             return
         }
-        log("Pulling the social graph of root id \(id)...", withFlag:"!")
-        var query:PFQuery = PFQuery(className:"GraphData")
-        query.whereKey("rootId", equalTo:base64StringFromUInt64(id))
+        log("Pulling the social graph of root id \(id)...", withFlag: "!")
+        var query:PFQuery = PFQuery(className: "GraphData")
+        query.whereKey("rootId", equalTo: encodeBase64(id))
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
             if error != nil || objects.count < 1 {
-                log("User \(id)'s graph was not found. Moving on...", withFlag:"?", withIndent:1)
+                log("User \(id)'s graph was not found. Moving on...", withFlag: "?", withIndent: 1)
                 self.fetchAndUpdateGraphDataForFriends(&idList, numFriendsQueried: numFriendsQueried)
                 return
             }
@@ -577,7 +589,7 @@ public class SocialGraph {
             let newNamesObject:AnyObject! = graphData["names"]
             var newNames:[UInt64:String] = [UInt64:String]()
             for nodeAsObject:AnyObject in newNamesObject.allKeys {
-                let node:UInt64 = uint64FromAnyObject(nodeAsObject, base64:true)
+                let node:UInt64 = uint64FromAnyObject(nodeAsObject, base64: true)
                 newNames[node] = newNamesObject[nodeAsObject.description] as? String
             }
             let newEdges:AnyObject! = graphData["edges"]
@@ -585,8 +597,8 @@ public class SocialGraph {
             var newEdgeMap:[UInt64:[UInt64:Float]] = [UInt64:[UInt64:Float]]()
             for index in 0..<newEdges.count {
                 let edge:AnyObject! = newEdges[index]!
-                let src:UInt64 = uint64FromAnyObject(edge[0], base64:true)
-                let dst:UInt64 = uint64FromAnyObject(edge[1], base64:true)
+                let src:UInt64 = uint64FromAnyObject(edge[0], base64: true)
+                let dst:UInt64 = uint64FromAnyObject(edge[1], base64: true)
                 let weight:Float = floatFromAnyObject(edge[2])
                 if newEdgeMap[src] == nil {
                     newEdgeMap[src] = [UInt64:Float]()
@@ -617,24 +629,24 @@ public class SocialGraph {
             }
             // Update the graph to contain all the new nodes.
             for newNode:UInt64 in newNodeList {
-                self.updateNodeWithId(newNode, andName:newNames[newNode]!)
+                self.updateNodeWithId(newNode, andName: newNames[newNode]!)
             }
             // Add all new edges that connect two members of the original graph.
             var edgeUpdateCount:Int = 0
             for (node:UInt64, neighbors:[UInt64:Float]) in newEdgeMap {
                 for (neighbor:UInt64, weight:Float) in neighbors {
                     if node < neighbor && self.names[node] != nil && self.names[neighbor] != nil {
-                        self.connectNode(node, toNode:neighbor, withWeight:weight)
+                        self.connectNode(node, toNode: neighbor, withWeight: weight)
                         edgeUpdateCount++
                     }
                 }
             }
-            log("Finished updating graph for root id \(id).", withIndent:1)
-            log("\(newNodeList.count) nodes added; \(edgeUpdateCount) edges updated.", withIndent:1, withNewline:true)
+            log("Finished updating graph for root id \(id).", withIndent: 1)
+            log("\(newNodeList.count) nodes added; \(edgeUpdateCount) edges updated.", withIndent: 1, withNewline: true)
             self.fetchAndUpdateGraphDataForFriends(&idList, numFriendsQueried: numFriendsQueried + 1)
         })
     }
-    
+
     /**
      * Takes all names that appear as values in self.names and extracts first names. Then
      * adds each first name to self.genders, if it is not already present. New first names
@@ -661,7 +673,7 @@ public class SocialGraph {
         }
         return Gender.Undetermined
     }
-    
+
     /**
      * Counts the overall gender of people in the social network, not
      * counting the root user. Returns a tuple of the form (# male, #
@@ -725,7 +737,7 @@ public class SocialGraph {
         if edges[node] == nil {
             edges[node] = [UInt64:Float]()
         }
-        var currentWeight:Float = weightFrom(node, toNode:toNode)
+        var currentWeight:Float = weightFrom(node, toNode: toNode)
         if currentWeight <= kUnconnectedEdgeWeight {
             currentWeight = 0
         }
@@ -752,7 +764,7 @@ public class SocialGraph {
     private func weightFrom(node:UInt64, toNode:UInt64) -> Float {
         return (edges[node] == nil || edges[node]![toNode] == nil) ? kUnconnectedEdgeWeight : edges[node]![toNode]!
     }
-    
+
     /**
      * Computes how "similar" two groups of users are. Returns a
      * float between 0 and 1, inclusive.
@@ -783,7 +795,7 @@ public class SocialGraph {
         }
         return similarityCount / totalCount
     }
-    
+
     /**
      * Iterate through all edges in the graph and remove edges
      * that have a weight less than a minimum threshold.
@@ -801,7 +813,7 @@ public class SocialGraph {
         }
         // Remove the undirected edges.
         for (src:UInt64, dst:UInt64) in edgesToRemove {
-            disconnectNode(src, fromNode:dst)
+            disconnectNode(src, fromNode: dst)
         }
         // Remove fully disconnected nodes.
         var nodesToRemove:[UInt64] = []
@@ -814,7 +826,16 @@ public class SocialGraph {
             names[node] = nil
         }
     }
-    
+
+    /**
+     * Computes the baseline average weight for the nodes. This
+     * is the mean weight of edges, not including those connecting
+     * root nodes.
+     */
+    private func baselineEdgeWeight() -> Float {
+        return (totalEdgeWeight - totalEdgeWeightFromRoot) / Float(edgeCount - edges[root]!.count)
+    }
+
     // Core app-related data.
     var root:UInt64
     var edges:[UInt64:[UInt64:Float]]
@@ -826,11 +847,11 @@ public class SocialGraph {
     var totalEdgeWeight:Float
     var edgeCount:Int
     var totalEdgeWeightFromRoot:Float
-    
+
     // Match graph used to improve heuristics.
     var matches:MatchGraph?
     var walkWeightMultipliers:[UInt64:Float]
-    
+
     // Miscellaneous state variables.
     var isCurrentlyUpdatingGender:Bool
     var shouldReupdateGender:Bool
