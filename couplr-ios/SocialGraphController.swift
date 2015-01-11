@@ -60,7 +60,7 @@ public class SocialGraphController {
                     self.graph!.updateGenders()
                     self.graph!.updateGraphDataUsingPhotos()
                 } else {
-                    log("Critical error: \"\(error.description)\" when loading comments!", withFlag: "-", withNewline: true)
+                    log("Critical error: \"\(error.description)\" when loading statuses!", withFlag: "-", withNewline: true)
                 }
         } as FBRequestHandler)
     }

@@ -91,6 +91,7 @@ let kLoadingViewTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, a
 let kUnconnectedEdgeWeight:Float = -1000.0          // The weight of an unconnected "edge".
 let kMaxNumStatuses:Int = 100                       // Number of statuses to query.
 let kMaxNumPhotos:Int = 100                         // Number of photos to query.
+let kMaxPhotoGroupSize:Int = 15                     // Max number of people considered in a photo.
 let kMinGraphEdgeWeight:Float = 0.15                // The minimum edge weight threshold when cleaning the graph.
 let kUserMatchVoteScore:Float = 1.0                 // Score for the user voting on title for a match.
 // Like and comment scores.

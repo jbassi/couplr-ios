@@ -122,13 +122,19 @@ public class SocialGraph {
      *
      * If another gender update is currently taking place when this function is
      * invoked, it will wait until the first response is received before executing.
+     * Additionally, if this function is invoked more than 2 times before the first
+     * response is received, only the second call will "go through" -- all
+     * subsequent invocations will be dropped.
      */
     public func updateGenders() {
+        dispatch_semaphore_wait(genderUpdateSemaphore, DISPATCH_TIME_FOREVER)
         if isCurrentlyUpdatingGender {
             shouldReupdateGender = true
+            return
         }
-        log("Requesting gender update...", withFlag: "!")
         isCurrentlyUpdatingGender = true
+        dispatch_semaphore_signal(genderUpdateSemaphore)
+        log("Requesting gender update...", withFlag: "!")
         updateFirstNames()
         let addGenders:(NSData?, NSURLResponse?, NSError?) -> Void = {
             (data:NSData?, response:NSURLResponse?, error:NSError?) in
@@ -320,7 +326,7 @@ public class SocialGraph {
                                 photoGroup[taggedId] = taggedName
                             }
                         }
-                        if photoGroup.count <= 1 || photoGroup.count > 15 {
+                        if photoGroup.count <= 1 || photoGroup.count > kMaxPhotoGroupSize {
                             continue
                         }
                         let dissimilarity:Float = 1.0 - self.similarityOfGroups(photoGroup, second: previousPhotoGroup)
@@ -715,10 +721,10 @@ public class SocialGraph {
      * Randomly samples a node in the graph.
      * TODO Add gendered bias.
      */
-    private func sampleRandomNode(withNodesTraversed:NSMutableSet, excludeRoot:Bool = true) -> UInt64 {
+    private func sampleRandomNode(withNodesTraversed:NSMutableSet, andIgnoreRoot:Bool = true) -> UInt64 {
         var possibleNextNodes:[UInt64] = [UInt64]()
         for (neighbor:UInt64, temp:String) in self.names {
-            if withNodesTraversed.containsObject(neighbor.description) || neighbor == root {
+            if withNodesTraversed.containsObject(neighbor.description) || (andIgnoreRoot && neighbor == root) {
                 continue
             }
             possibleNextNodes.append(neighbor)
@@ -801,7 +807,6 @@ public class SocialGraph {
      * that have a weight less than a minimum threshold.
      */
     private func updateGraphForMinWeightThreshold(minWeight:Float = kMinGraphEdgeWeight) {
-        var before = self.totalEdgeWeight
         // Collect a list of undirected edges that should be removed.
         var edgesToRemove:[(UInt64, UInt64)] = []
         for (node:UInt64, neighbors:[UInt64:Float]) in edges {
@@ -855,4 +860,8 @@ public class SocialGraph {
     // Miscellaneous state variables.
     var isCurrentlyUpdatingGender:Bool
     var shouldReupdateGender:Bool
+    
+    // For thread safety.
+    var genderUpdateSemaphore = dispatch_semaphore_create(1)
+    
 }
