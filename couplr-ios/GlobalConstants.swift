@@ -110,7 +110,7 @@ let kRandomSampleCount:Int = 9                      // The number of people to r
 let kMaxGraphDataQueries:Int = 4                    // Max number of friends to query graph data from.
 let kMinExportEdgeWeight:Float = 0.2                // Only export edges with more than this weight.
 let kScaleFactorForExportingRootEdges:Float = 0.25  // Export root edges scaled by this number.
-let kMutualFriendsThreshold:Int = 3                 // This many mutual friends to pull a friend over to the user's graph.
+let kMutualFriendsThreshold:Int = 2                 // This many mutual friends to pull a friend over to the user's graph.
 
 let kGenderBiasRatio:Float = 4.0                    // Make it this much more likely to land on the opposite gender.
 let kWalkWeightUserMatchBoost:Float = 1.5           // The walk weight "bonus" for a node when the user selects a match.
@@ -130,4 +130,4 @@ let kShowRandomWalkDebugOutput:Bool = false
 let kOutputLogMessages:Bool = true
 
 /* For managing local storage (core data) */
-let kMinTimeBeforeNextGraphUpdate:Double = 345600 // In seconds. This is about 4 days.
+let kSecondsBeforeNextGraphUpdate:Double = 345600 // In seconds. This is about 4 days.

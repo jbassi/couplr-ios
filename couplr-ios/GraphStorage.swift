@@ -16,24 +16,24 @@ import CoreData
 public class RootData: NSManagedObject {
     
     @NSManaged var idBase64:String
-    @NSManaged var timestamp:NSDate
+    @NSManaged var timeModified:Double
     
     public func id() -> UInt64 {
         return decodeBase64(idBase64)
     }
     
-    public func set(id:UInt64, timestamp:NSDate) {
+    public func set(id:UInt64, timeModified:Double) {
         self.idBase64 = encodeBase64(id)
-        self.timestamp = timestamp
+        self.timeModified = timeModified
     }
     
     public func toString() -> String {
-        return "Root(id=\(id()), time=\"\(timestamp.description)\")"
+        return "Root(id=\(id()), time=\"\(timeModified.description)\")"
     }
     
-    class func insert(context:NSManagedObjectContext, id:UInt64, timestamp:NSDate) {
+    class func insert(context:NSManagedObjectContext, rootId:UInt64, timeModified:Double) {
         let root = NSEntityDescription.insertNewObjectForEntityForName("RootData", inManagedObjectContext: context) as RootData
-        root.set(id, timestamp: timestamp)
+        root.set(rootId, timeModified: timeModified)
     }
     
     class func allObjects(context:NSManagedObjectContext) -> [RootData] {
@@ -61,18 +61,18 @@ public class NodeData: NSManagedObject {
         return decodeBase64(idBase64)
     }
     
-    public func set(id:UInt64, name:String) {
+    public func set(nodeId:UInt64, name:String) {
         self.name = name
-        self.idBase64 = encodeBase64(id)
+        self.idBase64 = encodeBase64(nodeId)
     }
 
     public func toString() -> String {
         return "Node(id=\(id()), name=\"\(name)\")"
     }
     
-    class func insert(context:NSManagedObjectContext, id:UInt64, name:String) {
+    class func insert(context:NSManagedObjectContext, nodeId:UInt64, name:String) {
         let node:NodeData = NSEntityDescription.insertNewObjectForEntityForName("NodeData", inManagedObjectContext: context) as NodeData
-        node.set(id, name: name)
+        node.set(nodeId, name: name)
     }
     
     class func allObjects(context:NSManagedObjectContext) -> [NodeData] {
@@ -105,9 +105,9 @@ public class EdgeData: NSManagedObject {
         return decodeBase64(toBase64)
     }
     
-    public func set(from:UInt64, to:UInt64, weight:Float) {
-        self.fromBase64 = encodeBase64(from)
-        self.toBase64 = encodeBase64(to)
+    public func set(fromId:UInt64, toId:UInt64, weight:Float) {
+        self.fromBase64 = encodeBase64(fromId)
+        self.toBase64 = encodeBase64(toId)
         self.weight = weight
     }
     
@@ -115,9 +115,9 @@ public class EdgeData: NSManagedObject {
         return "Edge(to=\(from), from=\(to()), weight=\(weight))"
     }
     
-    class func insert(context:NSManagedObjectContext, from:UInt64, to:UInt64, weight:Float) {
+    class func insert(context:NSManagedObjectContext, fromId:UInt64, toId:UInt64, weight:Float) {
         let edge:EdgeData = NSEntityDescription.insertNewObjectForEntityForName("EdgeData", inManagedObjectContext: context) as EdgeData
-        edge.set(from, to: to, weight: weight)
+        edge.set(fromId, toId: toId, weight: weight)
     }
     
     class func allObjects(context:NSManagedObjectContext) -> [EdgeData] {

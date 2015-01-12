@@ -12,7 +12,6 @@
 		0F1B9EEA19C4DD7A00CD64FD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0F1B9EE819C4DD7A00CD64FD /* Main.storyboard */; };
 		0F1B9EEC19C4DD7A00CD64FD /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0F1B9EEB19C4DD7A00CD64FD /* Images.xcassets */; };
 		0F1B9EEF19C4DD7A00CD64FD /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F1B9EED19C4DD7A00CD64FD /* LaunchScreen.xib */; };
-		0F1B9EFB19C4DD7A00CD64FD /* couplr_iosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1B9EFA19C4DD7A00CD64FD /* couplr_iosTests.swift */; };
 		0F24FB401A53BD5C00201C31 /* SocialGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F24FB3F1A53BD5C00201C31 /* SocialGraphController.swift */; };
 		0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37CA1819C5151E007A6951 /* CouplrSettingsManager.swift */; };
 		0F37CA1D19C52455007A6951 /* CouplrLoginErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37CA1C19C52455007A6951 /* CouplrLoginErrorHandler.swift */; };
@@ -71,8 +70,6 @@
 		0F1B9EEB19C4DD7A00CD64FD /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		0F1B9EEE19C4DD7A00CD64FD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		0F1B9EF419C4DD7A00CD64FD /* couplr-iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "couplr-iosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0F1B9EF919C4DD7A00CD64FD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0F1B9EFA19C4DD7A00CD64FD /* couplr_iosTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = couplr_iosTests.swift; sourceTree = "<group>"; };
 		0F24FB3F1A53BD5C00201C31 /* SocialGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphController.swift; sourceTree = "<group>"; };
 		0F37CA1819C5151E007A6951 /* CouplrSettingsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CouplrSettingsManager.swift; sourceTree = "<group>"; };
 		0F37CA1C19C52455007A6951 /* CouplrLoginErrorHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CouplrLoginErrorHandler.swift; sourceTree = "<group>"; };
@@ -153,7 +150,6 @@
 			children = (
 				F4F0DC761A630AA9007FC931 /* CoreData.framework */,
 				0F1B9EDF19C4DD7A00CD64FD /* couplr-ios */,
-				0F1B9EF719C4DD7A00CD64FD /* couplr-iosTests */,
 				0F1B9EDE19C4DD7A00CD64FD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -192,23 +188,6 @@
 			isa = PBXGroup;
 			children = (
 				0F1B9EE119C4DD7A00CD64FD /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		0F1B9EF719C4DD7A00CD64FD /* couplr-iosTests */ = {
-			isa = PBXGroup;
-			children = (
-				0F1B9EFA19C4DD7A00CD64FD /* couplr_iosTests.swift */,
-				0F1B9EF819C4DD7A00CD64FD /* Supporting Files */,
-			);
-			path = "couplr-iosTests";
-			sourceTree = "<group>";
-		};
-		0F1B9EF819C4DD7A00CD64FD /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				0F1B9EF919C4DD7A00CD64FD /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -437,7 +416,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0F1B9EFB19C4DD7A00CD64FD /* couplr_iosTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

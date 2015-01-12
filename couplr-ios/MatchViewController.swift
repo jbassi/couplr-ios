@@ -39,6 +39,7 @@ class MatchViewController: UIViewController {
         matchGraphController.fetchMatchTitles({
             (didError:Bool) -> Void in
             if !didError {
+                NodeData.insert(self.socialGraphController.managedObjectContext!, nodeId: 1337, name: "Hello world")
                 self.socialGraphController.initializeGraph()
                 let titleList:[MatchTitle] = self.matchGraphController.titleList()
                 self.matchTitleLabel.setTitle(titleList[0].text, forState: UIControlState.Normal)

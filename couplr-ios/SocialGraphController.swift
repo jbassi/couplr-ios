@@ -20,6 +20,7 @@ public class SocialGraphController {
     var voteHistoryOrPhotoDataLoadProgress:Int = 0
     var graphSerializationSemaphore = dispatch_semaphore_create(1)
     var appBeginTime:Double = currentTimeInSeconds()
+    var didInitializeFromCoreData:Bool = false
 
     lazy var managedObjectContext:NSManagedObjectContext? = {
         let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
@@ -30,14 +31,14 @@ public class SocialGraphController {
             return nil
         }
     }()
-    
+
     class var sharedInstance: SocialGraphController {
         struct SocialGraphSingleton {
             static let instance = SocialGraphController()
         }
         return SocialGraphSingleton.instance
     }
-    
+
     /**
      * Makes a request for the current user's ID and compares it against
      * root information (if any) in local storage to deterine whether we
@@ -52,6 +53,9 @@ public class SocialGraphController {
                     if self.shouldInitializeGraphFromCoreData(root) {
                         self.initializeGraphFromCoreData(root)
                     } else {
+                        if self.shouldEraseGraphData(root) {
+                            self.eraseGraphFromCoreData()
+                        }
                         self.initializeGraphFromFacebookData()
                     }
                 }
@@ -76,13 +80,18 @@ public class SocialGraphController {
                     graph!.connectNode(firstId, toNode: secondId, withWeight: kUserMatchVoteScore)
                 }
             }
-            graph!.saveGraphData(andLoadFriendGraphs: true)
+            // Save to Parse if the graph was updated using Facebook data.
+            if !didInitializeFromCoreData {
+                graph!.saveGraphData(andLoadFriendGraphs: true)
+            } else {
+                graph!.updateGraphDataFromFriends()
+            }
             // Prevent the graph from saving again under any condition.
             voteHistoryOrPhotoDataLoadProgress = 3
         }
         dispatch_semaphore_signal(graphSerializationSemaphore)
     }
-    
+
     /**
      * Initializes the graph directly from core data.
      */
@@ -94,12 +103,13 @@ public class SocialGraphController {
             names[node.id()] = node.name
         }
         self.graph = SocialGraph(root: rootId, names: names)
-        for edgeData:EdgeData in EdgeData.allObjects(managedObjectContext!) {
+        let edges:[EdgeData] = EdgeData.allObjects(managedObjectContext!)
+        for edgeData:EdgeData in edges {
             graph!.connectNode(edgeData.from(), toNode: edgeData.to(), withWeight: edgeData.weight)
         }
         didInitializeGraph(true)
     }
-    
+
     /**
      * Begins the graph initialization process, querying Facebook for
      * the user's statuses. Upon a successful response, notifies the
@@ -194,7 +204,7 @@ public class SocialGraphController {
         }
         return graph!.root
     }
-    
+
     /**
      * Write the graph to core data. This includes information
      * for the root node, time modified, the edge list, and a
@@ -202,20 +212,26 @@ public class SocialGraphController {
      */
     public func flushGraphToCoreData() {
         eraseGraphFromCoreData()
-        RootData.insert(managedObjectContext!, id: graph!.root, timestamp: NSDate())
+        managedObjectContext!.save(nil)
+        log("Flushing the graph to core data...", withFlag: "!")
+        RootData.insert(managedObjectContext!, rootId: graph!.root, timeModified: NSDate().timeIntervalSince1970)
         for (id:UInt64, name:String) in graph!.names {
-            NodeData.insert(managedObjectContext!, id: id, name: name)
+            NodeData.insert(managedObjectContext!, nodeId: id, name: name)
         }
         for (node:UInt64, neighbors:[UInt64:Float]) in graph!.edges {
             for (neighbor:UInt64, weight:Float) in neighbors {
                 if node < neighbor {
-                    EdgeData.insert(managedObjectContext!, from: node, to: neighbor, weight: weight)
+                    EdgeData.insert(managedObjectContext!, fromId: node, toId: neighbor, weight: weight)
                 }
             }
         }
-        managedObjectContext?.save(nil)
+        var error:NSError? = nil
+        managedObjectContext!.save(&error)
+        if error != nil {
+            log("Error when saving to Core Data: \(error!.description)")
+        }
     }
-    
+
     /**
      * Removes all graph data from local storage.
      */
@@ -230,16 +246,34 @@ public class SocialGraphController {
             managedObjectContext!.deleteObject(edge)
         }
     }
-    
+
+    /**
+     * Determines whether or not we should use Core Data to
+     * build the graph up.
+     */
     private func shouldInitializeGraphFromCoreData(rootId:UInt64) -> Bool {
         let roots:[RootData] = RootData.allObjects(managedObjectContext!)
         if roots.count != 1 {
             return false
         }
-        let secondsSinceUpdate:Double = NSDate().timeIntervalSince1970 - roots[0].timestamp.timeIntervalSince1970
-        return roots[0].id() == rootId && secondsSinceUpdate < kMinTimeBeforeNextGraphUpdate
+        let secondsSinceUpdate:Double = NSDate().timeIntervalSince1970 - roots[0].timeModified
+        return roots[0].id() == rootId && secondsSinceUpdate < kSecondsBeforeNextGraphUpdate
     }
-    
+
+    /**
+     * Determines whether or not we should wipe the data from
+     * the local cache.
+     */
+    private func shouldEraseGraphData(rootId:UInt64) -> Bool {
+        let roots:[RootData] = RootData.allObjects(managedObjectContext!)
+        if roots.count == 0 {
+            return false
+        } else if roots.count > 1 {
+            return true
+        }
+        return roots[0].id() != rootId
+    }
+
     private func didInitializeGraph(initializedFromCoreData:Bool) {
         delegate?.socialGraphControllerDidLoadSocialGraph(graph!)
         MatchGraphController.sharedInstance.socialGraphDidLoad()
@@ -248,6 +282,7 @@ public class SocialGraphController {
         log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
         self.graph!.updateGenders()
         if initializedFromCoreData {
+            didInitializeFromCoreData = true
             didLoadVoteHistoryOrInitializeGraph()
         } else {
             graph!.updateGraphDataUsingPhotos()
