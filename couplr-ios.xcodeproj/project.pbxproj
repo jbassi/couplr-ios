@@ -47,6 +47,9 @@
 		F4EE3ABC1A57891D00A49F32 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4EE3ABB1A57891D00A49F32 /* Social.framework */; };
 		F4EE3ABF1A57897800A49F32 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4EE3ABD1A57894900A49F32 /* Accounts.framework */; };
 		F4EE3AC11A57BD9C00A49F32 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4EE3AC01A57BD9C00A49F32 /* Parse.framework */; };
+		F4F0DC771A630AA9007FC931 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F0DC761A630AA9007FC931 /* CoreData.framework */; };
+		F4F0DC7D1A630DBA007FC931 /* CouplrData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F4F0DC7B1A630DBA007FC931 /* CouplrData.xcdatamodeld */; };
+		F4F0DCE91A63335B007FC931 /* GraphStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F0DCE81A63335B007FC931 /* GraphStorage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,7 +95,6 @@
 		F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphController.swift; sourceTree = "<group>"; };
 		F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraph.swift; sourceTree = "<group>"; };
 		F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraph.swift; sourceTree = "<group>"; };
-		F4EE3AA11A5785E100A49F32 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Parse.framework; path = "../../../Downloads/parse-library-1/Parse.framework"; sourceTree = "<group>"; };
 		F4EE3AA31A5786F100A49F32 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		F4EE3AA51A5786FA00A49F32 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		F4EE3AA71A57870300A49F32 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -107,6 +109,9 @@
 		F4EE3ABB1A57891D00A49F32 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		F4EE3ABD1A57894900A49F32 /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		F4EE3AC01A57BD9C00A49F32 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Parse.framework; path = ../Parse/Parse.framework; sourceTree = "<group>"; };
+		F4F0DC761A630AA9007FC931 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		F4F0DC7C1A630DBA007FC931 /* CouplrData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CouplrData.xcdatamodel; sourceTree = "<group>"; };
+		F4F0DCE81A63335B007FC931 /* GraphStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphStorage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +119,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F4F0DC771A630AA9007FC931 /* CoreData.framework in Frameworks */,
 				F4EE3AC11A57BD9C00A49F32 /* Parse.framework in Frameworks */,
 				F4EE3ABF1A57897800A49F32 /* Accounts.framework in Frameworks */,
 				F4EE3ABC1A57891D00A49F32 /* Social.framework in Frameworks */,
@@ -145,6 +151,7 @@
 		0F1B9ED419C4DD7900CD64FD = {
 			isa = PBXGroup;
 			children = (
+				F4F0DC761A630AA9007FC931 /* CoreData.framework */,
 				0F1B9EDF19C4DD7A00CD64FD /* couplr-ios */,
 				0F1B9EF719C4DD7A00CD64FD /* couplr-iosTests */,
 				0F1B9EDE19C4DD7A00CD64FD /* Products */,
@@ -176,6 +183,7 @@
 				0F1B9EEB19C4DD7A00CD64FD /* Images.xcassets */,
 				0F1B9F0419C4DE0C00CD64FD /* Frameworks */,
 				0F1B9EE019C4DD7A00CD64FD /* Supporting Files */,
+				F4F0DC7B1A630DBA007FC931 /* CouplrData.xcdatamodeld */,
 			);
 			path = "couplr-ios";
 			sourceTree = "<group>";
@@ -222,7 +230,6 @@
 				F4EE3AA71A57870300A49F32 /* CoreGraphics.framework */,
 				F4EE3AA51A5786FA00A49F32 /* CFNetwork.framework */,
 				F4EE3AA31A5786F100A49F32 /* AudioToolbox.framework */,
-				F4EE3AA11A5785E100A49F32 /* Parse.framework */,
 				0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */,
 			);
 			name = Frameworks;
@@ -290,6 +297,7 @@
 		F4973F091A50E30100FEA3B0 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				F4F0DCE81A63335B007FC931 /* GraphStorage.swift */,
 				F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */,
 				F43D50721A536CC2000E09CE /* GraphBuilder.swift */,
 				0F24FB3F1A53BD5C00201C31 /* SocialGraphController.swift */,
@@ -399,6 +407,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F4F0DCE91A63335B007FC931 /* GraphStorage.swift in Sources */,
 				0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */,
 				0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */,
 				0F9F1CBF1A5CFB7300E683A1 /* FXBlurView.m in Sources */,
@@ -411,6 +420,7 @@
 				0F24FB401A53BD5C00201C31 /* SocialGraphController.swift in Sources */,
 				0F0EB6EB1A5E16B300E2A25B /* LoadingView.swift in Sources */,
 				0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */,
+				F4F0DC7D1A630DBA007FC931 /* CouplrData.xcdatamodeld in Sources */,
 				0F37CA2219C53954007A6951 /* ProfileViewController.swift in Sources */,
 				0FA10B3F1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift in Sources */,
 				F4C911BB1A5A764300D2CB11 /* MatchGraph.swift in Sources */,
@@ -639,6 +649,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		F4F0DC7B1A630DBA007FC931 /* CouplrData.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				F4F0DC7C1A630DBA007FC931 /* CouplrData.xcdatamodel */,
+			);
+			currentVersion = F4F0DC7C1A630DBA007FC931 /* CouplrData.xcdatamodel */;
+			path = CouplrData.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 0F1B9ED519C4DD7A00CD64FD /* Project object */;
 }

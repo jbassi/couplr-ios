@@ -127,4 +127,7 @@ let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 
 /* Debugging outputs */
 let kShowRandomWalkDebugOutput:Bool = false
-let kOutputLogMessages:Bool = false
+let kOutputLogMessages:Bool = true
+
+/* For managing local storage (core data) */
+let kMinTimeBeforeNextGraphUpdate:Double = 345600 // In seconds. This is about 4 days.

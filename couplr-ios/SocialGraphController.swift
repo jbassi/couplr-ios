@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 protocol SocialGraphControllerDelegate: class {
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph)
@@ -14,27 +15,102 @@ protocol SocialGraphControllerDelegate: class {
 
 public class SocialGraphController {
 
-    weak var delegate: SocialGraphControllerDelegate?
-    var graph: SocialGraph?
+    weak var delegate:SocialGraphControllerDelegate?
+    var graph:SocialGraph?
     var voteHistoryOrPhotoDataLoadProgress:Int = 0
     var graphSerializationSemaphore = dispatch_semaphore_create(1)
     var appBeginTime:Double = currentTimeInSeconds()
 
+    lazy var managedObjectContext:NSManagedObjectContext? = {
+        let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
+        if let managedObjectContext = appDelegate.managedObjectContext {
+            return managedObjectContext
+        }
+        else {
+            return nil
+        }
+    }()
+    
     class var sharedInstance: SocialGraphController {
         struct SocialGraphSingleton {
             static let instance = SocialGraphController()
         }
         return SocialGraphSingleton.instance
     }
+    
+    /**
+     * Makes a request for the current user's ID and compares it against
+     * root information (if any) in local storage to deterine whether we
+     * can initialize the graph from local storage. If not, initializes
+     * the graph by querying Facebook for status and photo information.
+     */
+    public func initializeGraph() {
+        FBRequestConnection.startWithGraphPath("me?fields=id",
+            completionHandler: { (connection, result, error) -> Void in
+                if error == nil {
+                    let root:UInt64 = uint64FromAnyObject(result["id"])
+                    if self.shouldInitializeGraphFromCoreData(root) {
+                        self.initializeGraphFromCoreData(root)
+                    } else {
+                        self.initializeGraphFromFacebookData()
+                    }
+                }
+        } as FBRequestHandler)
+    }
 
+    /**
+     * Notifies this controller that the match graph finished loading
+     * the root user's match history. When both the vote history and
+     * photo data are loaded, adds edges from the user's matches to
+     * the graph and exports the results to Parse.
+     */
+    public func didLoadVoteHistoryOrInitializeGraph() {
+        dispatch_semaphore_wait(graphSerializationSemaphore, DISPATCH_TIME_FOREVER)
+        voteHistoryOrPhotoDataLoadProgress++
+        if voteHistoryOrPhotoDataLoadProgress == 2 {
+            // Both vote history and photo data are finished loading.
+            let voteHistory:[(UInt64, UInt64, Int)] = MatchGraphController.sharedInstance.matches!.userVoteHistory
+            for (firstId:UInt64, secondId:UInt64, titleId:Int) in voteHistory {
+                // For each match the user makes, connect the matched nodes.
+                if graph!.names[firstId] != nil && graph!.names[secondId] != nil {
+                    graph!.connectNode(firstId, toNode: secondId, withWeight: kUserMatchVoteScore)
+                }
+            }
+            graph!.saveGraphData(andLoadFriendGraphs: true)
+            // Prevent the graph from saving again under any condition.
+            voteHistoryOrPhotoDataLoadProgress = 3
+        }
+        dispatch_semaphore_signal(graphSerializationSemaphore)
+    }
+    
+    /**
+     * Initializes the graph directly from core data.
+     */
+    private func initializeGraphFromCoreData(rootId:UInt64) {
+        log("Initializing graph from core data...", withFlag:"!")
+        var names:[UInt64:String] = [UInt64:String]()
+        let nodes:[NodeData] = NodeData.allObjects(managedObjectContext!)
+        for node in nodes {
+            names[node.id()] = node.name
+        }
+        self.graph = SocialGraph(root: rootId, names: names)
+        for edgeData:EdgeData in EdgeData.allObjects(managedObjectContext!) {
+            graph!.connectNode(edgeData.from(), toNode: edgeData.to(), withWeight: edgeData.weight)
+        }
+        didInitializeGraph(true)
+    }
+    
     /**
      * Begins the graph initialization process, querying Facebook for
      * the user's statuses. Upon a successful response, notifies the
      * match graph controller as well as the match view controller, and
      * also calls on the graph to request a gender update and query
      * Facebook again for comment likes.
+     *
+     * TODO Refactor to use the rootId directly, now that we know it. We
+     * probably don't even need GraphBuilder at all then.
      */
-    public func initializeGraph(maxNumStatuses:Int = kMaxNumStatuses) {
+    private func initializeGraphFromFacebookData(maxNumStatuses:Int = kMaxNumStatuses) {
         log("Requesting user statuses...", withFlag: "!")
         FBRequestConnection.startWithGraphPath("me/statuses?limit=\(maxNumStatuses)&fields=from,likes,comments.fields(from,likes)",
             completionHandler: { (connection, result, error) -> Void in
@@ -52,42 +128,11 @@ public class SocialGraphController {
                     }
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
-                    self.delegate?.socialGraphControllerDidLoadSocialGraph(graph)
-                    MatchGraphController.sharedInstance.socialGraphDidLoad()
-                    log("Initialized base graph (\(graph.names.count) nodes \(graph.edgeCount) edges \(graph.totalEdgeWeight) weight) from \(statusCount) statuses.", withIndent: 1)
-                    let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.appBeginTime)
-                    log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
-                    self.graph!.updateGenders()
-                    self.graph!.updateGraphDataUsingPhotos()
+                    self.didInitializeGraph(false)
                 } else {
                     log("Critical error: \"\(error.description)\" when loading statuses!", withFlag: "-", withNewline: true)
                 }
         } as FBRequestHandler)
-    }
-
-    /**
-     * Notifies this controller that the match graph finished loading
-     * the root user's match history. When both the vote history and
-     * photo data are loaded, adds edges from the user's matches to
-     * the graph and exports the results to Parse.
-     */
-    public func didLoadVoteHistoryOrPhotoData() {
-        dispatch_semaphore_wait(graphSerializationSemaphore, DISPATCH_TIME_FOREVER)
-        voteHistoryOrPhotoDataLoadProgress++
-        if voteHistoryOrPhotoDataLoadProgress == 2 {
-            // Both vote history and photo data are finished loading.
-            let voteHistory:[(UInt64, UInt64, Int)] = MatchGraphController.sharedInstance.matches!.userVoteHistory
-            for (firstId:UInt64, secondId:UInt64, titleId:Int) in voteHistory {
-                // For each match the user makes, connect the matched nodes.
-                if graph!.names[firstId] != nil && graph!.names[secondId] != nil {
-                    graph!.connectNode(firstId, toNode: secondId, withWeight: kUserMatchVoteScore)
-                }
-            }
-            graph!.saveGraphData(andLoadFriendGraphs: true)
-            // Prevent the graph from saving again under any condition.
-            voteHistoryOrPhotoDataLoadProgress = 3
-        }
-        dispatch_semaphore_signal(graphSerializationSemaphore)
     }
 
     /**
@@ -148,6 +193,65 @@ public class SocialGraphController {
             return 0
         }
         return graph!.root
+    }
+    
+    /**
+     * Write the graph to core data. This includes information
+     * for the root node, time modified, the edge list, and a
+     * list of id-name mappings.
+     */
+    public func flushGraphToCoreData() {
+        eraseGraphFromCoreData()
+        RootData.insert(managedObjectContext!, id: graph!.root, timestamp: NSDate())
+        for (id:UInt64, name:String) in graph!.names {
+            NodeData.insert(managedObjectContext!, id: id, name: name)
+        }
+        for (node:UInt64, neighbors:[UInt64:Float]) in graph!.edges {
+            for (neighbor:UInt64, weight:Float) in neighbors {
+                if node < neighbor {
+                    EdgeData.insert(managedObjectContext!, from: node, to: neighbor, weight: weight)
+                }
+            }
+        }
+        managedObjectContext?.save(nil)
+    }
+    
+    /**
+     * Removes all graph data from local storage.
+     */
+    private func eraseGraphFromCoreData() {
+        for root:RootData in RootData.allObjects(managedObjectContext!) {
+            managedObjectContext!.deleteObject(root)
+        }
+        for node:NodeData in NodeData.allObjects(managedObjectContext!) {
+            managedObjectContext!.deleteObject(node)
+        }
+        for edge:EdgeData in EdgeData.allObjects(managedObjectContext!) {
+            managedObjectContext!.deleteObject(edge)
+        }
+    }
+    
+    private func shouldInitializeGraphFromCoreData(rootId:UInt64) -> Bool {
+        let roots:[RootData] = RootData.allObjects(managedObjectContext!)
+        if roots.count != 1 {
+            return false
+        }
+        let secondsSinceUpdate:Double = NSDate().timeIntervalSince1970 - roots[0].timestamp.timeIntervalSince1970
+        return roots[0].id() == rootId && secondsSinceUpdate < kMinTimeBeforeNextGraphUpdate
+    }
+    
+    private func didInitializeGraph(initializedFromCoreData:Bool) {
+        delegate?.socialGraphControllerDidLoadSocialGraph(graph!)
+        MatchGraphController.sharedInstance.socialGraphDidLoad()
+        log("Initialized base graph (\(graph!.names.count) nodes \(graph!.edgeCount) edges \(graph!.totalEdgeWeight) weight).", withIndent: 1)
+        let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.appBeginTime)
+        log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
+        self.graph!.updateGenders()
+        if initializedFromCoreData {
+            didLoadVoteHistoryOrInitializeGraph()
+        } else {
+            graph!.updateGraphDataUsingPhotos()
+        }
     }
 
     private func updateGraphBuilderFromStatus(status:AnyObject!, withRootId:UInt64!, inout withBuilder:GraphBuilder) -> Void {

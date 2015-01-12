@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class LoginViewController: UIViewController {
 
@@ -15,7 +16,7 @@ class LoginViewController: UIViewController {
 
     var viewDidAppear: Bool = false
     var viewIsVisible: Bool = false
-    
+
     let socialGraphController = SocialGraphController.sharedInstance
 
     override func viewDidLoad() {
@@ -23,6 +24,11 @@ class LoginViewController: UIViewController {
         continueButton.hidden = true
         loginView.delegate = self
         loginView.readPermissions = ["user_friends", "user_status", "user_photos"]
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
     }
 
     override func viewDidAppear(animated: Bool) {

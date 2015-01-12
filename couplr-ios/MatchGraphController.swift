@@ -39,7 +39,7 @@ public class MatchGraphController {
         matches!.fetchMatchesForId(SocialGraphController.sharedInstance.rootId())
         matches!.fetchRootUserVoteHistory {
             (didError) -> Void in
-            SocialGraphController.sharedInstance.didLoadVoteHistoryOrPhotoData()
+            SocialGraphController.sharedInstance.didLoadVoteHistoryOrInitializeGraph()
         }
     }
 

@@ -7,6 +7,7 @@
 //
 
 import Parse
+import CoreData
 
 /**
  * It's not quite politically correct, but it's a start.
@@ -348,7 +349,8 @@ public class SocialGraph {
                     }
                     self.updateGraphForMinWeightThreshold()
                     log("Received \(allPhotos.count) photos (+\(self.names.count - oldVertexCount) nodes, +\(self.edgeCount - oldEdgeCount) edges, +\(self.totalEdgeWeight - oldEdgeWeight) weight).", withIndent:1, withNewline:true)
-                    SocialGraphController.sharedInstance.didLoadVoteHistoryOrPhotoData()
+                    SocialGraphController.sharedInstance.flushGraphToCoreData()
+                    SocialGraphController.sharedInstance.didLoadVoteHistoryOrInitializeGraph()
                 } else {
                     log("Photos request failed with error \"\(error!.description)\"", withIndent: 1, withFlag: "-", withNewline: true)
                 }
@@ -392,7 +394,7 @@ public class SocialGraph {
         }
         updateWalkWeightMultipliersAfterRandomSample()
     }
-
+    
     /**
      * Given a current node and a list of nodes previously traversed, randomly jumps
      * to a new neighboring node that does not already appear in the list of previous
