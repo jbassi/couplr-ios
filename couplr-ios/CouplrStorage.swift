@@ -130,3 +130,39 @@ public class EdgeData: NSManagedObject {
         return []
     }
 }
+
+@objc(GenderData)
+/**
+ * Stores a result of querying the gender server, mapping a first
+ * name to a gender. For now, we only store male and female gender
+ * mappings. This should be expanded in the future.
+ */
+public class GenderData: NSManagedObject {
+    
+    @NSManaged var firstName: String
+    @NSManaged var genderAsString: String
+    
+    public func gender() -> Gender {
+        return Gender.fromString(self.genderAsString)
+    }
+    
+    public func set(name:String, gender:Gender) {
+        self.firstName = name
+        self.genderAsString = gender.toString()
+    }
+    
+    class func insert(context:NSManagedObjectContext, name:String, gender:Gender) {
+        let genderData:GenderData = NSEntityDescription.insertNewObjectForEntityForName("GenderData", inManagedObjectContext: context) as GenderData
+        genderData.set(name, gender: gender)
+    }
+    
+    class func allObjects(context:NSManagedObjectContext) -> [GenderData] {
+        let request = NSFetchRequest(entityName: "GenderData")
+        var error:NSError? = nil
+        if let fetchResults = context.executeFetchRequest(request, error: &error) as? [GenderData] {
+            return fetchResults
+        }
+        log("Could not fetch local edges with error \"\(error?.description)\"", withFlag: "-")
+        return []
+    }
+}

@@ -80,10 +80,11 @@ public class SocialGraphController {
                     graph!.connectNode(firstId, toNode: secondId, withWeight: kUserMatchVoteScore)
                 }
             }
-            // Save to Parse if the graph was updated using Facebook data.
+            // Save to Parse and then load friend graphs if the graph was updated using Facebook data.
             if !didInitializeFromCoreData {
                 graph!.saveGraphData(andLoadFriendGraphs: true)
             } else {
+                // Otherwise, just load friend graphs.
                 graph!.updateGraphDataFromFriends()
             }
             // Prevent the graph from saving again under any condition.

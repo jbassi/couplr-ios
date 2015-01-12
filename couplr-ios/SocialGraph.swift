@@ -15,7 +15,7 @@ import CoreData
  */
 public enum Gender {
     case Male, Female, Undetermined
-    public func description() -> String {
+    public func toString() -> String {
         switch self {
         case .Male:
             return "male"
@@ -25,20 +25,20 @@ public enum Gender {
             return "undetermined"
         }
     }
-}
-
-/**
- * Maps "male" to Gender.Male, "female" to Gender.Female, and anything
- * else to Undetermined.
- */
-func genderFromString(gender:String) -> Gender {
-    let lowercaseGender:String = gender.lowercaseString
-    if lowercaseGender == "female" {
-        return Gender.Female
-    } else if lowercaseGender == "male" {
-        return Gender.Male
+    
+    /**
+     * Maps "male" to Gender.Male, "female" to Gender.Female, and anything
+     * else to Undetermined.
+     */
+    static func fromString(gender:String) -> Gender {
+        let lowercaseGender:String = gender.lowercaseString
+        if lowercaseGender == "female" {
+            return Gender.Female
+        } else if lowercaseGender == "male" {
+            return Gender.Male
+        }
+        return Gender.Undetermined
     }
-    return Gender.Undetermined
 }
 
 /**
@@ -60,9 +60,9 @@ public class SocialGraph {
         self.genders = [String:Gender]()
         self.isCurrentlyUpdatingGender = false
         self.shouldReupdateGender = false
+        self.didLoadGendersFromCache = false
         self.walkWeightMultipliers = [UInt64:Float]()
         self.currentSample = [UInt64]()
-        updateFirstNames()
     }
 
     public var description:String {
@@ -137,6 +137,13 @@ public class SocialGraph {
         dispatch_semaphore_signal(genderUpdateSemaphore)
         log("Requesting gender update...", withFlag: "!")
         updateFirstNames()
+        if !didLoadGendersFromCache {
+            let cachedGenders:[GenderData] = GenderData.allObjects(SocialGraphController.sharedInstance.managedObjectContext!)
+            for genderData in cachedGenders {
+                self.genders[genderData.firstName] = genderData.gender()
+            }
+            didLoadGendersFromCache = true
+        }
         let addGenders:(NSData?, NSURLResponse?, NSError?) -> Void = {
             (data:NSData?, response:NSURLResponse?, error:NSError?) in
             if error == nil {
@@ -145,9 +152,14 @@ public class SocialGraph {
                     let genderResponseObject:AnyObject! = jsonData[index]
                     let nameObject:AnyObject! = genderResponseObject["name"]!
                     let genderObject:AnyObject! = genderResponseObject["gender"]!
-                    let (firstName:String, gender:String) = (nameObject.description, genderObject.description)
-                    self.genders[firstName] = genderFromString(gender)
+                    let (firstName:String, genderAsString:String) = (nameObject.description, genderObject.description)
+                    let gender:Gender = Gender.fromString(genderAsString)
+                    self.genders[firstName] = gender
+                    if gender != Gender.Undetermined {
+                        GenderData.insert(SocialGraphController.sharedInstance.managedObjectContext!, name: firstName, gender: gender)
+                    }
                 }
+                SocialGraphController.sharedInstance.managedObjectContext!.save(nil)
                 let (males:Int, females:Int, undetermined:Int) = self.overallGenderCount()
                 log("Gender response received (\(jsonData.count) predictions).", withIndent: 1)
                 log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent: 1, withNewline: true)
@@ -220,7 +232,7 @@ public class SocialGraph {
                 if succeeded && error == nil {
                     log("Successfully saved graph to Parse.", withIndent: 1, withNewline: true)
                     if andLoadFriendGraphs {
-                        self.updateGraphDataFromFriends()
+//                        self.updateGraphDataFromFriends()
                     }
                 } else {
                     if error == nil {
@@ -449,7 +461,7 @@ public class SocialGraph {
             if withNodesTraversed.count == 0 {
                 println("[!] Beginning random walk...")
             }
-            print("    [\(withNodesTraversed.count + 1)] Now at \(names[node]!) (\(genderFromID(node).description()))\n")
+            print("    [\(withNodesTraversed.count + 1)] Now at \(names[node]!) (\(genderFromID(node).toString()))\n")
             if possibleNextNodes.count == 0 {
                 println("        No unvisited neighbors to step to!")
             } else {
@@ -862,6 +874,7 @@ public class SocialGraph {
     // Miscellaneous state variables.
     var isCurrentlyUpdatingGender:Bool
     var shouldReupdateGender:Bool
+    var didLoadGendersFromCache:Bool
     
     // For thread safety.
     var genderUpdateSemaphore = dispatch_semaphore_create(1)

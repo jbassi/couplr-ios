@@ -5,6 +5,10 @@
         <attribute name="toBase64" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="weight" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
     </entity>
+    <entity name="GenderData" representedClassName="GenderData" syncable="YES">
+        <attribute name="firstName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="genderAsString" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
     <entity name="NodeData" representedClassName="NodeData" syncable="YES">
         <attribute name="idBase64" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
@@ -17,5 +21,6 @@
         <element name="EdgeData" positionX="-306" positionY="81" width="128" height="88"/>
         <element name="NodeData" positionX="-369" positionY="9" width="144" height="75"/>
         <element name="RootData" positionX="-333" positionY="72" width="128" height="75"/>
+        <element name="GenderData" positionX="-333" positionY="63" width="128" height="73"/>
     </elements>
 </model>

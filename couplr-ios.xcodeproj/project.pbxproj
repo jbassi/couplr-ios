@@ -48,7 +48,7 @@
 		F4EE3AC11A57BD9C00A49F32 /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4EE3AC01A57BD9C00A49F32 /* Parse.framework */; };
 		F4F0DC771A630AA9007FC931 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4F0DC761A630AA9007FC931 /* CoreData.framework */; };
 		F4F0DC7D1A630DBA007FC931 /* CouplrData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F4F0DC7B1A630DBA007FC931 /* CouplrData.xcdatamodeld */; };
-		F4F0DCE91A63335B007FC931 /* GraphStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F0DCE81A63335B007FC931 /* GraphStorage.swift */; };
+		F4F0DCE91A63335B007FC931 /* CouplrStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F0DCE81A63335B007FC931 /* CouplrStorage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,7 +108,7 @@
 		F4EE3AC01A57BD9C00A49F32 /* Parse.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Parse.framework; path = ../Parse/Parse.framework; sourceTree = "<group>"; };
 		F4F0DC761A630AA9007FC931 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		F4F0DC7C1A630DBA007FC931 /* CouplrData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CouplrData.xcdatamodel; sourceTree = "<group>"; };
-		F4F0DCE81A63335B007FC931 /* GraphStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphStorage.swift; sourceTree = "<group>"; };
+		F4F0DCE81A63335B007FC931 /* CouplrStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CouplrStorage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -276,7 +276,7 @@
 		F4973F091A50E30100FEA3B0 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				F4F0DCE81A63335B007FC931 /* GraphStorage.swift */,
+				F4F0DCE81A63335B007FC931 /* CouplrStorage.swift */,
 				F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */,
 				F43D50721A536CC2000E09CE /* GraphBuilder.swift */,
 				0F24FB3F1A53BD5C00201C31 /* SocialGraphController.swift */,
@@ -386,7 +386,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4F0DCE91A63335B007FC931 /* GraphStorage.swift in Sources */,
+				F4F0DCE91A63335B007FC931 /* CouplrStorage.swift in Sources */,
 				0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */,
 				0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */,
 				0F9F1CBF1A5CFB7300E683A1 /* FXBlurView.m in Sources */,
