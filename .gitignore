@@ -16,9 +16,6 @@ DerivedData
 *.ipa
 *.xcuserstate
 
-# Project
-couplr-iosTests/
-
 # CocoaPods
 #
 # We recommend against adding the Pods directory to your .gitignore. However
