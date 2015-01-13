@@ -34,12 +34,12 @@ class MatchViewController: UIViewController {
         collectionView.allowsMultipleSelection = true
         socialGraphController.delegate = self
         showLoadingScreen()
-        // TODO Query titles and statuses simultaneously and retry when failing.
+        // TODO Retry query upon failure.
         matchGraphController.matches = MatchGraph()
+        socialGraphController.graphInitializeBeginTime = currentTimeInSeconds()
         matchGraphController.fetchMatchTitles({
             (didError:Bool) -> Void in
             if !didError {
-                NodeData.insert(self.socialGraphController.managedObjectContext!, nodeId: 1337, name: "Hello world")
                 self.socialGraphController.initializeGraph()
                 let titleList:[MatchTitle] = self.matchGraphController.titleList()
                 self.matchTitleLabel.setTitle(titleList[0].text, forState: UIControlState.Normal)

@@ -19,8 +19,8 @@ public class SocialGraphController {
     var graph:SocialGraph?
     var voteHistoryOrPhotoDataLoadProgress:Int = 0
     var graphSerializationSemaphore = dispatch_semaphore_create(1)
-    var appBeginTime:Double = currentTimeInSeconds()
-    var didInitializeFromCoreData:Bool = false
+    var graphInitializeBeginTime:Double = 0
+    var doBuildGraphFromCoreData:Bool = false
 
     lazy var managedObjectContext:NSManagedObjectContext? = {
         let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
@@ -50,12 +50,11 @@ public class SocialGraphController {
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let root:UInt64 = uint64FromAnyObject(result["id"])
-                    if self.shouldInitializeGraphFromCoreData(root) {
+                    MatchGraphController.sharedInstance.matches!.fetchMatchesForId(root)
+                    self.doBuildGraphFromCoreData = self.shouldInitializeGraphFromCoreData(root)
+                    if self.doBuildGraphFromCoreData {
                         self.initializeGraphFromCoreData(root)
                     } else {
-                        if self.shouldEraseGraphData(root) {
-                            self.eraseGraphFromCoreData()
-                        }
                         self.initializeGraphFromFacebookData()
                     }
                 }
@@ -80,12 +79,12 @@ public class SocialGraphController {
                     graph!.connectNode(firstId, toNode: secondId, withWeight: kUserMatchVoteScore)
                 }
             }
-            // Save to Parse and then load friend graphs if the graph was updated using Facebook data.
-            if !didInitializeFromCoreData {
-                graph!.saveGraphData(andLoadFriendGraphs: true)
-            } else {
-                // Otherwise, just load friend graphs.
+            if doBuildGraphFromCoreData {
+                // No need to export graph data. Just update from friends directly.
                 graph!.updateGraphDataFromFriends()
+            } else {
+                // Export the graph and then update from friends.
+                graph!.exportGraphToParse(andLoadFriendGraphs: true)
             }
             // Prevent the graph from saving again under any condition.
             voteHistoryOrPhotoDataLoadProgress = 3
@@ -108,7 +107,7 @@ public class SocialGraphController {
         for edgeData:EdgeData in edges {
             graph!.connectNode(edgeData.from(), toNode: edgeData.to(), withWeight: edgeData.weight)
         }
-        didInitializeGraph(true)
+        didInitializeGraph()
     }
 
     /**
@@ -123,7 +122,7 @@ public class SocialGraphController {
      */
     private func initializeGraphFromFacebookData(maxNumStatuses:Int = kMaxNumStatuses) {
         log("Requesting user statuses...", withFlag: "!")
-        FBRequestConnection.startWithGraphPath("me/statuses?limit=\(maxNumStatuses)&fields=from,likes,comments.fields(from,likes)",
+        FBRequestConnection.startWithGraphPath("me/statuses?limit=\(maxNumStatuses)&\(kStatusGraphPathFields)",
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let statusData:AnyObject! = result["data"]!
@@ -139,7 +138,7 @@ public class SocialGraphController {
                     }
                     let graph:SocialGraph = builder.buildSocialGraph()
                     self.graph = graph
-                    self.didInitializeGraph(false)
+                    self.didInitializeGraph()
                 } else {
                     log("Critical error: \"\(error.description)\" when loading statuses!", withFlag: "-", withNewline: true)
                 }
@@ -262,28 +261,20 @@ public class SocialGraphController {
     }
 
     /**
-     * Determines whether or not we should wipe the data from
-     * the local cache.
+     * Notify this controller that the graph was initialized,
+     * whether it was using Core Data or Facebook statuses and
+     * photos. This notifies the MatchViewController and the
+     * MatchGraphController that the social graph has finished
+     * loading and matches are ready to be presented.
      */
-    private func shouldEraseGraphData(rootId:UInt64) -> Bool {
-        let roots:[RootData] = RootData.allObjects(managedObjectContext!)
-        if roots.count == 0 {
-            return false
-        } else if roots.count > 1 {
-            return true
-        }
-        return roots[0].id() != rootId
-    }
-
-    private func didInitializeGraph(initializedFromCoreData:Bool) {
+    private func didInitializeGraph() {
         delegate?.socialGraphControllerDidLoadSocialGraph(graph!)
         MatchGraphController.sharedInstance.socialGraphDidLoad()
-        log("Initialized base graph (\(graph!.names.count) nodes \(graph!.edgeCount) edges \(graph!.totalEdgeWeight) weight).", withIndent: 1)
-        let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.appBeginTime)
+        log("Initialized graph (\(graph!.names.count) nodes \(graph!.edgeCount) edges \(graph!.totalEdgeWeight) weight).", withIndent: 1)
+        let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
         log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
         self.graph!.updateGenders()
-        if initializedFromCoreData {
-            didInitializeFromCoreData = true
+        if doBuildGraphFromCoreData {
             didLoadVoteHistoryOrInitializeGraph()
         } else {
             graph!.updateGraphDataUsingPhotos()

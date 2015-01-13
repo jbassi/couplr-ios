@@ -36,7 +36,6 @@ public class MatchGraphController {
         if matches == nil {
             matches = MatchGraph()
         }
-        matches!.fetchMatchesForId(SocialGraphController.sharedInstance.rootId())
         matches!.fetchRootUserVoteHistory {
             (didError) -> Void in
             SocialGraphController.sharedInstance.didLoadVoteHistoryOrInitializeGraph()

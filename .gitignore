@@ -34,3 +34,6 @@ Parse/
 
 # Temporary files
 sample_*.tmp
+
+# Network captures
+*.pcapng

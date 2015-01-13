@@ -189,7 +189,7 @@ public class SocialGraph {
      * include edges GREATER THAN a given threshold. By default, kMinExportEdgeWeight
      * is chosen to remove all links that may have occured due to error.
      */
-    public func saveGraphData(minWeight:Float = kMinExportEdgeWeight, andLoadFriendGraphs:Bool = true) {
+    public func exportGraphToParse(minWeight:Float = kMinExportEdgeWeight, andLoadFriendGraphs:Bool = true) {
         var query:PFQuery = PFQuery(className:"GraphData")
         query.whereKey("rootId", equalTo: encodeBase64(root))
         log("Searching for objectId of \(root)'s graph data...", withFlag: "!")
@@ -232,7 +232,7 @@ public class SocialGraph {
                 if succeeded && error == nil {
                     log("Successfully saved graph to Parse.", withIndent: 1, withNewline: true)
                     if andLoadFriendGraphs {
-//                        self.updateGraphDataFromFriends()
+                        self.updateGraphDataFromFriends()
                     }
                 } else {
                     if error == nil {
@@ -313,7 +313,7 @@ public class SocialGraph {
      */
     public func updateGraphDataUsingPhotos(maxNumPhotos:Int = kMaxNumPhotos) {
         log("Requesting data from photos...", withFlag: "!")
-        FBRequestConnection.startWithGraphPath("me/photos?limit=\(maxNumPhotos)&fields=from,tags.fields(id,name)",
+        FBRequestConnection.startWithGraphPath("me/photos?limit=\(maxNumPhotos)&\(kPhotosGraphPathFields)",
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let oldEdgeCount = self.edgeCount
@@ -590,7 +590,7 @@ public class SocialGraph {
             log("Edge count: \(edgeCount)", withIndent: 2)
             log("Total weight: \(totalEdgeWeight)", withIndent: 2)
             log("Weight baseline: \(baselineEdgeWeight())", withIndent: 2)
-            let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.appBeginTime)
+            let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
             log("Time since startup: \(timeString) sec", withIndent: 2, withNewline: true)
             updateGenders()
             return

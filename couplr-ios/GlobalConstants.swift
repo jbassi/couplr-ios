@@ -131,3 +131,7 @@ let kOutputLogMessages:Bool = true
 
 /* For managing local storage (core data) */
 let kSecondsBeforeNextGraphUpdate:Double = 345600 // In seconds. This is about 4 days.
+
+/* Graph paths for statuses and photos. */
+let kStatusGraphPathFields:String = "fields=from,likes,comments.fields(from,likes)"
+let kPhotosGraphPathFields:String = "fields=from,tags.fields(id,name)"
