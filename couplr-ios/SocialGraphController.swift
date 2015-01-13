@@ -55,7 +55,8 @@ public class SocialGraphController {
                     if self.doBuildGraphFromCoreData {
                         self.initializeGraphFromCoreData(root)
                     } else {
-                        self.initializeGraphFromFacebookData()
+                        self.graph = SocialGraph(root: root, names: Dictionary<UInt64, String>())
+                        self.graph!.updateGraphUsingStatuses()
                     }
                 }
         } as FBRequestHandler)
@@ -90,59 +91,6 @@ public class SocialGraphController {
             voteHistoryOrPhotoDataLoadProgress = 3
         }
         dispatch_semaphore_signal(graphSerializationSemaphore)
-    }
-
-    /**
-     * Initializes the graph directly from core data.
-     */
-    private func initializeGraphFromCoreData(rootId:UInt64) {
-        log("Initializing graph from core data...", withFlag:"!")
-        var names:[UInt64:String] = [UInt64:String]()
-        let nodes:[NodeData] = NodeData.allObjects(managedObjectContext!)
-        for node in nodes {
-            names[node.id()] = node.name
-        }
-        self.graph = SocialGraph(root: rootId, names: names)
-        let edges:[EdgeData] = EdgeData.allObjects(managedObjectContext!)
-        for edgeData:EdgeData in edges {
-            graph!.connectNode(edgeData.from(), toNode: edgeData.to(), withWeight: edgeData.weight)
-        }
-        didInitializeGraph()
-    }
-
-    /**
-     * Begins the graph initialization process, querying Facebook for
-     * the user's statuses. Upon a successful response, notifies the
-     * match graph controller as well as the match view controller, and
-     * also calls on the graph to request a gender update and query
-     * Facebook again for comment likes.
-     *
-     * TODO Refactor to use the rootId directly, now that we know it. We
-     * probably don't even need GraphBuilder at all then.
-     */
-    private func initializeGraphFromFacebookData(maxNumStatuses:Int = kMaxNumStatuses) {
-        log("Requesting user statuses...", withFlag: "!")
-        FBRequestConnection.startWithGraphPath("me/statuses?limit=\(maxNumStatuses)&\(kStatusGraphPathFields)",
-            completionHandler: { (connection, result, error) -> Void in
-                if error == nil {
-                    let statusData:AnyObject! = result["data"]!
-                    let statusCount:Int = statusData.count
-                    let firstStatusFromObject:AnyObject! = statusData[0]!["from"]!
-                    let firstStatusFromObjectName:AnyObject! = firstStatusFromObject["name"]!
-                    let rootUserId:UInt64! = uint64FromAnyObject(firstStatusFromObject["id"]!)
-                    let rootUserName:String! = firstStatusFromObjectName.description!
-                    var builder:GraphBuilder = GraphBuilder(forRootUserId: rootUserId, withName: rootUserName)
-                    for index in 0..<statusCount {
-                        let status:AnyObject! = statusData[index]!
-                        self.updateGraphBuilderFromStatus(status, withRootId: rootUserId, withBuilder: &builder)
-                    }
-                    let graph:SocialGraph = builder.buildSocialGraph()
-                    self.graph = graph
-                    self.didInitializeGraph()
-                } else {
-                    log("Critical error: \"\(error.description)\" when loading statuses!", withFlag: "-", withNewline: true)
-                }
-        } as FBRequestHandler)
     }
 
     /**
@@ -193,7 +141,7 @@ public class SocialGraphController {
     public func userDidMatch(firstId:UInt64, toSecondId:UInt64) {
         graph?.userDidMatch(firstId, toSecondId: toSecondId)
     }
-
+    
     /**
      * Returns the root user's id, or 0 if the graph has not
      * been initialized yet.
@@ -203,6 +151,27 @@ public class SocialGraphController {
             return 0
         }
         return graph!.root
+    }
+    
+    /**
+     * Notify this controller that the graph was initialized,
+     * whether it was using Core Data or Facebook statuses and
+     * photos. This notifies the MatchViewController and the
+     * MatchGraphController that the social graph has finished
+     * loading and matches are ready to be presented.
+     */
+    public func didInitializeGraph() {
+        delegate?.socialGraphControllerDidLoadSocialGraph(graph!)
+        MatchGraphController.sharedInstance.socialGraphDidLoad()
+        log("Initialized graph (\(graph!.names.count) nodes \(graph!.edgeCount) edges \(graph!.totalEdgeWeight) weight).", withIndent: 1)
+        let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
+        log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
+        self.graph!.updateGenders()
+        if doBuildGraphFromCoreData {
+            didLoadVoteHistoryOrInitializeGraph()
+        } else {
+            graph!.updateGraphDataUsingPhotos()
+        }
     }
 
     /**
@@ -233,6 +202,24 @@ public class SocialGraphController {
     }
 
     /**
+     * Initializes the graph directly from core data.
+     */
+    private func initializeGraphFromCoreData(rootId:UInt64) {
+        log("Initializing graph from core data...", withFlag:"!")
+        var names:[UInt64:String] = [UInt64:String]()
+        let nodes:[NodeData] = NodeData.allObjects(managedObjectContext!)
+        for node in nodes {
+            names[node.id()] = node.name
+        }
+        self.graph = SocialGraph(root: rootId, names: names)
+        let edges:[EdgeData] = EdgeData.allObjects(managedObjectContext!)
+        for edgeData:EdgeData in edges {
+            graph!.connectNode(edgeData.from(), toNode: edgeData.to(), withWeight: edgeData.weight)
+        }
+        didInitializeGraph()
+    }
+    
+    /**
      * Removes all graph data from local storage.
      */
     private func eraseGraphFromCoreData() {
@@ -252,76 +239,14 @@ public class SocialGraphController {
      * build the graph up.
      */
     private func shouldInitializeGraphFromCoreData(rootId:UInt64) -> Bool {
+        if !kEnableGraphCaching {
+            return false
+        }
         let roots:[RootData] = RootData.allObjects(managedObjectContext!)
         if roots.count != 1 {
             return false
         }
         let secondsSinceUpdate:Double = NSDate().timeIntervalSince1970 - roots[0].timeModified
         return roots[0].id() == rootId && secondsSinceUpdate < kSecondsBeforeNextGraphUpdate
-    }
-
-    /**
-     * Notify this controller that the graph was initialized,
-     * whether it was using Core Data or Facebook statuses and
-     * photos. This notifies the MatchViewController and the
-     * MatchGraphController that the social graph has finished
-     * loading and matches are ready to be presented.
-     */
-    private func didInitializeGraph() {
-        delegate?.socialGraphControllerDidLoadSocialGraph(graph!)
-        MatchGraphController.sharedInstance.socialGraphDidLoad()
-        log("Initialized graph (\(graph!.names.count) nodes \(graph!.edgeCount) edges \(graph!.totalEdgeWeight) weight).", withIndent: 1)
-        let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
-        log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
-        self.graph!.updateGenders()
-        if doBuildGraphFromCoreData {
-            didLoadVoteHistoryOrInitializeGraph()
-        } else {
-            graph!.updateGraphDataUsingPhotos()
-        }
-    }
-
-    private func updateGraphBuilderFromStatus(status:AnyObject!, withRootId:UInt64!, inout withBuilder:GraphBuilder) -> Void {
-        var allComments:AnyObject? = status["comments"]
-        var previousThreadId:UInt64 = withRootId;
-        if allComments != nil {
-            let commentData:AnyObject! = allComments!["data"]!
-            for index in 0..<commentData.count {
-                let comment:AnyObject! = commentData[index]!
-                // Add scores for the author of the comment.
-                let from:AnyObject! = comment["from"]!
-                let fromId:UInt64 = uint64FromAnyObject(from["id"]!)
-                let fromNameObject:AnyObject! = from["name"]!
-                withBuilder.updateNameMappingForId(fromId, toName: fromNameObject.description!)
-                withBuilder.updateForEdgePair(EdgePair(first: withRootId, second: fromId), withWeight: kCommentRootScore)
-                withBuilder.updateForEdgePair(EdgePair(first: previousThreadId, second: fromId), withWeight: kCommentPrevScore)
-                previousThreadId = fromId
-                // Add comment like data if it exists.
-                let commentLikes:AnyObject? = comment["likes"]
-                if commentLikes == nil {
-                    continue
-                }
-                let commentLikeData:AnyObject! = commentLikes!["data"]!
-                for index in 0..<commentLikeData.count {
-                    let commentLike:AnyObject! = commentLikeData[index]
-                    let commentLikeId:UInt64 = uint64FromAnyObject(commentLike["id"])
-                    let commentLikeNameObject:AnyObject! = commentLike["name"]!
-                    let commentLikeName:String = commentLikeNameObject.description
-                    withBuilder.updateNameMappingForId(commentLikeId, toName: commentLikeName)
-                    withBuilder.updateForEdgePair(EdgePair(first: commentLikeId, second: fromId), withWeight: kCommentLikeScore)
-                }
-            }
-        }
-        var allLikes:AnyObject? = status["likes"]
-        if allLikes != nil {
-            let likeData:AnyObject! = allLikes!["data"]!
-            for index in 0..<likeData.count {
-                let like:AnyObject! = likeData[index]!
-                let fromId:UInt64 = uint64FromAnyObject(like["id"]!)
-                let fromNameObject:AnyObject! = like["name"]
-                withBuilder.updateNameMappingForId(fromId, toName: fromNameObject.description!)
-                withBuilder.updateForEdgePair(EdgePair(first: withRootId, second: fromId), withWeight: kLikeRootScore)
-            }
-        }
     }
 }

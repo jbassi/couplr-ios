@@ -28,7 +28,6 @@
 		0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BE01A50C55500C14FDC /* MatchViewController.swift */; };
 		0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF11BE31A50C63C00C14FDC /* PickerView.swift */; };
 		0FFBA3041A562D4E00A95F66 /* CouplrNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FFBA3031A562D4E00A95F66 /* CouplrNavigationController.swift */; };
-		F43D50731A536CC2000E09CE /* GraphBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43D50721A536CC2000E09CE /* GraphBuilder.swift */; };
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
 		F4973F0B1A50E31700FEA3B0 /* SocialGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */; };
 		F4C911BB1A5A764300D2CB11 /* MatchGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */; };
@@ -88,7 +87,6 @@
 		0FF11BE01A50C55500C14FDC /* MatchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchViewController.swift; sourceTree = "<group>"; };
 		0FF11BE31A50C63C00C14FDC /* PickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerView.swift; sourceTree = "<group>"; };
 		0FFBA3031A562D4E00A95F66 /* CouplrNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CouplrNavigationController.swift; sourceTree = "<group>"; };
-		F43D50721A536CC2000E09CE /* GraphBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphBuilder.swift; sourceTree = "<group>"; };
 		F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphController.swift; sourceTree = "<group>"; };
 		F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraph.swift; sourceTree = "<group>"; };
 		F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraph.swift; sourceTree = "<group>"; };
@@ -278,7 +276,6 @@
 			children = (
 				F4F0DCE81A63335B007FC931 /* CouplrStorage.swift */,
 				F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */,
-				F43D50721A536CC2000E09CE /* GraphBuilder.swift */,
 				0F24FB3F1A53BD5C00201C31 /* SocialGraphController.swift */,
 				F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */,
 				F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */,
@@ -394,7 +391,6 @@
 				0F9C98891A539E0A004CAC4D /* ProfilePictureImageView.swift in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,
 				0FDD9F6F1A5BA0E700927558 /* ProfileDetailView.swift in Sources */,
-				F43D50731A536CC2000E09CE /* GraphBuilder.swift in Sources */,
 				F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */,
 				0F24FB401A53BD5C00201C31 /* SocialGraphController.swift in Sources */,
 				0F0EB6EB1A5E16B300E2A25B /* LoadingView.swift in Sources */,
