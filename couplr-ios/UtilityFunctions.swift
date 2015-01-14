@@ -9,6 +9,10 @@
 import UIKit
 import Dispatch
 
+public enum NameDisplayMode {
+    case Full, MiddleInitial, LastInitialNoMiddle
+}
+
 func afterDelay(seconds: Double, closure: () -> ()) {
     let when = dispatch_time(DISPATCH_TIME_NOW, Int64(seconds * Double(NSEC_PER_SEC)))
     dispatch_after(when, dispatch_get_main_queue(), closure)
@@ -115,27 +119,45 @@ func weightedRandomSample(elements:[(UInt64, Float)]) -> UInt64 {
 }
 
 /**
- * Returns shortened versions of a full name, using initials instead
- * of the full word.
+ * Returns a specified version of a name given the full name. The Full
+ * display mode simply returns the original string. The MiddleInitial
+ * mode drops everything but the first word of the middle name if it is
+ * at least 2 characters and otherwise uses the first initial of the 
+ * first word of the middle name. LastInitialNoMiddle ignores the middle
+ * name entirely and uses only the last initial of the last name, or the
+ * full last name if it is two characters or less.
  */
-func shortenFullName(name:String, useMiddleInitial:Bool, useLastInitial:Bool) -> String {
+func shortenFullName(name:String, mode:NameDisplayMode) -> String {
     var words:[String] = split(name) {$0 == " "}
-    if useMiddleInitial && words.count > 2 {
-        if words.count > 3 || words[1].utf16Count > 2 {
-            let char:Character = words[1][words[1].startIndex]
-            words[1] = String(char).uppercaseString + "."
+    switch (mode) {
+    case .Full:
+        return name
+        
+    case .MiddleInitial:
+        if words.count > 2 {
+            if words.count > 3 || words[1].utf16Count > 2 {
+                let char:Character = words[1][words[1].startIndex]
+                words[1] = String(char).uppercaseString + "."
+            }
+            for index in 2..<words.count - 1 {
+                words[index] = ""
+            }
         }
-        for index in 2..<words.count - 1 {
-            words[index] = ""
+        break
+
+    case .LastInitialNoMiddle:
+        if words.count > 1 {
+            var lastNameString:String = words.last!
+            if lastNameString.utf16Count > 2 {
+                let char:Character = lastNameString[lastNameString.startIndex]
+                lastNameString = String(char).uppercaseString + "."
+            }
+            words[words.count - 1] = lastNameString
+            while words.count > 2 {
+                words.removeAtIndex(1)
+            }
+            break
         }
-    }
-    if useLastInitial {
-        var lastNameString:String = words.last!
-        if lastNameString.utf16Count > 2 {
-            let char:Character = lastNameString[lastNameString.startIndex]
-            lastNameString = String(char).uppercaseString + "."
-        }
-        words[words.count - 1] = lastNameString
     }
     return " ".join(words)
 }

@@ -127,10 +127,10 @@ public class SocialGraphController {
         }
         var name:String = graph!.names[id]!
         if name.utf16Count > maxStringLength {
-            name = shortenFullName(name, true, false)
+            name = shortenFullName(name, NameDisplayMode.MiddleInitial)
         }
         if name.utf16Count > maxStringLength {
-            name = shortenFullName(name, true, true)
+            name = shortenFullName(name, NameDisplayMode.LastInitialNoMiddle)
         }
         return name
     }
