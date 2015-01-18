@@ -116,6 +116,7 @@ public class SocialGraph {
      * enforce symmetry.
      */
     public func connectNode(node:UInt64, toNode:UInt64, withWeight:Float = 1) {
+        medianEdgeWeight = nil
         if !hasEdgeFromNode(node, to: toNode) {
             edgeCount++
         }
@@ -134,6 +135,7 @@ public class SocialGraph {
     public func disconnectNode(node:UInt64, fromNode:UInt64) {
         let currentEdgeWeight:Float = self[node, fromNode]
         if currentEdgeWeight > kUnconnectedEdgeWeight {
+            medianEdgeWeight = nil
             edgeCount--
             totalEdgeWeight -= currentEdgeWeight
             if node == root || fromNode == root {
@@ -428,14 +430,15 @@ public class SocialGraph {
         let id:UInt64 = popNextHighestConnectedFriend(&idList)
         if numFriendsQueried > kMaxGraphDataQueries || id == 0 {
             log("Done. No more friends to query.", withIndent: 1)
+            let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
+            log("Time since startup: \(timeString) sec", withIndent: 2, withNewline: true)
+            updateGenders()
+            updateMedianEdgeWeight()
             log("Graph construction finished! Showing statistics...", withIndent: 1)
             log("Vertex count: \(names.count)", withIndent: 2)
             log("Edge count: \(edgeCount)", withIndent: 2)
             log("Total weight: \(totalEdgeWeight)", withIndent: 2)
             log("Weight baseline: \(baselineEdgeWeight())", withIndent: 2)
-            let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
-            log("Time since startup: \(timeString) sec", withIndent: 2, withNewline: true)
-            updateGenders()
             return
         }
         log("Pulling the social graph of root id \(id)...", withFlag: "!")
@@ -587,6 +590,23 @@ public class SocialGraph {
             return 1
         }
         return similarityCount / totalCount
+    }
+    
+    /**
+     * Compute and store the median edge weight.
+     * TODO Maybe automatically update the median edge weight on the
+     * fly whenever a new edge is added or an edge is removed?
+     */
+    private func updateMedianEdgeWeight() {
+        var allEdges:[Float] = [Float]()
+        for (node:UInt64, neighbors:[UInt64:Float]) in edges {
+            for (neighbor:UInt64, weight:Float) in neighbors {
+                if node < neighbor {
+                    allEdges.append(weight)
+                }
+            }
+        }
+        medianEdgeWeight = median(allEdges)
     }
 
     // MARK: - User action handlers
@@ -892,6 +912,9 @@ public class SocialGraph {
      * root nodes.
      */
     private func baselineEdgeWeight() -> Float {
+        if medianEdgeWeight != nil {
+            return medianEdgeWeight!
+        }
         return (totalEdgeWeight - totalEdgeWeightFromRoot) / Float(edgeCount - edges[root]!.count)
     }
 
@@ -959,8 +982,8 @@ public class SocialGraph {
     var isCurrentlyUpdatingGender:Bool
     var shouldReupdateGender:Bool
     var didLoadGendersFromCache:Bool
+    var medianEdgeWeight:Float? = nil
 
     // For thread safety.
     var genderUpdateSemaphore = dispatch_semaphore_create(1)
-
 }

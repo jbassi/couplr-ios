@@ -237,3 +237,25 @@ func decodeBase64(string:String) -> UInt64 {
     }
     return result
 }
+
+/**
+ * Compute the median given an array of numbers.
+ */
+func median(list:[Float]) -> Float {
+    if list.count == 0 {
+        return 0
+    } else if list.count == 1 {
+        return list[0]
+    }
+    let sortedList:[Float] = list.sorted {
+        (Float first, Float second) -> Bool in
+        return first < second
+    }
+    let middleIndex:Int = sortedList.count / 2
+    if sortedList.count % 2 == 1 {
+        return sortedList[middleIndex]
+    } else {
+        println(middleIndex)
+        return (sortedList[middleIndex - 1] + sortedList[middleIndex]) / 2
+    }
+}

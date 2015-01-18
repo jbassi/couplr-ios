@@ -126,7 +126,7 @@ let kGenderizeURLPrefix:String = "http://api.genderize.io?"
 let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 
 /* Debugging outputs */
-let kShowRandomWalkDebugOutput:Bool = false
+let kShowRandomWalkDebugOutput:Bool = true
 let kOutputLogMessages:Bool = true
 
 /* For managing local storage (core data) */
