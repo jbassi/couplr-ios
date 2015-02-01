@@ -143,6 +143,13 @@ public class SocialGraphController {
     }
     
     /**
+     * Returns true iff the graph contains the given user id.
+     */
+    public func containsUser(userId:UInt64) -> Bool {
+        return graph?.names[userId] != nil
+    }
+    
+    /**
      * Returns the root user's id, or 0 if the graph has not
      * been initialized yet.
      */

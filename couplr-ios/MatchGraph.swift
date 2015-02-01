@@ -126,6 +126,9 @@ public class MatchGraph {
      * another list of (userId, vote count) pairs. This inner list is sorted by vote
      * count, and the outer list is sorted by the sum of all vote counts for the
      * titleId.
+     *
+     * This list of sorted matches will not include neighbors that the root user does
+     * not know about (i.e. users who do not appear in the root user's social graph).
      */
     public func sortedMatchesForUser(userId:UInt64) -> [(Int,[(UInt64,Int)])] {
         if cachedMatchesByTitle[userId] != nil {
@@ -137,6 +140,10 @@ public class MatchGraph {
         var matchResultSet:[Int:[UInt64:Int]] = [Int:[UInt64:Int]]()
         var matchCountsByTitle:[Int:Int] = [Int:Int]()
         for (neighbor:UInt64, list:MatchList) in matches[userId]! {
+            // HACK Find a better way of preventing unknown users from showing up in matches.
+            if !SocialGraphController.sharedInstance.containsUser(neighbor) {
+                continue
+            }
             for (titleId:Int, voters:[UInt64]) in list.matchesByTitle {
                 if matchResultSet[titleId] == nil {
                     matchResultSet[titleId] = [UInt64:Int]()
