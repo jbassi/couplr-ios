@@ -50,13 +50,13 @@ public class MatchGraphController {
      *
      * If the request failed, the resulting argument will be nil.
      */
-    public func doAfterLoadingMatchesForId(id:UInt64, callback:([UInt64:[Int:Int]]?) -> Void) {
+    public func doAfterLoadingMatchesForId(id:UInt64, callback:([(Int,[(UInt64,Int)])]?) -> Void) {
         matches?.fetchMatchesForId(id, callback: {
             (didError:Bool) -> Void in
             if didError {
                 callback(nil)
             } else {
-                callback(self.matches?.numMatchesByUserIdAndTitleFor(id))
+                callback(self.matches?.sortedMatchesForUser(id))
             }
         })
     }
@@ -79,21 +79,29 @@ public class MatchGraphController {
     /**
      * Returns an array of all the titles.
      */
-    public func titleList() -> [MatchTitle] {
+    public func matchTitles() -> [MatchTitle] {
         if matches == nil {
             return []
         }
         return matches!.titleList
     }
+    
+    /**
+     * Returns a MatchTitle object for the given title id.
+     */
+    public func matchTitleFromId(titleId:Int) -> MatchTitle? {
+        return matches!.titlesById[titleId]
+    }
 
     /**
      * Wraps a call to the same method of MatchGraph.
      */
-    public func numMatchesByUserIdAndTitleFor(id:UInt64) -> [UInt64:[Int:Int]] {
+    public func sortedMatchesForUser(userId:UInt64) -> [(Int,[(UInt64,Int)])] {
         if matches == nil {
-            return [UInt64:[Int:Int]]()
+            log("Warning: match graph not yet loaded!", withFlag:"?")
+            return [(Int,[(UInt64,Int)])]()
         }
-        return matches!.numMatchesByUserIdAndTitleFor(id)
+        return matches!.sortedMatchesForUser(userId)
     }
 
     /**

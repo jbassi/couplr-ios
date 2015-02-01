@@ -41,7 +41,7 @@ class MatchViewController: UIViewController {
             (didError:Bool) -> Void in
             if !didError {
                 self.socialGraphController.initializeGraph()
-                let titleList:[MatchTitle] = self.matchGraphController.titleList()
+                let titleList:[MatchTitle] = self.matchGraphController.matchTitles()
                 self.matchTitleLabel.setTitle(titleList[0].text, forState: UIControlState.Normal)
                 self.selectedTitle = titleList[0]
             }
@@ -84,7 +84,7 @@ class MatchViewController: UIViewController {
     }
 
     func shuffleTitle() {
-        let titleList:[MatchTitle] = matchGraphController.titleList()
+        let titleList:[MatchTitle] = matchGraphController.matchTitles()
         let randomIndex:Int = randomInt(titleList.count)
         selectedTitle = titleList[randomIndex]
         matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
@@ -110,15 +110,15 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     }
 
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return matchGraphController.titleList().count
+        return matchGraphController.matchTitles().count
     }
 
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
-        return matchGraphController.titleList()[row].text
+        return matchGraphController.matchTitles()[row].text
     }
 
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        let titles:[MatchTitle] = matchGraphController.titleList()
+        let titles:[MatchTitle] = matchGraphController.matchTitles()
         selectedTitle = titles[row]
         matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
     }

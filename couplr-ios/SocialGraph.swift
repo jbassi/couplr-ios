@@ -9,6 +9,36 @@
 import Parse
 import CoreData
 
+// MARK: - Social graph parameters
+let kUnconnectedEdgeWeight:Float = -1000.0          // The weight of an unconnected "edge".
+let kMaxNumStatuses:Int = 100                       // Number of statuses to query.
+let kMaxNumPhotos:Int = 100                         // Number of photos to query.
+let kMaxPhotoGroupSize:Int = 15                     // Max number of people considered in a photo.
+let kMinGraphEdgeWeight:Float = 0.15                // The minimum edge weight threshold when cleaning the graph.
+let kUserMatchVoteScore:Float = 1.0                 // Score for the user voting on title for a match.
+// Like and comment scores.
+let kCommentRootScore:Float = 0.5                   // Score for commenting on the root user's status.
+let kCommentPrevScore:Float = 0.1                   // Score for being the next to comment on the root user's status.
+let kLikeRootScore:Float = 0.2                      // Score for a like on the root user's status.
+let kCommentLikeScore:Float = 0.4                   // Score for a like on someone's comment on the root user's status.
+// Constants for scoring photo data.
+let kMaxPairwisePhotoScore:Float = 1.5              // A base photo score for a picture containing only 2 people.
+let kMinPhotoPairwiseWeight:Float = 0.05            // Only add edges from photo data with at least this weight.
+
+let kSamplingWeightLimit:Float = 10                 // The coefficient for the sigmoid function.
+let kSigmoidExponentialBase:Float = 3.5             // The exponential base for the sigmoid function.
+let kRandomSampleCount:Int = 9                      // The number of people to randomly sample.
+
+let kMaxGraphDataQueries:Int = 4                    // Max number of friends to query graph data from.
+let kMinExportEdgeWeight:Float = 0.2                // Only export edges with more than this weight.
+let kScaleFactorForExportingRootEdges:Float = 0.25  // Export root edges scaled by this number.
+let kMutualFriendsThreshold:Int = 3                 // This many mutual friends to pull a friend over to the user's graph.
+
+let kGenderBiasRatio:Float = 4.0                    // Make it this much more likely to land on the opposite gender.
+let kWalkWeightUserMatchBoost:Float = 1.5           // The walk weight "bonus" for a node when the user selects a match.
+let kWalkWeightDecayRate:Float = 0.5                // The decay rate for the walk weight bonus.
+let kWalkWeightPenalty:Float = 0.5                  // Constant penalty per step to encourage choosing new nodes.
+
 // MARK: - Gender enum
 
 /**

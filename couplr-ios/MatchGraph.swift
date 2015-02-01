@@ -47,18 +47,6 @@ public class MatchList {
         return false
     }
 
-    /**
-     * Returns a dictionary mapping each title id in this list of
-     * matches to the corresponding number of votes for that title.
-     */
-    public func numVotesByTitleId() -> [Int:Int] {
-        var result:[Int:Int] = [Int:Int]()
-        for (titleId:Int, voterList:[UInt64]) in matchesByTitle {
-            result[titleId] = voterList.count
-        }
-        return result
-    }
-
     // Maps a title ID to a list of users who voted for that match.
     var matchesByTitle:[Int:[UInt64]]
 }
@@ -77,6 +65,7 @@ public class MatchGraph {
         self.unregisteredMatches = [(UInt64, UInt64, Int)]()
         self.matchesBeforeUserHistoryLoaded = [(UInt64, UInt64, Int)]()
         self.userVoteHistory = [(UInt64, UInt64, Int)]()
+        self.cachedMatchesByTitle = [UInt64:[(Int,[(UInt64,Int)])]]()
     }
 
     /**
@@ -133,30 +122,54 @@ public class MatchGraph {
     }
 
     /**
-     * For a given user, a dictionary that contains, as keys, all other users
-     * to which the given user has been matched. The value corresponding to
-     * each key (the other user) is another dictionary mapping title id to
-     * the number of votes for that title.
-     *
-     * For example, suppose we call numMatchesByUserIdAndTitleFor(A) and
-     * receive [B:[3:1, 0:4]]. Then A has matches only with B, consisting
-     * of 1 vote for the title with ID 3 and 4 votes for the title with ID 0.
-     *
-     * This queries the current state of the graph, and does not assume that
-     * the matches were previously loaded for the given userId. In order to
-     * ensure that matches for the userId were loaded, use a callback with
-     * MatchGraph::fetchMatchesForId.
+     * For a given user, returns a list of (titleId, <list>) pairs, where <list> is
+     * another list of (userId, vote count) pairs. This inner list is sorted by vote
+     * count, and the outer list is sorted by the sum of all vote counts for the
+     * titleId.
      */
-    public func numMatchesByUserIdAndTitleFor(userId:UInt64) -> [UInt64:[Int:Int]] {
-        var result:[UInt64:[Int:Int]] = [UInt64:[Int:Int]]()
-        if matches[userId] != nil {
-            for (matchedUser:UInt64, matchList:MatchList) in matches[userId]! {
-                result[matchedUser] = matchList.numVotesByTitleId()
+    public func sortedMatchesForUser(userId:UInt64) -> [(Int,[(UInt64,Int)])] {
+        if cachedMatchesByTitle[userId] != nil {
+            return cachedMatchesByTitle[userId]!
+        }
+        if matches[userId] == nil {
+            return [(Int,[(UInt64,Int)])]()
+        }
+        var matchResultSet:[Int:[UInt64:Int]] = [Int:[UInt64:Int]]()
+        var matchCountsByTitle:[Int:Int] = [Int:Int]()
+        for (neighbor:UInt64, list:MatchList) in matches[userId]! {
+            for (titleId:Int, voters:[UInt64]) in list.matchesByTitle {
+                if matchResultSet[titleId] == nil {
+                    matchResultSet[titleId] = [UInt64:Int]()
+                }
+                matchResultSet[titleId]![neighbor] = voters.count
+                if matchCountsByTitle[titleId] == nil {
+                    matchCountsByTitle[titleId] = 0
+                }
+                matchCountsByTitle[titleId] = matchCountsByTitle[titleId]! + voters.count
             }
         }
-        return result
+        var sortedMatches:[(Int,[(UInt64,Int)])] = [(Int,[(UInt64,Int)])]()
+        for (titleId:Int, results:[UInt64:Int]) in matchResultSet {
+            var list:[(UInt64,Int)] = [(UInt64,Int)]()
+            for (neighbor:UInt64, count:Int) in results {
+                list.append((neighbor, count))
+            }
+            list.sort {
+                (first:(UInt64,Int), second:(UInt64,Int)) -> Bool in
+                return first.1 > second.1
+            }
+            let element:(Int,[(UInt64,Int)]) = (titleId, list)
+            // TODO Why doesn't this work without using temp variable?
+            sortedMatches.append(element)
+        }
+        sortedMatches.sort {
+            (first:(Int,[(UInt64,Int)]), second:(Int,[(UInt64,Int)])) -> Bool in
+            return matchCountsByTitle[first.0]! > matchCountsByTitle[second.0]!
+        }
+        cachedMatchesByTitle[userId] = sortedMatches
+        return sortedMatches
     }
-
+    
     /**
      * Loads all matches relevant to a given user id. Takes an optional callback
      * function that is called when the results are received. In the case that the
@@ -321,7 +334,12 @@ public class MatchGraph {
         if matches[from]![to] == nil {
             matches[from]![to] = MatchList()
         }
-        return matches[from]![to]!.updateMatch(titleId, voter:voter)
+        let didUpdateMatch:Bool = matches[from]![to]!.updateMatch(titleId, voter:voter)
+        if didUpdateMatch {
+            cachedMatchesByTitle[from] = nil
+            cachedMatchesByTitle[to] = nil
+        }
+        return didUpdateMatch
     }
 
     /**
@@ -369,4 +387,6 @@ public class MatchGraph {
     var unregisteredMatches:[(UInt64, UInt64, Int)]
     var matchesBeforeUserHistoryLoaded:[(UInt64, UInt64, Int)]
     var userVoteHistory:[(UInt64, UInt64, Int)]
+    
+    var cachedMatchesByTitle:[UInt64:[(Int,[(UInt64,Int)])]]
 }

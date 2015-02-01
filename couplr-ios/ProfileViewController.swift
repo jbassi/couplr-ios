@@ -9,11 +9,10 @@
 import UIKit
 
 class ProfileViewController: UIViewController {
-    
-    let testData = ["One Night Stand", "Prom King And Queen", "Friendzoned Forever", "Zombie Apocalypse Survivors", "Married But Not Married", "Whipped", "Met At Band Camp", "Partners In Crime", "Met At Chess Club", "Opposites Attract", "PDA Overload", "Met At A Frat Party", "Met At Church", "Overly Attached", "One True Paring"]
     let imageNames = ["sample-1049-at-sign", "sample-1055-ticket", "sample-1067-enter-fullscreen", "sample-1079-fork-path", "sample-1082-merge"]
     
     let socialGraphController = SocialGraphController.sharedInstance
+    let matchGraphController = MatchGraphController.sharedInstance
     var profileDetailView: ProfileDetailView?
     var matchTableView: UITableView?
 
@@ -42,15 +41,30 @@ class ProfileViewController: UIViewController {
 extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 50
+        let rootId:UInt64 = socialGraphController.rootId()
+        if rootId == 0 {
+            log("Warning: root user must be known before loading profile view.", withFlag:"?")
+            return 0
+        }
+        return matchGraphController.sortedMatchesForUser(rootId).count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ProfileViewControllerTableViewCell
-        cell.textLabel?.text = testData[indexPath.row % testData.count]
+        let rootId:UInt64 = socialGraphController.rootId()
+        if rootId == 0 {
+            log("Warning: root user must be known before loading profile view.", withFlag:"?")
+            return cell
+        }
+        let sortedMatches:[(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
+        let titleId:Int = sortedMatches[indexPath.row].0
+        cell.textLabel?.text = matchGraphController.matchTitleFromId(titleId)?.text
         cell.imageView?.image = UIImage(named: imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))])
-        let randomMatchNumber = arc4random_uniform(UInt32(150))
-        cell.numberOfTimesVotedLabel.text = Int(randomMatchNumber) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : String(randomMatchNumber)
+        var voteCount:Int = 0
+        for (neighbor:UInt64, numVotes:Int) in sortedMatches[indexPath.row].1 {
+            voteCount += numVotes
+        }
+        cell.numberOfTimesVotedLabel.text = Int(voteCount) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : String(voteCount)
         cell.selectionStyle = .None
         
         return cell
