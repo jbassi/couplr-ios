@@ -64,9 +64,9 @@ public enum Gender {
      */
     static func fromString(gender:String) -> Gender {
         let lowercaseGender:String = gender.lowercaseString
-        if lowercaseGender == "female" {
+        if lowercaseGender == "1" || lowercaseGender == "female" {
             return Gender.Female
-        } else if lowercaseGender == "male" {
+        } else if lowercaseGender == "0" || lowercaseGender == "male" {
             return Gender.Male
         }
         return Gender.Undetermined
@@ -293,22 +293,21 @@ public class SocialGraph {
         let addGenders:(NSData?, NSURLResponse?, NSError?) -> Void = {
             (data:NSData?, response:NSURLResponse?, error:NSError?) in
             if error == nil {
-                let jsonData:Array<NSDictionary> = parseArrayFromJSONData(data!)
-                for index in 0..<jsonData.count {
-                    let genderResponseObject:AnyObject! = jsonData[index]
-                    let nameObject:AnyObject! = genderResponseObject["name"]!
-                    let genderObject:AnyObject! = genderResponseObject["gender"]!
-                    let (firstName:String, genderAsString:String) = (nameObject.description, genderObject.description)
-                    let gender:Gender = Gender.fromString(genderAsString)
-                    self.genders[firstName] = gender
-                    if gender != Gender.Undetermined {
-                        GenderData.insert(SocialGraphController.sharedInstance.managedObjectContext!, name: firstName, gender: gender)
+                var error:NSError? = nil
+                let rawGenderData:AnyObject = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions(0), error: &error)!
+                if let genderData = rawGenderData as? [String : AnyObject] {
+                    for (firstName:String, genderIndicator:AnyObject) in genderData {
+                        let gender = Gender.fromString(genderIndicator.description!)
+                        self.genders[firstName] = gender
+                        if gender != Gender.Undetermined {
+                            GenderData.insert(SocialGraphController.sharedInstance.managedObjectContext!, name: firstName, gender: gender)
+                        }
                     }
+                    SocialGraphController.sharedInstance.managedObjectContext!.save(nil)
+                    let (males:Int, females:Int, undetermined:Int) = self.overallGenderCount()
+                    log("Gender response received (\(genderData.count) predictions).", withIndent: 1)
+                    log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent: 1, withNewline: true)
                 }
-                SocialGraphController.sharedInstance.managedObjectContext!.save(nil)
-                let (males:Int, females:Int, undetermined:Int) = self.overallGenderCount()
-                log("Gender response received (\(jsonData.count) predictions).", withIndent: 1)
-                log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent: 1, withNewline: true)
             }
             self.isCurrentlyUpdatingGender = false
             if self.shouldReupdateGender {
@@ -317,15 +316,13 @@ public class SocialGraph {
             }
         }
         var requestURL:String = kGenderizeURLPrefix
-        var counter:Int = 0
         for (firstName:String, gender:Gender) in genders {
             if gender == Gender.Undetermined {
-                requestURL += "name[\(counter)]=\(firstName)&"
-                counter++
+                requestURL += "\(firstName),"
             }
         }
         if genders.count > 0 {
-            requestURL = requestURL.substringToIndex(requestURL.endIndex.predecessor())
+            requestURL = requestURL.substringToIndex(requestURL.endIndex.predecessor()) // Remove the trailing ampersand.
             getRequestToURL(requestURL, addGenders)
         }
     }
