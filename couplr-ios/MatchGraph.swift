@@ -22,6 +22,38 @@ public class MatchTitle {
 }
 
 /**
+ * Represents a tuple uniquely identifying a voter who matched two users
+ * for some title. Includes the IDs of the two people who were matched,
+ * the ID of the voter, and the title id.
+ */
+public class MatchTuple : Hashable {
+    public init(firstId:UInt64, secondId:UInt64, voterId:UInt64, titleId:Int) {
+        if firstId > secondId {
+            self.firstId = secondId
+            self.secondId = firstId
+        } else {
+            self.firstId = firstId
+            self.secondId = secondId
+        }
+        self.voterId = voterId
+        self.titleId = titleId
+    }
+    
+    public var hashValue:Int {
+        return Int(self.firstId + self.secondId + self.titleId + self.voterId)
+    }
+    
+    var firstId:UInt64
+    var secondId:UInt64
+    var voterId:UInt64
+    var titleId:Int
+}
+
+public func ==(lhs:MatchTuple, rhs:MatchTuple) -> Bool {
+    return lhs.firstId == rhs.firstId && lhs.secondId == rhs.secondId && lhs.voterId == rhs.voterId && lhs.titleId == rhs.titleId
+}
+
+/**
  * Represents an edge in the MatchGraph consisting of all the matches
  * between two people in the graph.
  */
@@ -66,6 +98,7 @@ public class MatchGraph {
         self.matchesBeforeUserHistoryLoaded = [(UInt64, UInt64, Int)]()
         self.userVoteHistory = [(UInt64, UInt64, Int)]()
         self.cachedMatchesByTitle = [UInt64:[(Int,[(UInt64,Int)])]]()
+        self.matchUpdateTimes = [MatchTuple:NSDate]()
     }
 
     /**
@@ -207,6 +240,8 @@ public class MatchGraph {
                     let titleId:Int = matchData["titleId"] as Int
                     self.tryToUpdateDirectedEdge(first, to:second, voter:voter, titleId:titleId)
                     self.tryToUpdateDirectedEdge(second, to:first, voter:voter, titleId:titleId)
+                    let matchTuple:MatchTuple = MatchTuple(firstId:first, secondId:second, voterId:voter, titleId:titleId)
+                    self.matchUpdateTimes[matchTuple] = matchData.updatedAt
                 }
                 // Consider a match fetched only after the response arrives.
                 self.fetchedIdHistory.append(userId)
@@ -394,6 +429,7 @@ public class MatchGraph {
     var unregisteredMatches:[(UInt64, UInt64, Int)]
     var matchesBeforeUserHistoryLoaded:[(UInt64, UInt64, Int)]
     var userVoteHistory:[(UInt64, UInt64, Int)]
+    var matchUpdateTimes:[MatchTuple:NSDate]
     
     var cachedMatchesByTitle:[UInt64:[(Int,[(UInt64,Int)])]]
 }

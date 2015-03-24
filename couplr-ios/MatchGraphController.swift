@@ -41,6 +41,40 @@ public class MatchGraphController {
             SocialGraphController.sharedInstance.didLoadVoteHistoryOrInitializeGraph()
         }
     }
+    
+    /**
+     * Returns a sorted list of the most recent matches, which contains
+     * pairs of (MatchTuple, NSDate) where the NSDate indicates when the
+     * match was voted for, and the MatchTuple contains all the relevant
+     * information needed to identify a match. The list is sorted by
+     * NSDate, where the first elements are the newest matches and the
+     * last elements are the oldest matches.
+     * 
+     * minNumMatches: indicates the minimum number of matches to count as
+     *   most recent, given that there are at least that many total matches.
+     */
+    public func recentMatches(minNumMatches:Int = 8) -> [(MatchTuple,NSDate)] {
+        if matches == nil {
+            return []
+        }
+        var recentMatchesAndUpdateTimes:[(MatchTuple,NSDate)] = []
+        for (match:MatchTuple, updateTime:NSDate) in matches!.matchUpdateTimes {
+            recentMatchesAndUpdateTimes.append((match, updateTime))
+        }
+        recentMatchesAndUpdateTimes.sort({
+            (first:(MatchTuple, NSDate), second:(MatchTuple, NSDate)) -> Bool in
+            return first.1.compare(second.1) == .OrderedDescending
+        })
+        if recentMatchesAndUpdateTimes.count > minNumMatches {
+            let timeThreshold:NSDate = recentMatchesAndUpdateTimes[minNumMatches].1
+            recentMatchesAndUpdateTimes.filter({
+                (tupleAndDate:(MatchTuple, NSDate)) -> Bool in
+                let timeComparison:NSComparisonResult = tupleAndDate.1.compare(timeThreshold)
+                return timeComparison == .OrderedDescending || timeComparison == .OrderedSame
+            })
+        }
+        return recentMatchesAndUpdateTimes
+    }
 
     /**
      * Query all matches for a given match ID and update the graph
