@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6254" systemVersion="14C81f" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="Ufm-HO-aoq">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="14C109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="Ufm-HO-aoq">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6736"/>
     </dependencies>
     <scenes>
         <!--Login View Controller-->
@@ -108,7 +108,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gev-os-w0J">
-                                <rect key="frame" x="280" y="513" width="40" height="30"/>
+                                <rect key="frame" x="150" y="465" width="40" height="30"/>
                                 <state key="normal" title="Reset">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -146,14 +146,33 @@
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TXx-6t-F9F">
+                                <rect key="frame" x="276" y="465" width="49" height="30"/>
+                                <state key="normal" title="Submit">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="submitMatch" destination="eGk-i9-lER" eventType="touchUpInside" id="E74-Dc-mxg"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TFy-Gf-4xF">
+                                <rect key="frame" x="402" y="465" width="46" height="30"/>
+                                <state key="normal" title="Toggle">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="centerY" secondItem="Gev-os-w0J" secondAttribute="centerY" constant="-228" id="4jC-Xj-kfN"/>
+                            <constraint firstAttribute="centerY" secondItem="Gev-os-w0J" secondAttribute="centerY" constant="-180" id="4jC-Xj-kfN"/>
+                            <constraint firstAttribute="centerX" secondItem="TXx-6t-F9F" secondAttribute="centerX" constant="-0.5" id="Ay5-Zk-La8"/>
                             <constraint firstAttribute="centerX" secondItem="oKn-lB-K4c" secondAttribute="centerX" id="CQE-7K-Sef"/>
+                            <constraint firstAttribute="centerY" secondItem="TFy-Gf-4xF" secondAttribute="centerY" constant="-180" id="ErH-b5-3fj"/>
                             <constraint firstAttribute="centerX" secondItem="70u-3R-ST3" secondAttribute="centerX" constant="-0.5" id="HQl-mq-tMG"/>
+                            <constraint firstAttribute="centerX" secondItem="TFy-Gf-4xF" secondAttribute="centerX" constant="-125" id="Pr4-4c-Hh4"/>
+                            <constraint firstAttribute="centerY" secondItem="TXx-6t-F9F" secondAttribute="centerY" constant="-180" id="YIq-ny-9EQ"/>
                             <constraint firstAttribute="centerY" secondItem="70u-3R-ST3" secondAttribute="centerY" constant="0.5" id="q6X-2l-5eR"/>
-                            <constraint firstAttribute="centerX" secondItem="Gev-os-w0J" secondAttribute="centerX" id="soU-H2-A5I"/>
+                            <constraint firstAttribute="centerX" secondItem="Gev-os-w0J" secondAttribute="centerX" constant="130" id="soU-H2-A5I"/>
                             <constraint firstAttribute="centerY" secondItem="oKn-lB-K4c" secondAttribute="centerY" constant="204" id="zSC-DU-hM6"/>
                         </constraints>
                     </view>
@@ -168,6 +187,7 @@
                     <connections>
                         <outlet property="collectionView" destination="70u-3R-ST3" id="fZX-zg-BCX"/>
                         <outlet property="matchTitleLabel" destination="oKn-lB-K4c" id="Uhz-Je-Jz1"/>
+                        <outlet property="toggleNamesButton" destination="TFy-Gf-4xF" id="nBn-vD-DhT"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6ku-9p-6N3" userLabel="First Responder" sceneMemberID="firstResponder"/>

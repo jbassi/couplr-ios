@@ -40,7 +40,8 @@ public class MatchTuple : Hashable {
     }
     
     public var hashValue:Int {
-        return Int(self.firstId + self.secondId + self.titleId + self.voterId)
+//        return Int(self.firstId + self.secondId + self.titleId + self.voterId)
+        return 0
     }
     
     var firstId:UInt64

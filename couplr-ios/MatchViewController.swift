@@ -12,6 +12,7 @@ import Parse
 class MatchViewController: UIViewController {
 
     @IBOutlet weak var matchTitleLabel: UIButton!
+    @IBOutlet weak var toggleNamesButton: UIButton!
     @IBOutlet weak var collectionView: UICollectionView!
 
     var selectedTitle:MatchTitle? = nil
@@ -29,6 +30,8 @@ class MatchViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        toggleNamesButton.addTarget(self, action: "buttonDown:", forControlEvents: .TouchDown)
+        toggleNamesButton.addTarget(self, action: "buttonUp:", forControlEvents: .TouchUpInside)
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.allowsMultipleSelection = true
@@ -67,6 +70,27 @@ class MatchViewController: UIViewController {
             shufflePeople()
         }
     }
+    
+    func buttonDown(sender: UIButton) {
+        let cellCount = collectionView.visibleCells().count - 1
+        for index in 0...cellCount {
+            let indexPath = NSIndexPath(forRow: index, inSection: 0)
+            let randomSample:[UInt64] = socialGraphController.currentSample()
+            let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
+            cell.userName = socialGraphController.nameFromId(randomSample[indexPath.row])
+            collectionView.selectItemAtIndexPath(indexPath, animated: false, scrollPosition: .None)
+        }
+    }
+    
+    func buttonUp(sender: UIButton) {
+        let cellCount = collectionView.visibleCells().count - 1
+        for index in 0...cellCount {
+            let indexPath = NSIndexPath(forRow: index, inSection: 0)
+            if !contains(selectedIndices, indexPath) {
+                collectionView.deselectItemAtIndexPath(indexPath, animated: false)
+            }
+        }
+    }
 
     @IBAction func showButtonPressed() {
         let pickerView = PickerView.createPickerViewInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
@@ -82,6 +106,21 @@ class MatchViewController: UIViewController {
             collectionView.reloadData()
         }
     }
+    
+    @IBAction func submitMatch() {
+        if selectedUsers.count == 2 {
+            matchGraphController.userDidMatch(selectedUsers[0], toSecondId: selectedUsers[1], withTitleId: selectedTitle!.id)
+            log("Matching \(socialGraphController.nameFromId(selectedUsers[0])) with \(socialGraphController.nameFromId(selectedUsers[1])) for \"\(selectedTitle!.text)\"", withFlag: "~")
+            selectedUsers.removeAll(keepCapacity: true)
+            for index:NSIndexPath in selectedIndices {
+                collectionView.deselectItemAtIndexPath(index, animated: false)
+            }
+            selectedIndices.removeAll(keepCapacity: true)
+            shufflePeople()
+            shuffleTitle()
+        }
+    }
+    
 
     func shuffleTitle() {
         let titleList:[MatchTitle] = matchGraphController.matchTitles()
@@ -152,17 +191,6 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
             selectedUsers.append(randomSample[indexPath.row])
             selectedIndices.append(indexPath)
             collectionView.selectItemAtIndexPath(indexPath, animated: false, scrollPosition: .None)
-            if selectedUsers.count == 2 && selectedTitle != nil {
-                matchGraphController.userDidMatch(selectedUsers[0], toSecondId: selectedUsers[1], withTitleId: selectedTitle!.id)
-                log("Matching \(socialGraphController.nameFromId(selectedUsers[0])) with \(socialGraphController.nameFromId(selectedUsers[1])) for \"\(selectedTitle!.text)\"", withFlag: "~")
-                selectedUsers.removeAll(keepCapacity: true)
-                for index:NSIndexPath in selectedIndices {
-                    collectionView.deselectItemAtIndexPath(index, animated: false)
-                }
-                selectedIndices.removeAll(keepCapacity: true)
-                shufflePeople()
-                shuffleTitle()
-            }
         } else {
             collectionView.deselectItemAtIndexPath(indexPath, animated: false)
         }
