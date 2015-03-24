@@ -17,7 +17,8 @@ class ProfileDetailLayoverView: UIView {
     let blurView = FXBlurView()
     let dismissButton: UIButton = UIButton()
     let tableView: UITableView = UITableView()
-    var headerTitle: String?
+    var title:MatchTitle? = nil
+    var matchResult:[(UInt64,Int)]? = nil
     var imageName: String?
     let headerLabel: UILabel = UILabel()
     let titleImage: UIImageView = UIImageView()
@@ -94,7 +95,7 @@ class ProfileDetailLayoverView: UIView {
             superview!.insertSubview(blurView, belowSubview: self)
             superview!.insertSubview(transparentLayer, belowSubview: blurView)
             
-            headerLabel.text = headerTitle?
+            headerLabel.text = title?.text
             titleImage.image = UIImage(named: imageName!)
             
             UIView.animateWithDuration(0.5, animations: {
@@ -118,18 +119,42 @@ class ProfileDetailLayoverView: UIView {
                 self.removeFromSuperview()
         })
     }
-
+    
+    func matchResultsForTitleId() -> [(UInt64,Int)]? {
+        if self.title == nil {
+            return nil
+        }
+        if self.matchResult != nil {
+            return self.matchResult
+        }
+        let rootId:UInt64 = socialGraphController.rootId()
+        let sortedMatches:[(Int,[(UInt64,Int)])] = matchGraphController.sortedMatchesForUser(rootId)
+        let matchResult:[(UInt64,Int)] = sortedMatches.filter ({
+            (titleAndMatches:(Int,[(UInt64,Int)])) -> Bool in
+            return titleAndMatches.0 == self.title?.id
+        })[0].1
+        self.matchResult = matchResult
+        return matchResult
+    }
 }
 
 extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
-
+    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 20
+        self.matchResult = nil // Reset the match result upon rendering a new view.
+        if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
+            return matchResult.count
+        }
+        return 0
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ProfileViewControllerTableViewCell
-        
+        if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
+            let (matchedWithId:UInt64, voteCount:Int) = matchResult[indexPath.row]
+            cell.textLabel?.text = socialGraphController.nameFromId(matchedWithId, maxStringLength: 20)
+            cell.numberOfTimesVotedLabel.text = Int(voteCount) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : voteCount.description
+        }
         return cell
     }
     

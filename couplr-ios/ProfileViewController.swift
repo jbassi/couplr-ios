@@ -80,7 +80,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         let sortedMatches:[(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
         let titleId:Int = sortedMatches[indexPath.row].0
         
-        pickerView.headerTitle = matchGraphController.matchTitleFromId(titleId)!.text
+        pickerView.title = matchGraphController.matchTitleFromId(titleId)!
         pickerView.imageName = imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))]
         pickerView.showAnimated(true)
     }

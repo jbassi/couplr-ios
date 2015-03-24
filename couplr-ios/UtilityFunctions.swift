@@ -255,7 +255,6 @@ func median(list:[Float]) -> Float {
     if sortedList.count % 2 == 1 {
         return sortedList[middleIndex]
     } else {
-        println(middleIndex)
         return (sortedList[middleIndex - 1] + sortedList[middleIndex]) / 2
     }
 }
