@@ -13,6 +13,7 @@ class ProfileDetailView: UIView {
     
     let profilePictureView = ProfilePictureImageView()
     let profileNameLabel = UILabel()
+    let recentMatchesButton = UIButton()
     let bottomBorder = CALayer()
     
     override init(frame: CGRect) {
@@ -31,9 +32,9 @@ class ProfileDetailView: UIView {
         profilePictureMask.addSubview(profilePictureView)
         profilePictureMask.clipsToBounds = true
         
-        let profileNameLabelX: CGFloat = profilePictureCircle.frame.origin.x + profilePictureCircle.frame.size.width
-        let profileNameLabelY: CGFloat = profilePictureCircle.frame.origin.y + profilePictureCircle.frame.size.height - kProfileDetailViewNameLabelX
-        profileNameLabel.frame = CGRectMake(profileNameLabelX, profileNameLabelY, frame.size.width - profileNameLabelX - kProfileDetailViewBottomBorderWidth, kProfileDetailViewNameLabelX)
+        let profileNameLabelX: CGFloat = profilePictureCircle.frame.origin.x + profilePictureCircle.frame.size.width + 10
+        let profileNameLabelY: CGFloat = profilePictureCircle.frame.origin.y + (profilePictureCircle.frame.size.height / 2) - (kProfileDetailViewNameLabelX / 2)
+        profileNameLabel.frame = CGRectMake(profileNameLabelX, profileNameLabelY, frame.size.width - profileNameLabelX - kProfileDetailViewBottomBorderWidth - 10, kProfileDetailViewNameLabelX)
         profileNameLabel.adjustsFontSizeToFitWidth = true
         profileNameLabel.lineBreakMode = NSLineBreakMode.ByClipping
         profileNameLabel.font = kProfileDetailViewProfileNameLabelFont
@@ -42,10 +43,15 @@ class ProfileDetailView: UIView {
         bottomBorder.frame = CGRectMake(kProfileDetailViewBottomBorderWidth, frame.origin.y + frame.size.height, frame.size.width - kProfileDetailViewBottomBorderWidth, kProfileDetailViewBottomBorderHeight)
         bottomBorder.backgroundColor = UIColor.grayColor().CGColor
         
+        recentMatchesButton.frame = CGRectMake(profileNameLabelX, profileNameLabelY + profileNameLabel.frame.height + 5, 150, 40)
+        recentMatchesButton.backgroundColor = UIColor.lightGrayColor()
+        recentMatchesButton.setTitle("Recent Matches", forState: .Normal)
+        
         self.layer.addSublayer(bottomBorder)
         self.addSubview(profileNameLabel)
         self.addSubview(profilePictureCircle)
         self.addSubview(profilePictureMask)
+        self.addSubview(recentMatchesButton)
     }
     
     required init(coder aDecoder: NSCoder) {

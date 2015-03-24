@@ -23,6 +23,7 @@ class ProfileViewController: UIViewController {
         profileDetailView = ProfileDetailView(frame: CGRectMake(0, kStatusBarHeight, view.bounds.size.width, kProfileViewControllerDetailViewHeight))
         profileDetailView!.profilePictureView.performRequestWith(profilePictureURLFromID(rootID!))
         profileDetailView!.profileNameLabel.text = socialGraphController.nameFromId(rootID!)
+        profileDetailView!.recentMatchesButton.addTarget(self, action: "showRecentMatches:", forControlEvents: .TouchUpInside)
         
         let profileDetailViewTotalHeight = kProfileViewControllerDetailViewHeight + (kStatusBarHeight * 2)
         let matchTableViewHeight = view.bounds.size.height - profileDetailViewTotalHeight - kCouplrNavigationBarButtonHeight
@@ -30,10 +31,16 @@ class ProfileViewController: UIViewController {
         matchTableView = UITableView(frame: CGRectMake(0, profileDetailViewTotalHeight, view.bounds.size.width, matchTableViewHeight))
         matchTableView!.delegate = self
         matchTableView!.dataSource = self
-        matchTableView!.registerClass(ProfileViewControllerTableViewCell.self, forCellReuseIdentifier: "ProfileViewCell")
+        matchTableView!.registerClass(ImageTableViewCell.self, forCellReuseIdentifier: "ProfileViewCell")
         
         self.view.addSubview(matchTableView!)
         self.view.addSubview(profileDetailView!)
+    }
+    
+    func showRecentMatches(sender: UIButton) {
+        let pickerView = ProfileDetailLayoverView.createDetailLayoverInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
+        pickerView.useRecentMatches = true
+        pickerView.showAnimated(true)
     }
     
 }
@@ -50,7 +57,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ProfileViewControllerTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ImageTableViewCell
         let rootId:UInt64 = socialGraphController.rootId()
         if rootId == 0 {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")
@@ -58,9 +65,9 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         }
         let sortedMatches:[(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
         let titleId:Int = sortedMatches[indexPath.row].0
-        cell.textLabel?.text = matchGraphController.matchTitleFromId(titleId)?.text
+        cell.cellText.text = matchGraphController.matchTitleFromId(titleId)?.text
         let imageName = imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))]
-        cell.imageView?.image = UIImage(named: imageName)
+        cell.cellImage.image = UIImage(named: imageName)
         var voteCount:Int = 0
         for (neighbor:UInt64, numVotes:Int) in sortedMatches[indexPath.row].1 {
             voteCount += numVotes
@@ -69,6 +76,10 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         cell.selectionStyle = .None
         
         return cell
+    }
+    
+    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        return kTableViewCellHeight
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {

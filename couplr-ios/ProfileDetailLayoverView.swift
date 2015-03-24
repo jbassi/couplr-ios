@@ -23,6 +23,8 @@ class ProfileDetailLayoverView: UIView {
     let headerLabel: UILabel = UILabel()
     let titleImage: UIImageView = UIImageView()
     
+    var useRecentMatches: Bool = false
+    
     class func createDetailLayoverInView(view: UIView, animated: Bool) -> ProfileDetailLayoverView {
         let detailLayoverView = ProfileDetailLayoverView(frame: view.bounds)
         detailLayoverView.backgroundColor = UIColor.whiteColor()
@@ -62,7 +64,12 @@ class ProfileDetailLayoverView: UIView {
         tableView.frame = CGRectMake(0, 110, self.frame.width, self.frame.height-self.dismissButton.frame.height-120)
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.registerClass(ProfileViewControllerTableViewCell.self, forCellReuseIdentifier: "ProfileViewCell")
+        
+        if useRecentMatches {
+            tableView.registerClass(ImageTitleTableViewCell.self, forCellReuseIdentifier: "ProfileViewCell")
+        } else {
+            tableView.registerClass(ImageTableViewCell.self, forCellReuseIdentifier: "ProfileViewCell")
+        }
         
         let headerView: UIView = UIView()
         headerView.frame = CGRectMake(0, 10, self.frame.width, 100)
@@ -95,8 +102,10 @@ class ProfileDetailLayoverView: UIView {
             superview!.insertSubview(blurView, belowSubview: self)
             superview!.insertSubview(transparentLayer, belowSubview: blurView)
             
-            headerLabel.text = title?.text
-            titleImage.image = UIImage(named: imageName!)
+            headerLabel.text = useRecentMatches ? "Recent Matches" : title?.text
+            if let newImageName = imageName? {
+                titleImage.image = UIImage(named: newImageName)
+            }
             
             UIView.animateWithDuration(0.5, animations: {
                 self.frame.origin.y = 50
@@ -118,6 +127,7 @@ class ProfileDetailLayoverView: UIView {
                 self.transparentLayer.removeFromSuperview()
                 self.removeFromSuperview()
         })
+        useRecentMatches = false
     }
     
     func matchResultsForTitleId() -> [(UInt64,Int)]? {
@@ -149,13 +159,33 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ProfileViewControllerTableViewCell
-        if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
-            let (matchedWithId:UInt64, voteCount:Int) = matchResult[indexPath.row]
-            cell.textLabel?.text = socialGraphController.nameFromId(matchedWithId, maxStringLength: 20)
-            cell.numberOfTimesVotedLabel.text = Int(voteCount) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : voteCount.description
+        if useRecentMatches {
+            let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ImageTitleTableViewCell
+            
+            return cell
+            
+        } else {
+            let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ImageTableViewCell
+            if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
+                let (matchedWithId:UInt64, voteCount:Int) = matchResult[indexPath.row]
+            
+                cell.selectionStyle = .None
+                cell.cellText.text = socialGraphController.nameFromId(matchedWithId, maxStringLength: 20)
+                let profileImage = ProfilePictureImageView(pictureURL: profilePictureURLFromID(matchedWithId))
+                cell.cellImage.image = UIImage(named: "sample-1049-at-sign")
+                func doLoadCellImage() {
+                    cell.cellImage.image = profileImage.image
+                }
+                profileImage.performRequestWith(NSString(string: profilePictureURLFromID(matchedWithId)), doLoadCellImage)
+                cell.numberOfTimesVotedLabel.text = Int(voteCount) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : voteCount.description
+                
+            }
+            return cell
         }
-        return cell
+    }
+    
+    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        return kTableViewCellHeight
     }
     
 }

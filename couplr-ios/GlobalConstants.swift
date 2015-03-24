@@ -35,6 +35,9 @@ let kStoryboardProfileViewControllerName = "ProfileViewController"
 /* Facebook API */
 let kMaxAllowedBatchRequestSize:Int = 50
 
+/* General TableViewCell Constatns */
+let kTableViewCellHeight: CGFloat = 80
+
 /* PickerView Constants */
 let kPickerViewWidthInsets: CGFloat = 80.0
 let kPickerViewHeight: CGFloat = 180.0
@@ -56,9 +59,9 @@ let kLoadingLabelHideAnimationDuration: NSTimeInterval = 0.1
 /* ProfilePictureCollectionViewCell Constants */
 let kProfilePictureCollectionViewCellHideAnimationDuration = 0.2
 
-/* ProfileViewControllerTableViewCell Constants */
-let kProfileViewControllerTableViewCellPadding: CGFloat = 10.0
-let kProfileViewControllerTableViewCellWidth: CGFloat = 40.0
+/* ImageTableViewCell Constants */
+let kImageTableViewCellPadding: CGFloat = 10.0
+let kImageTableViewCellWidth: CGFloat = 40.0
 
 /* ProfileViewController Constants */
 let kProfileViewControllerMaximumNumberOfMatches = 99

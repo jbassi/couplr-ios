@@ -15,6 +15,7 @@ class ProfilePictureImageView: UIImageView {
     var pictureData: NSMutableData = NSMutableData()
     var pictureURL: NSString?
     var connection: NSURLConnection?
+    var callback:(() -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -22,15 +23,17 @@ class ProfilePictureImageView: UIImageView {
     
     init(pictureURL: NSString = "") {
         super.init()
+        self.callback = nil
         self.pictureURL = pictureURL
         let request: NSURLRequest = NSURLRequest(URL: NSURL(string: pictureURL)!)
         self.connection = NSURLConnection(request: request, delegate: self)
     }
     
-    func performRequestWith(URL: NSString) {
+    func performRequestWith(URL: NSString, callback:(() -> Void)? = nil) {
         pictureURL = URL
         let request: NSURLRequest = NSURLRequest(URL: NSURL(string: URL)!)
         connection = NSURLConnection(request: request, delegate: self)
+        self.callback = callback
     }
     
     required init(coder aDecoder: NSCoder) {
@@ -58,6 +61,9 @@ extension ProfilePictureImageView: NSURLConnectionDataDelegate {
         loading = false
         self.image = UIImage(data: pictureData)
         pictureData.length = 0
+        if callback != nil {
+            callback!()
+        }
     }
     
 }
