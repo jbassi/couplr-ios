@@ -22,7 +22,7 @@ class ProfileViewController: UIViewController {
         
         profileDetailView = ProfileDetailView(frame: CGRectMake(0, kStatusBarHeight, view.bounds.size.width, kProfileViewControllerDetailViewHeight))
         profileDetailView!.profilePictureView.performRequestWith(profilePictureURLFromID(rootID!))
-        profileDetailView!.profileNameLabel.text = socialGraphController.graph?.names[rootID!]
+        profileDetailView!.profileNameLabel.text = socialGraphController.nameFromId(rootID!)
         
         let profileDetailViewTotalHeight = kProfileViewControllerDetailViewHeight + (kStatusBarHeight * 2)
         let matchTableViewHeight = view.bounds.size.height - profileDetailViewTotalHeight - kCouplrNavigationBarButtonHeight
@@ -59,7 +59,8 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         let sortedMatches:[(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
         let titleId:Int = sortedMatches[indexPath.row].0
         cell.textLabel?.text = matchGraphController.matchTitleFromId(titleId)?.text
-        cell.imageView?.image = UIImage(named: imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))])
+        let imageName = imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))]
+        cell.imageView?.image = UIImage(named: imageName)
         var voteCount:Int = 0
         for (neighbor:UInt64, numVotes:Int) in sortedMatches[indexPath.row].1 {
             voteCount += numVotes
@@ -68,6 +69,20 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         cell.selectionStyle = .None
         
         return cell
+    }
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        let pickerView = ProfileDetailLayoverView.createDetailLayoverInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
+        let rootId:UInt64 = socialGraphController.rootId()
+        if rootId == 0 {
+            log("Warning: root user must be known before loading profile view.", withFlag:"?")
+        }
+        let sortedMatches:[(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
+        let titleId:Int = sortedMatches[indexPath.row].0
+        
+        pickerView.headerTitle = matchGraphController.matchTitleFromId(titleId)!.text
+        pickerView.imageName = imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))]
+        pickerView.showAnimated(true)
     }
     
 }

@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Jeremy Bassi. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 class PickerView: UIPickerView {
     

@@ -105,4 +105,4 @@ let kPhotosGraphPathFields:String = "fields=from,tags.fields(id,name)"
 
 /* Debugging outputs */
 let kShowRandomWalkDebugOutput:Bool = false
-let kOutputLogMessages:Bool = true
+let kOutputLogMessages:Bool = false
