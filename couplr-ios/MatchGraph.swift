@@ -40,8 +40,8 @@ public class MatchTuple : Hashable {
     }
     
     public var hashValue:Int {
-//        return Int(self.firstId + self.secondId + self.titleId + self.voterId)
-        return 0
+        let sum:UInt64 = UInt64.addWithOverflow(UInt64.addWithOverflow(self.firstId, self.secondId).0, self.voterId).0
+        return lower32Bits(sum).hashValue + self.titleId
     }
     
     var firstId:UInt64

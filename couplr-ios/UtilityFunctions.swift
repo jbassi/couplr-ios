@@ -258,3 +258,10 @@ func median(list:[Float]) -> Float {
         return (sortedList[middleIndex - 1] + sortedList[middleIndex]) / 2
     }
 }
+
+/**
+ * Returns the lower 32 bits of a 64-bit unsigned number.
+ */
+func lower32Bits(num:UInt64) -> UInt {
+    return UInt(num & 0xFFFFFFFF)
+}
