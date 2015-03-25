@@ -466,15 +466,16 @@ public class SocialGraph {
             log("Edge count: \(edgeCount)", withIndent: 2)
             log("Total weight: \(totalEdgeWeight)", withIndent: 2)
             log("Weight baseline: \(baselineEdgeWeight())", withIndent: 2)
+            MatchGraphController.sharedInstance.didFinishLoadingExtendedSocialGraph()
             return
         }
-        log("Pulling the social graph of root id \(id)...", withFlag: "!")
+        log("Pulling the social graph of \(SocialGraphController.sharedInstance.nameFromId(id))...", withFlag: "!")
         var query:PFQuery = PFQuery(className: "GraphData")
         query.whereKey("rootId", equalTo: encodeBase64(id))
         query.findObjectsInBackgroundWithBlock({
             (objects:[AnyObject]!, error:NSError?) -> Void in
             if error != nil || objects.count < 1 {
-                log("User \(id)'s graph was not found. Moving on...", withFlag: "?", withIndent: 1)
+                log("\(SocialGraphController.sharedInstance.nameFromId(id))'s graph was not found. Moving on...", withFlag: "?", withIndent: 1)
                 self.fetchAndUpdateGraphDataForFriends(&idList, numFriendsQueried: numFriendsQueried)
                 return
             }
@@ -534,7 +535,7 @@ public class SocialGraph {
                     }
                 }
             }
-            log("Finished updating graph for root id \(id).", withIndent: 1)
+            log("Finished updating graph for root id \(SocialGraphController.sharedInstance.nameFromId(id)).", withIndent: 1)
             log("\(newNodeList.count) nodes added; \(edgeUpdateCount) edges updated.", withIndent: 1, withNewline: true)
             self.fetchAndUpdateGraphDataForFriends(&idList, numFriendsQueried: numFriendsQueried + 1)
         })
@@ -1002,7 +1003,6 @@ public class SocialGraph {
     var totalEdgeWeightFromRoot:Float
 
     // Match graph used to improve heuristics.
-    var matches:MatchGraph?
     var walkWeightMultipliers:[UInt64:Float]
 
     // Miscellaneous state variables.

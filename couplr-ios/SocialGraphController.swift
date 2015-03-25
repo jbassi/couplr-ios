@@ -17,7 +17,7 @@ public class SocialGraphController {
 
     weak var delegate:SocialGraphControllerDelegate?
     var graph:SocialGraph?
-    var voteHistoryOrPhotoDataLoadProgress:Int = 0
+    var voteHistoryOrPhotoDataLoadProgress:Int = 0 // HACK This is really terrible. Make this an enum or something!
     var graphSerializationSemaphore = dispatch_semaphore_create(1)
     var graphInitializeBeginTime:Double = 0
     var doBuildGraphFromCoreData:Bool = false
@@ -50,7 +50,7 @@ public class SocialGraphController {
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let root:UInt64 = uint64FromAnyObject(result["id"])
-                    MatchGraphController.sharedInstance.matches!.fetchMatchesForId(root)
+                    MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root])
                     self.doBuildGraphFromCoreData = self.shouldInitializeGraphFromCoreData(root)
                     if self.doBuildGraphFromCoreData {
                         self.initializeGraphFromCoreData(root)
@@ -134,6 +134,14 @@ public class SocialGraphController {
         }
         return name
     }
+    
+    /**
+     * Returns a list of names from a list of ids. Simply
+     * for convenience.
+     */
+    public func namesFromIds(ids:[UInt64], maxStringLength:Int = kMaxNameDisplayLength) -> [String] {
+        return ids.map { self.nameFromId($0, maxStringLength: 15) }
+    }
 
     /**
      * Notifies the graph that the user performed a match.
@@ -207,7 +215,30 @@ public class SocialGraphController {
             log("Error when saving to Core Data: \(error!.description)")
         }
     }
-
+    
+    /**
+     * Returns a list of the given user's closest friends.
+     *
+     * maxNumFriends: indicates the maximum number of friends to
+     *   consider as "close". This function will not return more
+     *   than that number.
+     */
+    public func closestFriendsOfUser(userId:UInt64, maxNumFriends:Int) -> [UInt64] {
+        if graph == nil || graph!.edges[userId] == nil {
+            return []
+        }
+        var closestNeighbors:[(UInt64, Float)] = []
+        for (neighbor:UInt64, weight:Float) in graph!.edges[userId]! {
+            closestNeighbors.append((neighbor, weight))
+        }
+        closestNeighbors.sort({
+            (first:(UInt64,Float), second:(UInt64,Float)) -> Bool in
+            return first.1 > second.1
+        })
+        let numClosestFriends:Int = min(maxNumFriends, closestNeighbors.count)
+        return Array(closestNeighbors[0..<numClosestFriends]).map({$0.0})
+    }
+    
     /**
      * Initializes the graph directly from core data.
      */

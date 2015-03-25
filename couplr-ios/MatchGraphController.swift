@@ -85,7 +85,7 @@ public class MatchGraphController {
      * If the request failed, the resulting argument will be nil.
      */
     public func doAfterLoadingMatchesForId(id:UInt64, callback:([(Int,[(UInt64,Int)])]?) -> Void) {
-        matches?.fetchMatchesForId(id, callback: {
+        matches?.fetchMatchesForIds([id], callback: {
             (didError:Bool) -> Void in
             if didError {
                 callback(nil)
@@ -94,7 +94,7 @@ public class MatchGraphController {
             }
         })
     }
-
+    
     /**
      * Wraps an invocation to MatchGraph::fetchMatchTitles, requiring a
      * callback.
@@ -145,5 +145,16 @@ public class MatchGraphController {
      */
     public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int) {
         matches?.userDidMatch(firstId, toSecondId: toSecondId, withTitleId: withTitleId)
+    }
+    
+    /**
+     * Called when the social graph is completely finished loading,
+     * including data pulled from social networks of friends. Fetches
+     * match information for the user's closest friends from Parse.
+     */
+    public func didFinishLoadingExtendedSocialGraph() {
+        let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
+        let friends:[UInt64] = SocialGraphController.sharedInstance.closestFriendsOfUser(rootId, maxNumFriends:25)
+        matches?.fetchMatchesForIds(friends)
     }
 }

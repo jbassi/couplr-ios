@@ -92,7 +92,7 @@ public class MatchGraph {
         self.matches = [UInt64:[UInt64:MatchList]]()
         self.titlesById = [Int:MatchTitle]()
         self.titleList = [MatchTitle]()
-        self.fetchedIdHistory = [UInt64]()
+        self.fetchedIdHistory = [UInt64:Bool]()
         self.didFetchUserMatchHistory = false
         self.currentlyFlushingMatches = false
         self.unregisteredMatches = [(UInt64, UInt64, Int)]()
@@ -219,16 +219,25 @@ public class MatchGraph {
      * finishes. The callback takes a Bool parameter indicating whether or not an
      * error occurred when receiving the data.
      */
-    public func fetchMatchesForId(userId:UInt64, callback:((didError:Bool)->Void)? = nil) {
-        log("Requesting match records for user \(userId)", withFlag:"!")
+    public func fetchMatchesForIds(userIds:[UInt64], callback:((didError:Bool)->Void)? = nil) {
+        log("Requesting match records for user(s) \(SocialGraphController.sharedInstance.namesFromIds(userIds))", withFlag:"!")
         // Do not re-fetch matches.
-        if find(fetchedIdHistory, userId) != nil {
+        let userIdsToQuery:[UInt64] = userIds.filter {
+            (userId:UInt64) -> Bool in
+            if self.fetchedIdHistory[userId] != nil {
+                log("Skipping match query for user \(SocialGraphController.sharedInstance.namesFromIds(userIds))")
+                return false
+            }
+            return true
+        }
+        if userIdsToQuery.count == 0 {
             if callback != nil {
                 callback!(didError:false)
             }
-            return log("Matches for user \(userId) already loaded.", withIndent:1, withNewline:true)
+            return log("Matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIds))) already loaded.", withIndent:1, withNewline:true)
         }
-        let predicate:NSPredicate = NSPredicate(format:"firstId = \"\(encodeBase64(userId))\" OR secondId = \"\(encodeBase64(userId))\"")!
+        let encodedUserIds:[String] = userIds.map(encodeBase64)
+        let predicate:NSPredicate = NSPredicate(format:"firstId IN %@ OR secondId IN %@", encodedUserIds, encodedUserIds)!
         var query = PFQuery(className:"MatchData", predicate:predicate)
         query.findObjectsInBackgroundWithBlock {
             (objects:[AnyObject]!, error:NSError?) -> Void in
@@ -245,13 +254,15 @@ public class MatchGraph {
                     self.matchUpdateTimes[matchTuple] = matchData.updatedAt
                 }
                 // Consider a match fetched only after the response arrives.
-                self.fetchedIdHistory.append(userId)
-                log("Received and updated \(objects.count) matches for user \(userId).", withIndent:1, withNewline:true)
+                for userId:UInt64 in userIdsToQuery {
+                    self.fetchedIdHistory[userId] = true
+                }
+                log("Received and updated \(objects.count) matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent:1, withNewline:true)
                 if callback != nil {
                     callback!(didError:false)
                 }
             } else {
-                log("Error \(error!.description) occurred when loading \(userId)'s matches.", withIndent:1, withFlag:"-", withNewline:true)
+                log("Error \(error!.description) occurred when loading matches for \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent:1, withFlag:"-", withNewline:true)
                 if callback != nil {
                     callback!(didError:true)
                 }
@@ -424,7 +435,7 @@ public class MatchGraph {
     var matches:[UInt64:[UInt64:MatchList]]
     var titlesById:[Int:MatchTitle]
     var titleList:[MatchTitle]
-    var fetchedIdHistory:[UInt64]
+    var fetchedIdHistory:[UInt64:Bool]
     var didFetchUserMatchHistory:Bool
     var currentlyFlushingMatches:Bool
     var unregisteredMatches:[(UInt64, UInt64, Int)]
