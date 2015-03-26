@@ -16,6 +16,7 @@ class MatchViewController: UIViewController {
     @IBOutlet weak var toggleNamesSwitch: UISwitch!
 
     var selectedTitle:MatchTitle? = nil
+    var selectedRow:Int = 0
     var selectedUsers:[UInt64] = [UInt64]()
     var selectedIndices:[NSIndexPath] = [NSIndexPath]()
 
@@ -107,6 +108,7 @@ class MatchViewController: UIViewController {
         let pickerView = PickerView.createPickerViewInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
         pickerView.dataSource = self
         pickerView.delegate = self
+        pickerView.selectRow(selectedRow, inComponent: 0, animated: false)
     }
 
     @IBAction func shufflePeople() {
@@ -147,6 +149,7 @@ class MatchViewController: UIViewController {
         let titleList:[MatchTitle] = matchGraphController.matchTitles()
         let randomIndex:Int = randomInt(titleList.count)
         selectedTitle = titleList[randomIndex]
+        selectedRow = randomIndex
         matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
 
     }
@@ -180,7 +183,30 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         let titles:[MatchTitle] = matchGraphController.matchTitles()
         selectedTitle = titles[row]
+        selectedRow = row
         matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
+    }
+    
+    func pickerView(pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+        return 30
+    }
+    
+    func pickerView(pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusingView view: UIView!) -> UIView {
+        var label = view as? UILabel
+        
+        if label == nil {
+            label = UILabel()
+            let width = pickerView.rowSizeForComponent(component).width
+            let height = pickerView.rowSizeForComponent(component).height
+            label?.frame = CGRectMake(0, 0, width, height)
+        }
+        
+        label!.adjustsFontSizeToFitWidth = true
+        label!.textAlignment = NSTextAlignment.Center
+        label!.font = UIFont.systemFontOfSize(22)
+        label!.text = matchGraphController.matchTitles()[row].text
+        
+        return label!
     }
 
 }
