@@ -198,7 +198,10 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
                 let matchedWithId:UInt64 = matchTuple.firstId == rootId ? matchTuple.secondId : matchTuple.firstId
                 let profileImage = ProfilePictureImageView(pictureURL: profilePictureURLFromID(matchedWithId))
                 cell.selectionStyle = .None
+                cell.cellImage.layer.cornerRadius = 30
+                cell.cellImage.layer.masksToBounds = true
                 cell.cellText.text = socialGraphController.nameFromId(matchedWithId)
+                cell.cellSubText.text = matchGraphController.matchTitleFromId(matchTuple.titleId)?.text
                 func doLoadCellImage() {
                     cell.cellImage.image = profileImage.image
                 }
@@ -215,6 +218,8 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
                 cell.cellText.text = socialGraphController.nameFromId(matchedWithId, maxStringLength: 20)
                 let profileImage = ProfilePictureImageView(pictureURL: profilePictureURLFromID(matchedWithId))
                 cell.cellImage.image = UIImage(named: "sample-1049-at-sign")
+                cell.cellImage.layer.cornerRadius = 30
+                cell.cellImage.layer.masksToBounds = true
                 func doLoadCellImage() {
                     cell.cellImage.image = profileImage.image
                 }
