@@ -46,6 +46,8 @@ class ProfileDetailView: UIView {
         recentMatchesButton.frame = CGRectMake(profileNameLabelX, profileNameLabelY + profileNameLabel.frame.height + 5, 150, 40)
         recentMatchesButton.backgroundColor = UIColor.lightGrayColor()
         recentMatchesButton.setTitle("Recent Matches", forState: .Normal)
+        recentMatchesButton.layer.cornerRadius = 20
+        recentMatchesButton.layer.masksToBounds = true
         
         self.layer.addSublayer(bottomBorder)
         self.addSubview(profileNameLabel)

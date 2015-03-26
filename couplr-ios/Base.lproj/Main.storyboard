@@ -76,6 +76,24 @@
             </objects>
             <point key="canvasLocation" x="-446" y="246"/>
         </scene>
+        <!--Newsfeed View Controller-->
+        <scene sceneID="Nge-yu-oqK">
+            <objects>
+                <viewController storyboardIdentifier="NewsViewController" id="3jO-Bu-p5a" customClass="NewsfeedViewController" customModule="couplr_ios" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="alt-A5-nEn"/>
+                        <viewControllerLayoutGuide type="bottom" id="ume-XK-Yg1"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="9X3-Yh-J8L">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="g5n-qY-wbF" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-446" y="948"/>
+        </scene>
         <!--Page View Controller-->
         <scene sceneID="EGq-mj-mEV">
             <objects>

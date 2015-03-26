@@ -30,6 +30,7 @@
 		11CF0BDA1AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11CF0BD91AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift */; };
 		11E5870F1AC39BFB00D61CDB /* ImageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E5870E1AC39BFB00D61CDB /* ImageTableViewCell.swift */; };
 		11E587111AC3A92F00D61CDB /* ImageTitleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E587101AC3A92F00D61CDB /* ImageTitleTableViewCell.swift */; };
+		11E587131AC3B85100D61CDB /* NewsfeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E587121AC3B85100D61CDB /* NewsfeedViewController.swift */; };
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
 		F4973F0B1A50E31700FEA3B0 /* SocialGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */; };
 		F4C911BB1A5A764300D2CB11 /* MatchGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */; };
@@ -91,6 +92,7 @@
 		11CF0BD91AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileDetailLayoverView.swift; sourceTree = "<group>"; };
 		11E5870E1AC39BFB00D61CDB /* ImageTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageTableViewCell.swift; sourceTree = "<group>"; };
 		11E587101AC3A92F00D61CDB /* ImageTitleTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageTitleTableViewCell.swift; sourceTree = "<group>"; };
+		11E587121AC3B85100D61CDB /* NewsfeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewsfeedViewController.swift; sourceTree = "<group>"; };
 		F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphController.swift; sourceTree = "<group>"; };
 		F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraph.swift; sourceTree = "<group>"; };
 		F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraph.swift; sourceTree = "<group>"; };
@@ -172,6 +174,7 @@
 				0FF11BD81A50B6E300C14FDC /* Utilities */,
 				0FF11BDF1A50C52300C14FDC /* Match */,
 				0F37CA2019C53923007A6951 /* Profile */,
+				11E587141AC3B85600D61CDB /* Newsfeed */,
 				0F859B4319C4EB09000FB737 /* Login */,
 				0F1B9EE219C4DD7A00CD64FD /* AppDelegate.swift */,
 				0F5A034E19C4E1860050DC9F /* Bridging-Header.h */,
@@ -275,6 +278,14 @@
 				11E587101AC3A92F00D61CDB /* ImageTitleTableViewCell.swift */,
 			);
 			name = "Generic Views";
+			sourceTree = "<group>";
+		};
+		11E587141AC3B85600D61CDB /* Newsfeed */ = {
+			isa = PBXGroup;
+			children = (
+				11E587121AC3B85100D61CDB /* NewsfeedViewController.swift */,
+			);
+			name = Newsfeed;
 			sourceTree = "<group>";
 		};
 		F4973F091A50E30100FEA3B0 /* Data */ = {
@@ -390,6 +401,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				11E587131AC3B85100D61CDB /* NewsfeedViewController.swift in Sources */,
 				F4F0DCE91A63335B007FC931 /* CouplrStorage.swift in Sources */,
 				0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */,
 				0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */,

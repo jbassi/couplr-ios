@@ -16,10 +16,12 @@ let kStatusBarHeight = min(kStatusBarSize.width, kStatusBarSize.height)
 let kShouldSkipLoginKey: String = "kShouldSkipLoginKey"
 
 /* CouplrNavigationController Constants */
-let kMatchViewButtonTag = 1000
-let kProfileViewButtonTag = 1001
+let kProfileViewButtonTag = 0
+let kMatchViewButtonTag = 1
+let kNewsfeedViewButtonTag = 2
 let kMatchViewButtonTitle = "Matches"
 let kProfileViewButtonTitle = "Profile"
+let kNewsfeedViewButtonTitle = "Newsfeed"
 let kCouplrNavigationButtonFont: UIFont = UIFont.systemFontOfSize(18.0)
 let kCouplrNavigationButtonBoldFont: UIFont = UIFont.boldSystemFontOfSize(18.0)
 let kCouplrNavigationBarHeight: CGFloat = 50.0
@@ -31,6 +33,7 @@ let kCouplrNavigationBarSelectionIndicatorCornerRadius: CGFloat = 2.5
 let kStoryboardName = "Main"
 let kStoryboardMatchViewControllerName = "MatchViewController"
 let kStoryboardProfileViewControllerName = "ProfileViewController"
+let kStoryboardNewsViewControllerName = "NewsViewController"
 
 /* Facebook API */
 let kMaxAllowedBatchRequestSize:Int = 50
