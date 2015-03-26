@@ -223,7 +223,7 @@ public class SocialGraphController {
      *   consider as "close". This function will not return more
      *   than that number.
      */
-    public func closestFriendsOfUser(userId:UInt64, maxNumFriends:Int) -> [UInt64] {
+    public func closestFriendsOfUser(userId:UInt64, maxNumFriends:Int = kMaxNumClosestFriends) -> [UInt64] {
         if graph == nil || graph!.edges[userId] == nil {
             return []
         }

@@ -25,9 +25,12 @@ public class MatchTitle {
  * Represents a tuple uniquely identifying a voter who matched two users
  * for some title. Includes the IDs of the two people who were matched,
  * the ID of the voter, and the title id.
+ * 
+ * The voterId does not need to be specified, in the case that the use of
+ * a MatchTuple does not depend on a particular voter.
  */
 public class MatchTuple : Hashable {
-    public init(firstId:UInt64, secondId:UInt64, voterId:UInt64, titleId:Int) {
+    public init(firstId:UInt64, secondId:UInt64, titleId:Int, voterId:UInt64 = 0) {
         if firstId > secondId {
             self.firstId = secondId
             self.secondId = firstId
@@ -61,6 +64,7 @@ public func ==(lhs:MatchTuple, rhs:MatchTuple) -> Bool {
 public class MatchList {
     public init() {
         self.matchesByTitle = [Int:[UInt64]]()
+        self.latestUpdateTimes = [Int:NSDate]()
     }
 
     /**
@@ -68,20 +72,40 @@ public class MatchList {
      * has been correctly added, otherwise returns false (e.g. if
      * the result already exists).
      */
-    public func updateMatch(id:Int, voter:UInt64) -> Bool {
-        if matchesByTitle[id] == nil {
-            matchesByTitle[id] = []
+    public func updateMatch(titleId:Int, voterId:UInt64, updateTime:NSDate? = nil) -> Bool {
+        if matchesByTitle[titleId] == nil {
+            matchesByTitle[titleId] = []
         }
-        let voterList:[UInt64] = matchesByTitle[id]!
-        if find(voterList, voter) == nil {
-            matchesByTitle[id]!.append(voter)
+        let voterList:[UInt64] = matchesByTitle[titleId]!
+        if find(voterList, voterId) == nil {
+            matchesByTitle[titleId]!.append(voterId)
+            if updateTime != nil && shouldUpdateLatestTime(titleId, voterId:voterId, updateTime:updateTime!) {
+                latestUpdateTimes[titleId] = updateTime
+            }
             return true
         }
         return false
     }
+    
+    /**
+     * Computes the last known voter of this pair, excluding matches voted
+     * on by the root user. A nil result indicates that only the user voted
+     * on this match pair.
+     */
+    public func lastUpdateTimeForTitle(titleId:Int) -> NSDate? {
+        return latestUpdateTimes[titleId]
+    }
+    
+    private func shouldUpdateLatestTime(titleId:Int, voterId:UInt64, updateTime:NSDate) -> Bool {
+        
+        return voterId != SocialGraphController.sharedInstance.rootId() &&
+            (latestUpdateTimes[titleId] == nil || updateTime.compare(latestUpdateTimes[titleId]!) == .OrderedDescending)
+    }
 
     // Maps a title ID to a list of users who voted for that match.
     var matchesByTitle:[Int:[UInt64]]
+    // Maps a title to the last time that it was updated.
+    var latestUpdateTimes:[Int:NSDate]
 }
 
 /**
@@ -248,9 +272,9 @@ public class MatchGraph {
                     let second:UInt64 = uint64FromAnyObject(matchData["secondId"], base64:true)
                     let voter:UInt64 = uint64FromAnyObject(matchData["voterId"], base64:true)
                     let titleId:Int = matchData["titleId"] as Int
-                    self.tryToUpdateDirectedEdge(first, to:second, voter:voter, titleId:titleId)
-                    self.tryToUpdateDirectedEdge(second, to:first, voter:voter, titleId:titleId)
-                    let matchTuple:MatchTuple = MatchTuple(firstId:first, secondId:second, voterId:voter, titleId:titleId)
+                    self.tryToUpdateDirectedEdge(first, to:second, voter:voter, titleId:titleId, updateTime:matchData.updatedAt)
+                    self.tryToUpdateDirectedEdge(second, to:first, voter:voter, titleId:titleId, updateTime:matchData.updatedAt)
+                    let matchTuple:MatchTuple = MatchTuple(firstId:first, secondId:second, titleId:titleId, voterId:voter)
                     self.matchUpdateTimes[matchTuple] = matchData.updatedAt
                 }
                 // Consider a match fetched only after the response arrives.
@@ -294,8 +318,9 @@ public class MatchGraph {
                     let first:UInt64 = uint64FromAnyObject(matchData["firstId"], base64:true)
                     let second:UInt64 = uint64FromAnyObject(matchData["secondId"], base64:true)
                     let titleId:Int = matchData["titleId"] as Int
-                    self.tryToUpdateDirectedEdge(first, to:second, voter:rootUser, titleId:titleId)
-                    self.tryToUpdateDirectedEdge(second, to:first, voter:rootUser, titleId:titleId)
+                    let updateTime:NSDate = matchData.updatedAt
+                    self.tryToUpdateDirectedEdge(first, to:second, voter:rootUser, titleId:titleId, updateTime:updateTime)
+                    self.tryToUpdateDirectedEdge(second, to:first, voter:rootUser, titleId:titleId, updateTime:updateTime)
                     self.userVoteHistory.append((first, second, titleId))
                 }
                 self.didFetchUserMatchHistory = true
@@ -374,12 +399,19 @@ public class MatchGraph {
         }
         SocialGraphController.sharedInstance.userDidMatch(firstId, toSecondId:toSecondId)
     }
+    
+    /**
+     * Returns a dictionary containing MatchLists of each neighbor of the given user.
+     */
+    public func matchListsForUserId(userId:UInt64) -> [UInt64:MatchList] {
+        return matches[userId] == nil ? [UInt64:MatchList]() : matches[userId]!
+    }
 
     /**
      * Updates the graph going in one direction. Returns if the edge was successfully
      * added (i.e. the user did not already vote on the pair for the same title).
      */
-    private func tryToUpdateDirectedEdge(from:UInt64, to:UInt64, voter:UInt64, titleId:Int) -> Bool {
+    private func tryToUpdateDirectedEdge(from:UInt64, to:UInt64, voter:UInt64, titleId:Int, updateTime:NSDate? = nil) -> Bool {
         // Make a new adjacency map if none exists.
         if matches[from] == nil {
             matches[from] = [UInt64:MatchList]()
@@ -388,7 +420,7 @@ public class MatchGraph {
         if matches[from]![to] == nil {
             matches[from]![to] = MatchList()
         }
-        let didUpdateMatch:Bool = matches[from]![to]!.updateMatch(titleId, voter:voter)
+        let didUpdateMatch:Bool = matches[from]![to]!.updateMatch(titleId, voterId:voter, updateTime:updateTime)
         if didUpdateMatch {
             cachedMatchesByTitle[from] = nil
             cachedMatchesByTitle[to] = nil

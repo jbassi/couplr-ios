@@ -109,6 +109,10 @@ let kMinNumRecentMatches:Int = 8
 let kStatusGraphPathFields:String = "fields=from,likes,comments.fields(from,likes)"
 let kPhotosGraphPathFields:String = "fields=from,tags.fields(id,name)"
 
+/* News feed */
+let kMaxNumNewsFeedMatches:Int = 25
+let kMaxNumClosestFriends:Int = 25
+
 /* Debugging outputs */
 let kShowRandomWalkDebugOutput:Bool = false
 let kOutputLogMessages:Bool = false

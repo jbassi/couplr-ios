@@ -26,6 +26,40 @@ public class MatchGraphController {
     public func appWillClose() {
         matches?.flushUnregisteredMatches()
     }
+    
+    /**
+     * Returns a list of recent matches in the user's social network.
+     * The matches involve the user's closest friends, and are sorted
+     * by chronological order, newest first.
+     */
+    public func newsFeedMatches(maxNumMatches:Int = kMaxNumNewsFeedMatches) -> [MatchTuple] {
+        if matches == nil {
+            return []
+        }
+        let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
+        var updateTimesByMatchTuple:[MatchTuple:NSDate] = [MatchTuple:NSDate]()
+        for friendId:UInt64 in SocialGraphController.sharedInstance.closestFriendsOfUser(rootId) {
+            for (neighborId:UInt64, matchList:MatchList) in matches!.matchListsForUserId(friendId) {
+                if neighborId == rootId {
+                    continue
+                }
+                for (titleId:Int, _:[UInt64]) in matchList.matchesByTitle {
+                    let updateTime:NSDate? = matchList.lastUpdateTimeForTitle(titleId)
+                    if updateTime != nil {
+                        updateTimesByMatchTuple[MatchTuple(firstId: friendId, secondId: neighborId, titleId: titleId)] = updateTime!
+                    }
+                }
+            }
+        }
+        var matchTuples:[MatchTuple] = updateTimesByMatchTuple.keys.array
+        matchTuples.sort {
+            (first:MatchTuple, second:MatchTuple) -> Bool in
+            let firstUpdateTime:NSDate = updateTimesByMatchTuple[first]!
+            let secondUpdateTime:NSDate = updateTimesByMatchTuple[second]!
+            return firstUpdateTime.compare(secondUpdateTime) == .OrderedDescending
+        }
+        return Array(matchTuples[0..<min(matchTuples.count, maxNumMatches)])
+    }
 
     /**
      * Once the social graph loads, we know the root user. Use this
@@ -157,7 +191,7 @@ public class MatchGraphController {
      */
     public func didFinishLoadingExtendedSocialGraph() {
         let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
-        let friends:[UInt64] = SocialGraphController.sharedInstance.closestFriendsOfUser(rootId, maxNumFriends:25)
+        let friends:[UInt64] = SocialGraphController.sharedInstance.closestFriendsOfUser(rootId)
         matches?.fetchMatchesForIds(friends)
     }
 }
