@@ -13,15 +13,16 @@ class ProfilePictureCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var imageView: ProfilePictureImageView!
     
     var userName: String = ""
+    var overrideLayerSelection: Bool = false
     let transparentLayer = UIView()
     let nameLabel = UILabel()
     
     func addTransparentLayerWithName(name:String) {
-        transparentLayer.frame = contentView.frame
+        transparentLayer.frame = CGRectMake(4, 4, 92, 92)
         transparentLayer.backgroundColor = UIColor(white: 0.1, alpha: 0.8)
         
         nameLabel.numberOfLines = 0
-        nameLabel.frame = CGRectMake(0, 0, 100, 100)
+        nameLabel.frame = CGRectMake(0, 0, 92, 92)
         nameLabel.textColor = UIColor.whiteColor()
         nameLabel.font = UIFont.boldSystemFontOfSize(12)
         nameLabel.text = name
@@ -41,9 +42,15 @@ class ProfilePictureCollectionViewCell: UICollectionViewCell {
         })
     }
     
+    func addTransparentLayer() {
+        addTransparentLayerWithName(userName)
+    }
+    
     override var selected: Bool {
         willSet(newValue) {
-            newValue ? addTransparentLayerWithName(userName) : removeTransparentLayer()
+            if !overrideLayerSelection {
+                newValue ? addTransparentLayerWithName(userName) : removeTransparentLayer()
+            }
         }
     }
     

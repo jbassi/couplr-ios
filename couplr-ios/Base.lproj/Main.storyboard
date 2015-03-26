@@ -116,17 +116,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oKn-lB-K4c">
-                                <rect key="frame" x="248" y="81" width="104" height="30"/>
-                                <state key="normal" title="Select A Title...">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="showButtonPressed" destination="eGk-i9-lER" eventType="touchUpInside" id="id3-SU-get"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gev-os-w0J">
-                                <rect key="frame" x="150" y="465" width="40" height="30"/>
+                                <rect key="frame" x="168" y="444" width="40" height="30"/>
                                 <state key="normal" title="Reset">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -135,7 +126,7 @@
                                 </connections>
                             </button>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="70u-3R-ST3">
-                                <rect key="frame" x="143" y="142" width="315" height="315"/>
+                                <rect key="frame" x="143" y="125" width="315" height="315"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="315" id="np1-gK-mQp"/>
@@ -155,17 +146,17 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Ama-Bv-cdU" customClass="ProfilePictureImageView" customModule="couplr_ios" customModuleProvider="target">
-                                                    <rect key="frame" x="0.0" y="0.0" width="100" height="100"/>
+                                                    <rect key="frame" x="4" y="4" width="92" height="92"/>
                                                 </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
-                                            <constraint firstItem="Ama-Bv-cdU" firstAttribute="leading" secondItem="ASY-IT-Xeu" secondAttribute="leading" id="2Mr-Wn-OE8"/>
-                                            <constraint firstAttribute="trailing" secondItem="Ama-Bv-cdU" secondAttribute="trailing" id="I9w-VB-EaO"/>
-                                            <constraint firstItem="Ama-Bv-cdU" firstAttribute="top" secondItem="ASY-IT-Xeu" secondAttribute="top" id="KEb-BH-4Ji"/>
-                                            <constraint firstAttribute="bottom" secondItem="Ama-Bv-cdU" secondAttribute="bottom" id="QGc-Kg-RxE"/>
+                                            <constraint firstItem="Ama-Bv-cdU" firstAttribute="leading" secondItem="ASY-IT-Xeu" secondAttribute="leading" constant="4" id="2Mr-Wn-OE8"/>
+                                            <constraint firstAttribute="trailing" secondItem="Ama-Bv-cdU" secondAttribute="trailing" constant="4" id="I9w-VB-EaO"/>
+                                            <constraint firstItem="Ama-Bv-cdU" firstAttribute="top" secondItem="ASY-IT-Xeu" secondAttribute="top" constant="4" id="KEb-BH-4Ji"/>
+                                            <constraint firstAttribute="bottom" secondItem="Ama-Bv-cdU" secondAttribute="bottom" constant="4" id="QGc-Kg-RxE"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="imageView" destination="Ama-Bv-cdU" id="ZyM-F4-YhR"/>
@@ -174,7 +165,7 @@
                                 </cells>
                             </collectionView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TXx-6t-F9F">
-                                <rect key="frame" x="276" y="465" width="49" height="30"/>
+                                <rect key="frame" x="276" y="444" width="49" height="30"/>
                                 <state key="normal" title="Submit">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -182,26 +173,40 @@
                                     <action selector="submitMatch" destination="eGk-i9-lER" eventType="touchUpInside" id="E74-Dc-mxg"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TFy-Gf-4xF">
-                                <rect key="frame" x="402" y="465" width="46" height="30"/>
-                                <state key="normal" title="Toggle">
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="x14-Uy-ae4">
+                                <rect key="frame" x="389" y="472" width="51" height="31"/>
+                            </switch>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Names:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="npC-d2-qQv">
+                                <rect key="frame" x="386" y="448" width="59" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oKn-lB-K4c">
+                                <rect key="frame" x="248" y="74" width="104" height="30"/>
+                                <state key="normal" title="Select A Title...">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections>
+                                    <action selector="showButtonPressed" destination="eGk-i9-lER" eventType="touchUpInside" id="id3-SU-get"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="centerY" secondItem="Gev-os-w0J" secondAttribute="centerY" constant="-180" id="4jC-Xj-kfN"/>
+                            <constraint firstAttribute="centerY" secondItem="x14-Uy-ae4" secondAttribute="centerY" constant="-187.5" id="0Vs-Z6-fZy"/>
+                            <constraint firstAttribute="centerY" secondItem="Gev-os-w0J" secondAttribute="centerY" constant="-159" id="4jC-Xj-kfN"/>
                             <constraint firstAttribute="centerX" secondItem="TXx-6t-F9F" secondAttribute="centerX" constant="-0.5" id="Ay5-Zk-La8"/>
                             <constraint firstAttribute="centerX" secondItem="oKn-lB-K4c" secondAttribute="centerX" id="CQE-7K-Sef"/>
-                            <constraint firstAttribute="centerY" secondItem="TFy-Gf-4xF" secondAttribute="centerY" constant="-180" id="ErH-b5-3fj"/>
                             <constraint firstAttribute="centerX" secondItem="70u-3R-ST3" secondAttribute="centerX" constant="-0.5" id="HQl-mq-tMG"/>
-                            <constraint firstAttribute="centerX" secondItem="TFy-Gf-4xF" secondAttribute="centerX" constant="-125" id="Pr4-4c-Hh4"/>
-                            <constraint firstAttribute="centerY" secondItem="TXx-6t-F9F" secondAttribute="centerY" constant="-180" id="YIq-ny-9EQ"/>
-                            <constraint firstItem="Gev-os-w0J" firstAttribute="top" secondItem="70u-3R-ST3" secondAttribute="bottom" constant="8" symbolic="YES" id="eEZ-TS-fRG"/>
-                            <constraint firstAttribute="centerY" secondItem="70u-3R-ST3" secondAttribute="centerY" constant="0.5" id="q6X-2l-5eR"/>
-                            <constraint firstAttribute="centerX" secondItem="Gev-os-w0J" secondAttribute="centerX" constant="130" id="soU-H2-A5I"/>
-                            <constraint firstAttribute="centerY" secondItem="oKn-lB-K4c" secondAttribute="centerY" constant="204" id="zSC-DU-hM6"/>
+                            <constraint firstAttribute="centerY" secondItem="TXx-6t-F9F" secondAttribute="centerY" constant="-159" id="YIq-ny-9EQ"/>
+                            <constraint firstItem="Gev-os-w0J" firstAttribute="top" secondItem="70u-3R-ST3" secondAttribute="bottom" constant="4" id="eEZ-TS-fRG"/>
+                            <constraint firstAttribute="centerY" secondItem="70u-3R-ST3" secondAttribute="centerY" constant="17.5" id="q6X-2l-5eR"/>
+                            <constraint firstAttribute="centerX" secondItem="Gev-os-w0J" secondAttribute="centerX" constant="112" id="soU-H2-A5I"/>
+                            <constraint firstAttribute="centerX" secondItem="x14-Uy-ae4" secondAttribute="centerX" constant="-113.5" id="u9G-mA-ZWp"/>
+                            <constraint firstAttribute="centerX" secondItem="npC-d2-qQv" secondAttribute="centerX" constant="-115.5" id="zCf-Ya-KGb"/>
+                            <constraint firstAttribute="centerY" secondItem="oKn-lB-K4c" secondAttribute="centerY" constant="211" id="zSC-DU-hM6"/>
+                            <constraint firstAttribute="centerY" secondItem="npC-d2-qQv" secondAttribute="centerY" constant="-158.5" id="zkT-6K-jQd"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Match" id="vCm-A7-M6g"/>
@@ -215,7 +220,7 @@
                     <connections>
                         <outlet property="collectionView" destination="70u-3R-ST3" id="fZX-zg-BCX"/>
                         <outlet property="matchTitleLabel" destination="oKn-lB-K4c" id="Uhz-Je-Jz1"/>
-                        <outlet property="toggleNamesButton" destination="TFy-Gf-4xF" id="nBn-vD-DhT"/>
+                        <outlet property="toggleNamesSwitch" destination="x14-Uy-ae4" id="8AK-nB-9eR"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6ku-9p-6N3" userLabel="First Responder" sceneMemberID="firstResponder"/>

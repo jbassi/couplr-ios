@@ -113,29 +113,31 @@ class CouplrNavigationController: UINavigationController {
     func tapSegmentButton(button: UIButton) {
         let offset = button.tag - lastPageIndex
         
-        if offset > 0 {
-            // Positive direction
-            for i in (currentPageIndex+1)...(button.tag) {
-                pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Forward, animated: true, completion: {(completed:Bool) in
-                    if completed {
-                        self.currentPageIndex = i
-                        self.buttonArray[self.lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
-                        self.lastPageIndex = button.tag
-                        self.buttonArray[button.tag].titleLabel?.font = kCouplrNavigationButtonBoldFont
-                    }
-                })
-            }
-        } else {
-            // Negative direction
-            for i in reverse(button.tag...(currentPageIndex-1)) {
-                pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Reverse, animated: true, completion: {(completed:Bool) in
-                    if completed {
-                        self.currentPageIndex = i
-                        self.buttonArray[self.lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
-                        self.lastPageIndex = button.tag
-                        self.buttonArray[button.tag].titleLabel?.font = kCouplrNavigationButtonBoldFont
-                    }
-                })
+        if button.tag != currentPageIndex {
+            if offset > 0 {
+                // Positive direction
+                for i in (currentPageIndex+1)...(button.tag) {
+                    pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Forward, animated: true, completion: {(completed:Bool) in
+                        if completed {
+                            self.currentPageIndex = i
+                            self.buttonArray[self.lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
+                            self.lastPageIndex = button.tag
+                            self.buttonArray[button.tag].titleLabel?.font = kCouplrNavigationButtonBoldFont
+                        }
+                    })
+                }
+            } else {
+                // Negative direction
+                for i in reverse(button.tag...(currentPageIndex-1)) {
+                    pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Reverse, animated: true, completion: {(completed:Bool) in
+                        if completed {
+                            self.currentPageIndex = i
+                            self.buttonArray[self.lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
+                            self.lastPageIndex = button.tag
+                            self.buttonArray[button.tag].titleLabel?.font = kCouplrNavigationButtonBoldFont
+                        }
+                    })
+                }
             }
         }
     }

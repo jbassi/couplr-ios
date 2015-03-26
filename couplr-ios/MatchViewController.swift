@@ -12,8 +12,8 @@ import Parse
 class MatchViewController: UIViewController {
 
     @IBOutlet weak var matchTitleLabel: UIButton!
-    @IBOutlet weak var toggleNamesButton: UIButton!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var toggleNamesSwitch: UISwitch!
 
     var selectedTitle:MatchTitle? = nil
     var selectedUsers:[UInt64] = [UInt64]()
@@ -30,8 +30,8 @@ class MatchViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        toggleNamesButton.addTarget(self, action: "buttonDown:", forControlEvents: .TouchDown)
-        toggleNamesButton.addTarget(self, action: "buttonUp:", forControlEvents: .TouchUpInside)
+        toggleNamesSwitch.on = false
+        toggleNamesSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.allowsMultipleSelection = true
@@ -71,23 +71,34 @@ class MatchViewController: UIViewController {
         }
     }
     
-    func buttonDown(sender: UIButton) {
+    func switchToggled(sender: UISwitch) {
+        if sender.on {
+            showAllNames()
+        } else {
+            hideAllNames()
+        }
+    }
+    
+    func showAllNames() {
         let cellCount = collectionView.visibleCells().count - 1
         for index in 0...cellCount {
             let indexPath = NSIndexPath(forRow: index, inSection: 0)
             let randomSample:[UInt64] = socialGraphController.currentSample()
             let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
             cell.userName = socialGraphController.nameFromId(randomSample[indexPath.row])
-            collectionView.selectItemAtIndexPath(indexPath, animated: false, scrollPosition: .None)
+            cell.addTransparentLayer()
+            cell.overrideLayerSelection = true
         }
     }
     
-    func buttonUp(sender: UIButton) {
+    func hideAllNames() {
         let cellCount = collectionView.visibleCells().count - 1
         for index in 0...cellCount {
             let indexPath = NSIndexPath(forRow: index, inSection: 0)
+            let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
+            cell.overrideLayerSelection = false
             if !contains(selectedIndices, indexPath) {
-                collectionView.deselectItemAtIndexPath(indexPath, animated: false)
+                cell.removeTransparentLayer()
             }
         }
     }
@@ -103,7 +114,17 @@ class MatchViewController: UIViewController {
             socialGraphController.updateRandomSample()
             selectedUsers.removeAll(keepCapacity: true)
             selectedIndices.removeAll(keepCapacity: true)
-            collectionView.reloadData()
+            let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+            dispatch_async(dispatch_get_main_queue()) {
+                self.collectionView.reloadData()
+                dispatch_async(dispatch_get_main_queue()) {
+                    if self.toggleNamesSwitch.on {
+                        self.showAllNames()
+                    } else {
+                        self.hideAllNames()
+                    }
+                }
+            }
         }
     }
     
@@ -174,11 +195,14 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
 
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as ProfilePictureCollectionViewCell
+        cell.backgroundColor = UIColor.grayColor()
 
         let randomSample:[UInt64] = socialGraphController.currentSample()
         if randomSample.count > 0 {
             let userID = randomSample[indexPath.row]
-            cell.imageView.performRequestWith(profilePictureURLFromID(userID))
+            dispatch_async(dispatch_get_main_queue()) {
+                cell.imageView.performRequestWith(profilePictureURLFromID(userID))
+            }
         }
         return cell
     }
@@ -188,6 +212,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
             let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
             let randomSample:[UInt64] = socialGraphController.currentSample()
             cell.userName = socialGraphController.nameFromId(randomSample[indexPath.row])
+            cell.backgroundColor = UIColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 0.8)
             selectedUsers.append(randomSample[indexPath.row])
             selectedIndices.append(indexPath)
             collectionView.selectItemAtIndexPath(indexPath, animated: false, scrollPosition: .None)
@@ -198,12 +223,16 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
 
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
+        cell.backgroundColor = UIColor.grayColor()
         let randomSample:[UInt64] = socialGraphController.currentSample()
         if let index = find(selectedUsers, randomSample[indexPath.row]) {
              selectedIndices.removeAtIndex(index)
              selectedUsers.removeAtIndex(index)
         }
         collectionView.deselectItemAtIndexPath(indexPath, animated: false)
+        if toggleNamesSwitch.on {
+            cell.addTransparentLayer()
+        }
     }
 
 }
@@ -216,6 +245,8 @@ extension MatchViewController: SocialGraphControllerDelegate {
         socialGraphLoaded = true
         dismissLoadingScreen()
         socialGraphController.updateRandomSample()
-        collectionView.reloadData()
+        dispatch_async(dispatch_get_main_queue()) {
+            self.collectionView.reloadData()
+        }
     }
 }
