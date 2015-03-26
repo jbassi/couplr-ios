@@ -15,6 +15,7 @@ let kMaxNumStatuses:Int = 100                       // Number of statuses to que
 let kMaxNumPhotos:Int = 100                         // Number of photos to query.
 let kMaxPhotoGroupSize:Int = 15                     // Max number of people considered in a photo.
 let kMinGraphEdgeWeight:Float = 0.15                // The minimum edge weight threshold when cleaning the graph.
+let kMatchExistsBetweenUsersWeight:Float = 1       // The connection weight between two users who are matched at least once.
 let kUserMatchVoteScore:Float = 1.0                 // Score for the user voting on title for a match.
 // Like and comment scores.
 let kCommentRootScore:Float = 0.5                   // Score for commenting on the root user's status.
@@ -461,7 +462,6 @@ public class SocialGraph {
             log("Time since startup: \(timeString) sec", withIndent: 2, withNewline: true)
             updateGenders()
             updateMedianEdgeWeight()
-            log("Graph construction finished! Showing statistics...", withIndent: 1)
             log("Vertex count: \(names.count)", withIndent: 2)
             log("Edge count: \(edgeCount)", withIndent: 2)
             log("Total weight: \(totalEdgeWeight)", withIndent: 2)
@@ -625,7 +625,7 @@ public class SocialGraph {
      * TODO Maybe automatically update the median edge weight on the
      * fly whenever a new edge is added or an edge is removed?
      */
-    private func updateMedianEdgeWeight() {
+    public func updateMedianEdgeWeight() {
         var allEdges:[Float] = [Float]()
         for (node:UInt64, neighbors:[UInt64:Float]) in edges {
             for (neighbor:UInt64, weight:Float) in neighbors {

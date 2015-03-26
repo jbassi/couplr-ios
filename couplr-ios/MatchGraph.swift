@@ -27,10 +27,11 @@ public class MatchTitle {
  * the ID of the voter, and the title id.
  * 
  * The voterId does not need to be specified, in the case that the use of
- * a MatchTuple does not depend on a particular voter.
+ * a MatchTuple does not depend on a particular voter. The same goes for
+ * the titleId.
  */
 public class MatchTuple : Hashable {
-    public init(firstId:UInt64, secondId:UInt64, titleId:Int, voterId:UInt64 = 0) {
+    public init(firstId:UInt64, secondId:UInt64, titleId:Int = 0, voterId:UInt64 = 0) {
         if firstId > secondId {
             self.firstId = secondId
             self.secondId = firstId
@@ -424,6 +425,7 @@ public class MatchGraph {
         if didUpdateMatch {
             cachedMatchesByTitle[from] = nil
             cachedMatchesByTitle[to] = nil
+            SocialGraphController.sharedInstance.notifyMatchExistsBetweenUsers(from, secondUser:to, withVoter:voter)
         }
         return didUpdateMatch
     }

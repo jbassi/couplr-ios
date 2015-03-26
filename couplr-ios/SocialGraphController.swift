@@ -21,7 +21,8 @@ public class SocialGraphController {
     var graphSerializationSemaphore = dispatch_semaphore_create(1)
     var graphInitializeBeginTime:Double = 0
     var doBuildGraphFromCoreData:Bool = false
-
+    var matchesRecordedInSocialGraph:[MatchTuple:Bool] = [MatchTuple:Bool]() // HACK This name is so terrible I can't even.
+    
     lazy var managedObjectContext:NSManagedObjectContext? = {
         let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
         if let managedObjectContext = appDelegate.managedObjectContext {
@@ -237,6 +238,33 @@ public class SocialGraphController {
         })
         let numClosestFriends:Int = min(maxNumFriends, closestNeighbors.count)
         return Array(closestNeighbors[0..<numClosestFriends]).map({$0.0})
+    }
+    
+    /**
+     * Called when the MatchGraphController has received information
+     * about a match between two users in the graph. Adds an edge
+     * between the two users who were matched, but only if the voter
+     * was not the root and an edge had not been previously added.
+     */
+    public func notifyMatchExistsBetweenUsers(firstUser:UInt64, secondUser:UInt64, withVoter:UInt64) {
+        if graph == nil || withVoter == graph!.root || graph!.names[firstUser] == nil || graph!.names[secondUser] == nil {
+            return
+        }
+        let pair:MatchTuple = MatchTuple(firstId:firstUser, secondId:secondUser)
+        if matchesRecordedInSocialGraph[pair] == nil {
+            graph!.connectNode(firstUser, toNode:secondUser, withWeight:kMatchExistsBetweenUsersWeight)
+            matchesRecordedInSocialGraph[pair] = true
+        }
+    }
+    
+    /**
+     * Called when the MatchGraphController has finished loading the
+     * matches between closest friends. Updates the median edge weight.
+     */
+    public func didLoadMatchesForClosestFriends() {
+        if graph != nil {
+            graph!.updateMedianEdgeWeight()
+        }
     }
     
     /**
