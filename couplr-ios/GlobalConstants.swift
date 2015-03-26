@@ -102,6 +102,9 @@ let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 let kSecondsBeforeNextGraphUpdate:Double = 345600 // In seconds. This is about 4 days.
 let kEnableGraphCaching:Bool = true
 
+/* Recent match view */
+let kMinNumRecentMatches:Int = 8
+
 /* Graph paths for statuses and photos. */
 let kStatusGraphPathFields:String = "fields=from,likes,comments.fields(from,likes)"
 let kPhotosGraphPathFields:String = "fields=from,tags.fields(id,name)"

@@ -53,13 +53,16 @@ public class MatchGraphController {
      * minNumMatches: indicates the minimum number of matches to count as
      *   most recent, given that there are at least that many total matches.
      */
-    public func recentMatches(minNumMatches:Int = 8) -> [(MatchTuple,NSDate)] {
+    public func recentMatches(minNumMatches:Int = kMinNumRecentMatches) -> [(MatchTuple,NSDate)] {
         if matches == nil {
             return []
         }
+        let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
         var recentMatchesAndUpdateTimes:[(MatchTuple,NSDate)] = []
         for (match:MatchTuple, updateTime:NSDate) in matches!.matchUpdateTimes {
-            recentMatchesAndUpdateTimes.append((match, updateTime))
+            if match.firstId == rootId || match.secondId == rootId {
+                recentMatchesAndUpdateTimes.append((match, updateTime))
+            }
         }
         recentMatchesAndUpdateTimes.sort({
             (first:(MatchTuple, NSDate), second:(MatchTuple, NSDate)) -> Bool in

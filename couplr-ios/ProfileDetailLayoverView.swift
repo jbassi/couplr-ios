@@ -19,6 +19,7 @@ class ProfileDetailLayoverView: UIView {
     let tableView: UITableView = UITableView()
     var title:MatchTitle? = nil
     var matchResult:[(UInt64,Int)]? = nil
+    var recentMatchesResult:[MatchTuple]? = nil
     var imageName: String?
     let headerLabel: UILabel = UILabel()
     let titleImage: UIImageView = UIImageView()
@@ -65,11 +66,8 @@ class ProfileDetailLayoverView: UIView {
         tableView.delegate = self
         tableView.dataSource = self
         
-        if useRecentMatches {
-            tableView.registerClass(ImageTitleTableViewCell.self, forCellReuseIdentifier: "ProfileViewCell")
-        } else {
-            tableView.registerClass(ImageTableViewCell.self, forCellReuseIdentifier: "ProfileViewCell")
-        }
+        tableView.registerClass(ImageTitleTableViewCell.self, forCellReuseIdentifier: "RecentViewCell")
+        tableView.registerClass(ImageTableViewCell.self, forCellReuseIdentifier: "ProfileViewCell")
         
         let headerView: UIView = UIView()
         headerView.frame = CGRectMake(0, 10, self.frame.width, 100)
@@ -130,6 +128,32 @@ class ProfileDetailLayoverView: UIView {
         useRecentMatches = false
     }
     
+    func recentMatches() -> [MatchTuple]? {
+        if recentMatchesResult != nil {
+            return recentMatchesResult!
+        }
+        let rootId:UInt64 = socialGraphController.rootId()
+        recentMatchesResult = []
+        let tuples:[MatchTuple] = matchGraphController.recentMatches().filter({
+            (tupleAndTime:(MatchTuple,NSDate)) -> Bool in
+            let tuple:MatchTuple = tupleAndTime.0
+            let matchedWithId:UInt64 = tuple.firstId == rootId ? tuple.secondId : tuple.firstId
+            return self.socialGraphController.containsUser(matchedWithId)
+        }).map{ $0.0 }
+        for u:MatchTuple in tuples {
+            var shouldAddMatch:Bool = true
+            for v:MatchTuple in recentMatchesResult! {
+                if u == v {
+                    shouldAddMatch = false
+                }
+            }
+            if shouldAddMatch {
+                recentMatchesResult!.append(u)
+            }
+        }
+        return recentMatchesResult
+    }
+    
     func matchResultsForTitleId() -> [(UInt64,Int)]? {
         if self.title == nil {
             return nil
@@ -151,17 +175,35 @@ class ProfileDetailLayoverView: UIView {
 extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        self.matchResult = nil // Reset the match result upon rendering a new view.
-        if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
-            return matchResult.count
+        if useRecentMatches {
+            self.recentMatchesResult = nil // Reset the recent matches upon rendering a new view.
+            if let recentMatchesResult:[MatchTuple]? = recentMatches() {
+                return recentMatchesResult!.count
+            }
+        } else {
+            self.matchResult = nil // Reset the match result upon rendering a new view.
+            if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
+                return matchResult.count
+            }
         }
         return 0
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if useRecentMatches {
-            let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ImageTitleTableViewCell
-            
+            let rootId:UInt64 = socialGraphController.rootId()
+            let cell = tableView.dequeueReusableCellWithIdentifier("RecentViewCell", forIndexPath: indexPath) as ImageTitleTableViewCell
+            if let recentMatchesResult:[MatchTuple]? = recentMatches() {
+                let matchTuple:MatchTuple = recentMatchesResult![indexPath.row]
+                let matchedWithId:UInt64 = matchTuple.firstId == rootId ? matchTuple.secondId : matchTuple.firstId
+                let profileImage = ProfilePictureImageView(pictureURL: profilePictureURLFromID(matchedWithId))
+                cell.selectionStyle = .None
+                cell.cellText.text = socialGraphController.nameFromId(matchedWithId)
+                func doLoadCellImage() {
+                    cell.cellImage.image = profileImage.image
+                }
+                profileImage.performRequestWith(NSString(string: profilePictureURLFromID(matchedWithId)), doLoadCellImage)
+            }
             return cell
             
         } else {
