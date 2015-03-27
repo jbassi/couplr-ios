@@ -13,6 +13,31 @@ public enum NameDisplayMode {
     case Full, MiddleInitial, LastInitialNoMiddle
 }
 
+func timeElapsedAsText(timeInterval:NSTimeInterval) -> String {
+    if timeInterval < 60 {
+        return "A moment"
+    } else if timeInterval >= 31536000 {
+        return "An eternity"
+    } else {
+        var value:Int = 0
+        var unit:String = ""
+        if timeInterval < 3600 {
+            value = Int(round(timeInterval / 60))
+            unit = "minute"
+        } else if timeInterval < 86400 {
+            value = Int(round(timeInterval / 3600))
+            unit = "hour"
+        } else if timeInterval < 2592000 {
+            value = Int(round(timeInterval / 86400))
+            unit = "day"
+        } else {
+            value = Int(round(timeInterval / 2592000))
+            unit = "month"
+        }
+        return value == 1 ? "1 \(unit)" : "\(value) \(unit)s"
+    }
+}
+
 func configureCellImageViewWithProfilePicture(inout cellImageView:UIImageView, userId:UInt64) {
     let profileImage = ProfilePictureImageView(pictureURL: profilePictureURLFromID(userId))
     cellImageView.image = UIImage(named: "sample-1049-at-sign")

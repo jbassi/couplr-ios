@@ -36,7 +36,7 @@ public class MatchGraphController {
      * The matches involve the user's closest friends, and are sorted
      * by chronological order, newest first.
      */
-    public func newsFeedMatches(maxNumMatches:Int = kMaxNumNewsFeedMatches) -> [MatchTuple] {
+    public func newsFeedMatches(maxNumMatches:Int = kMaxNumNewsFeedMatches) -> [(MatchTuple,NSDate)] {
         if matches == nil {
             return []
         }
@@ -44,7 +44,7 @@ public class MatchGraphController {
         var updateTimesByMatchTuple:[MatchTuple:NSDate] = [MatchTuple:NSDate]()
         for friendId:UInt64 in SocialGraphController.sharedInstance.closestFriendsOfUser(rootId) {
             for (neighborId:UInt64, matchList:MatchList) in matches!.matchListsForUserId(friendId) {
-                if neighborId == rootId {
+                if neighborId == rootId || !SocialGraphController.sharedInstance.containsUser(neighborId) {
                     continue
                 }
                 for (titleId:Int, _:[UInt64]) in matchList.matchesByTitle {
@@ -62,7 +62,8 @@ public class MatchGraphController {
             let secondUpdateTime:NSDate = updateTimesByMatchTuple[second]!
             return firstUpdateTime.compare(secondUpdateTime) == .OrderedDescending
         }
-        return Array(matchTuples[0..<min(matchTuples.count, maxNumMatches)])
+        matchTuples = Array(matchTuples[0..<min(matchTuples.count, maxNumMatches)])
+        return matchTuples.map { ($0, updateTimesByMatchTuple[$0]!) }
     }
 
     /**
@@ -200,6 +201,7 @@ public class MatchGraphController {
             (didError:Bool) -> Void in
             if !didError {
                 SocialGraphController.sharedInstance.didLoadMatchesForClosestFriends()
+                CouplrViewControllers.sharedInstance.newsfeedView?.newsfeedTableView?.reloadData()
             }
         })
     }

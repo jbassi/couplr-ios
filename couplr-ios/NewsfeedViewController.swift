@@ -14,7 +14,7 @@ class NewsfeedViewController: UIViewController {
     let matchGraphController = MatchGraphController.sharedInstance
     var headerView:NewsfeedHeaderView?
     var newsfeedTableView:UITableView?
-    var cachedNewsFeedMatches:[MatchTuple]?
+    var cachedNewsFeedMatches:[(MatchTuple, NSDate)]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +37,7 @@ class NewsfeedViewController: UIViewController {
         view.addSubview(newsfeedTableView!)
     }
     
-    func newsFeedMatches() -> [MatchTuple]? {
+    func newsFeedMatches() -> [(MatchTuple, NSDate)]? {
         if cachedNewsFeedMatches == nil {
             cachedNewsFeedMatches = matchGraphController.newsFeedMatches()
         }
@@ -51,9 +51,11 @@ class NewsfeedViewController: UIViewController {
             let randomSample:[UInt64] = socialGraphController.currentSample()
             let cell = newsfeedTableView!.cellForRowAtIndexPath(indexPath) as NewsfeedTableViewCell
             
-            if let matches:[MatchTuple]? = newsFeedMatches() {
-                let match:MatchTuple = matches![indexPath.row]
-                 cell.addTransparentLayerWithName(socialGraphController.nameFromId(match.firstId), rightName: socialGraphController.nameFromId(match.secondId))
+            if let matches:[(MatchTuple, NSDate)]? = newsFeedMatches() {
+                let match:MatchTuple = matches![indexPath.row].0
+                let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
+                let nameForSecondId:String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
+                cell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
             }
         }
     }
@@ -81,14 +83,14 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         self.cachedNewsFeedMatches = nil
-        let matches:[MatchTuple]? = newsFeedMatches()
+        let matches:[(MatchTuple, NSDate)]? = newsFeedMatches()
         return matches == nil ? 0 : matches!.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as NewsfeedTableViewCell
-        if let matches:[MatchTuple]? = newsFeedMatches() {
-            let match:MatchTuple = matches![indexPath.row]
+        if let matchesAndUpdateTimes:[(MatchTuple, NSDate)]? = newsFeedMatches() {
+            let (match:MatchTuple, updateTime:NSDate) = matchesAndUpdateTimes![indexPath.row]
             cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text
             cell.selectionStyle = .None
             var cellImage:UIImageView = cell.leftCellImage
@@ -96,10 +98,14 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
             cellImage = cell.rightCellImage
             configureCellImageViewWithProfilePicture(&cellImage, match.secondId)
             if headerView!.nameSwitch.on {
-                cell.addTransparentLayerWithName(socialGraphController.nameFromId(match.firstId), rightName: socialGraphController.nameFromId(match.secondId))
+                let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
+                let nameForSecondId:String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
+                cell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
             } else {
                 cell.removeTransparentLayer()
             }
+            let updateTimeInterval:NSTimeInterval = NSDate().timeIntervalSinceDate(updateTime)
+            cell.dateLabel.text = "\(timeElapsedAsText(updateTimeInterval)) ago"
         }
         return cell
     }
