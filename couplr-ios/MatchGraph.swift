@@ -245,6 +245,10 @@ public class MatchGraph {
      * error occurred when receiving the data.
      */
     public func fetchMatchesForIds(userIds:[UInt64], callback:((didError:Bool)->Void)? = nil) {
+        // FIXME Why is this function being invoked with an empty list?
+        if userIds.count == 0 {
+            return log("Skipping match request for 0 users.", withFlag:"-")
+        }
         log("Requesting match records for user(s) \(SocialGraphController.sharedInstance.namesFromIds(userIds))", withFlag:"!")
         // Do not re-fetch matches.
         let userIdsToQuery:[UInt64] = userIds.filter {

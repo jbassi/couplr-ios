@@ -32,6 +32,10 @@ class CouplrControllers {
         newsfeedViewController?.newsfeedTableView?.reloadData()
     }
     
+    func showMatchViewLoadingScreen() {
+        matchViewController?.showLoadingScreen()
+    }
+    
     weak var profileViewController:ProfileViewController?
     weak var matchViewController:MatchViewController?
     weak var newsfeedViewController:NewsfeedViewController?

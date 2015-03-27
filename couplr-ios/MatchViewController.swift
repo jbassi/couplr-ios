@@ -36,11 +36,15 @@ class MatchViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.allowsMultipleSelection = true
-        socialGraphController.delegate = self
+        initializeSocialGraphAndMatchGraphControllers()
+    }
+    
+    func initializeSocialGraphAndMatchGraphControllers() {
         showLoadingScreen()
+        socialGraphController.delegate = self
         // TODO Retry query upon failure.
-        matchGraphController.matches = MatchGraph()
         socialGraphController.graphInitializeBeginTime = currentTimeInSeconds()
+        matchGraphController.matches = MatchGraph()
         matchGraphController.fetchMatchTitles({
             (didError:Bool) -> Void in
             if !didError {
