@@ -9,6 +9,27 @@
 import UIKit
 import QuartzCore
 
+class CouplrViewControllers {
+    weak var delegate:SocialGraphControllerDelegate?
+    
+    init() {
+        profileView = nil
+        matchView = nil
+        newsfeedView = nil
+    }
+    
+    class var sharedInstance: CouplrViewControllers {
+        struct CouplrViewControllersSingleton {
+            static let instance = CouplrViewControllers()
+        }
+        return CouplrViewControllersSingleton.instance
+    }
+    
+    var profileView:ProfileViewController?
+    var matchView:MatchViewController?
+    var newsfeedView:NewsfeedViewController?
+}
+
 class CouplrNavigationController: UINavigationController {
     
     var navigationSelectionBar = UIView()
@@ -36,6 +57,10 @@ class CouplrNavigationController: UINavigationController {
         let matchView = storyboard.instantiateViewControllerWithIdentifier(kStoryboardMatchViewControllerName) as MatchViewController
         let profileView = storyboard.instantiateViewControllerWithIdentifier(kStoryboardProfileViewControllerName) as ProfileViewController
         let newsfeedView = storyboard.instantiateViewControllerWithIdentifier(kStoryboardNewsViewControllerName) as NewsfeedViewController
+        
+        CouplrViewControllers.sharedInstance.profileView = profileView
+        CouplrViewControllers.sharedInstance.matchView = matchView
+        CouplrViewControllers.sharedInstance.newsfeedView = newsfeedView
         
         viewControllerArray.append(profileView)
         viewControllerArray.append(matchView)

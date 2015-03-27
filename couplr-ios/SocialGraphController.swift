@@ -51,7 +51,16 @@ public class SocialGraphController {
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let root:UInt64 = uint64FromAnyObject(result["id"])
-                    MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root])
+                    MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root], {
+                        (didError:Bool) -> Void in
+                        if !didError {
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                CouplrViewControllers.sharedInstance.profileView?.matchTableView?.reloadData()
+                                return
+                            })
+                        }
+                        // TODO Handle the sad path.
+                    })
                     self.doBuildGraphFromCoreData = self.shouldInitializeGraphFromCoreData(root)
                     if self.doBuildGraphFromCoreData {
                         self.initializeGraphFromCoreData(root)

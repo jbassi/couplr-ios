@@ -74,7 +74,6 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         }
         cell.numberOfTimesVotedLabel.text = Int(voteCount) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : String(voteCount)
         cell.selectionStyle = .None
-        
         return cell
     }
     
