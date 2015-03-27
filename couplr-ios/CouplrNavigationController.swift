@@ -116,9 +116,9 @@ class CouplrNavigationController: UINavigationController {
         matchViewButton.frame = CGRectMake(buttonWidth, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
         newsfeedViewButton.frame = CGRectMake(buttonWidth*2, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
         
-        matchViewButton.backgroundColor = UIColor.grayColor()
-        profileViewButton.backgroundColor = UIColor.grayColor()
-        newsfeedViewButton.backgroundColor = UIColor.grayColor()
+        matchViewButton.backgroundColor = UIColor.lightGrayColor()
+        profileViewButton.backgroundColor = UIColor.lightGrayColor()
+        newsfeedViewButton.backgroundColor = UIColor.lightGrayColor()
         
         matchViewButton.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
         profileViewButton.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
@@ -146,7 +146,7 @@ class CouplrNavigationController: UINavigationController {
     func setupNavigationSelectionBar(andAddSubview:Bool = true) {
         let selectionBarWidth = view.frame.width / CGFloat(viewControllerArray.count)
         navigationSelectionBar.frame = CGRectMake(selectionBarWidth, 0, selectionBarWidth, kCouplrNavigationBarSelectionIndicatorHeight)
-        navigationSelectionBar.backgroundColor = UIColor.greenColor()
+        navigationSelectionBar.backgroundColor = UIColor(red: 0.25, green: 0.25, blue: 1, alpha: 1)
         navigationSelectionBar.alpha = 0.8
         navigationSelectionBar.layer.cornerRadius = kCouplrNavigationBarSelectionIndicatorCornerRadius
         if andAddSubview {
