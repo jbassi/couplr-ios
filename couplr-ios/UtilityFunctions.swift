@@ -41,8 +41,10 @@ func timeElapsedAsText(timeInterval:NSTimeInterval) -> String {
 func configureCellImageViewWithProfilePicture(inout cellImageView:UIImageView, userId:UInt64) {
     let profileImage = ProfilePictureImageView(pictureURL: profilePictureURLFromID(userId))
     cellImageView.image = UIImage(named: "sample-1049-at-sign")
-    profileImage.performRequestWith(NSString(string: profilePictureURLFromID(userId)), {
-        cellImageView.image = profileImage.image
+    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+        profileImage.performRequestWith(NSString(string: profilePictureURLFromID(userId)), {
+            cellImageView.image = profileImage.image
+        })
     })
 }
 

@@ -45,27 +45,21 @@ class NewsfeedViewController: UIViewController {
     }
     
     func showAllNamesInVisibleCells() {
-        let cellCount = newsfeedTableView!.visibleCells().count - 1
-        for index in 0...cellCount {
-            let indexPath = NSIndexPath(forRow: index, inSection: 0)
-            let randomSample:[UInt64] = socialGraphController.currentSample()
-            let cell = newsfeedTableView!.cellForRowAtIndexPath(indexPath) as NewsfeedTableViewCell
-            
+        for cell in newsfeedTableView!.visibleCells() {
+            let newsCell = cell as NewsfeedTableViewCell
             if let matches:[(MatchTuple, NSDate)]? = newsFeedMatches() {
-                let match:MatchTuple = matches![indexPath.row].0
+                let match:MatchTuple = matches![newsfeedTableView!.indexPathForCell(newsCell)!.row].0
                 let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
                 let nameForSecondId:String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
-                cell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
+                newsCell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
             }
         }
     }
     
     func hideAllNamesInVisibleCells() {
-        let cellCount = newsfeedTableView!.visibleCells().count - 1
-        for index in 0...cellCount {
-            let indexPath = NSIndexPath(forRow: index, inSection: 0)
-            let cell = newsfeedTableView!.cellForRowAtIndexPath(indexPath) as NewsfeedTableViewCell
-            cell.removeTransparentLayer()
+        for cell in newsfeedTableView!.visibleCells() {
+            let newsCell = cell as NewsfeedTableViewCell
+            newsCell.removeTransparentLayer()
         }
     }
     
@@ -112,6 +106,14 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         return kTableViewCellHeight
+    }
+    
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        headerView!.nameSwitch.enabled = false
+    }
+    
+    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+        headerView!.nameSwitch.enabled = true
     }
     
 }
