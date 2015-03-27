@@ -9,25 +9,33 @@
 import UIKit
 import QuartzCore
 
-class CouplrViewControllers {
-    weak var delegate:SocialGraphControllerDelegate?
-    
+class CouplrControllers {
     init() {
-        profileView = nil
-        matchView = nil
-        newsfeedView = nil
+        profileViewController = nil
+        matchViewController = nil
+        newsfeedViewController = nil
+        navigationController = nil
     }
     
-    class var sharedInstance: CouplrViewControllers {
-        struct CouplrViewControllersSingleton {
-            static let instance = CouplrViewControllers()
+    class var sharedInstance: CouplrControllers {
+        struct CouplrControllersSingleton {
+            static let instance = CouplrControllers()
         }
-        return CouplrViewControllersSingleton.instance
+        return CouplrControllersSingleton.instance
     }
     
-    var profileView:ProfileViewController?
-    var matchView:MatchViewController?
-    var newsfeedView:NewsfeedViewController?
+    func refreshProfileView() {
+        profileViewController?.matchTableView?.reloadData()
+    }
+
+    func refreshNewsfeedView() {
+        newsfeedViewController?.newsfeedTableView?.reloadData()
+    }
+    
+    weak var profileViewController:ProfileViewController?
+    weak var matchViewController:MatchViewController?
+    weak var newsfeedViewController:NewsfeedViewController?
+    weak var navigationController:CouplrNavigationController?
 }
 
 class CouplrNavigationController: UINavigationController {
@@ -58,9 +66,10 @@ class CouplrNavigationController: UINavigationController {
         let profileView = storyboard.instantiateViewControllerWithIdentifier(kStoryboardProfileViewControllerName) as ProfileViewController
         let newsfeedView = storyboard.instantiateViewControllerWithIdentifier(kStoryboardNewsViewControllerName) as NewsfeedViewController
         
-        CouplrViewControllers.sharedInstance.profileView = profileView
-        CouplrViewControllers.sharedInstance.matchView = matchView
-        CouplrViewControllers.sharedInstance.newsfeedView = newsfeedView
+        CouplrControllers.sharedInstance.navigationController = self
+        CouplrControllers.sharedInstance.profileViewController = profileView
+        CouplrControllers.sharedInstance.matchViewController = matchView
+        CouplrControllers.sharedInstance.newsfeedViewController = newsfeedView
         
         viewControllerArray.append(profileView)
         viewControllerArray.append(matchView)
@@ -72,6 +81,19 @@ class CouplrNavigationController: UINavigationController {
         
         setupNavigationBarButtons()
         setupPageViewController()
+    }
+    
+    func resetNavigation() {
+        pageViewController!.setViewControllers([viewControllerArray[1]], direction: .Forward, animated: false, completion: {(completed:Bool) in
+            if completed {
+                self.currentPageIndex = 1
+                self.lastPageIndex = 1
+                for (index:Int, button:UIButton) in enumerate(self.buttonArray) {
+                    button.titleLabel?.font = index == self.lastPageIndex ? kCouplrNavigationButtonBoldFont : kCouplrNavigationButtonFont
+                }
+            }
+        })
+        setupNavigationSelectionBar(andAddSubview: false)
     }
     
     func setupPageViewController() {
@@ -117,13 +139,15 @@ class CouplrNavigationController: UINavigationController {
         setupNavigationSelectionBar()
     }
     
-    func setupNavigationSelectionBar() {
+    func setupNavigationSelectionBar(andAddSubview:Bool = true) {
         let selectionBarWidth = view.frame.width / CGFloat(viewControllerArray.count)
         navigationSelectionBar.frame = CGRectMake(selectionBarWidth, 0, selectionBarWidth, kCouplrNavigationBarSelectionIndicatorHeight)
         navigationSelectionBar.backgroundColor = UIColor.greenColor()
         navigationSelectionBar.alpha = 0.8
         navigationSelectionBar.layer.cornerRadius = kCouplrNavigationBarSelectionIndicatorCornerRadius
-        customNavigationBar.addSubview(navigationSelectionBar)
+        if andAddSubview {
+            customNavigationBar.addSubview(navigationSelectionBar)
+        }
     }
     
     func syncScrollView() {

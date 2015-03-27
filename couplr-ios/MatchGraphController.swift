@@ -201,7 +201,7 @@ public class MatchGraphController {
             (didError:Bool) -> Void in
             if !didError {
                 SocialGraphController.sharedInstance.didLoadMatchesForClosestFriends()
-                CouplrViewControllers.sharedInstance.newsfeedView?.newsfeedTableView?.reloadData()
+                CouplrControllers.sharedInstance.refreshNewsfeedView()
             }
         })
     }
