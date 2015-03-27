@@ -46,8 +46,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
-        CouplrControllers.sharedInstance.matchViewController?.showLoadingScreen()
-        CouplrControllers.sharedInstance.matchViewController?.initializeSocialGraphAndMatchGraphControllers()
+        CouplrControllers.sharedInstance.showMatchViewLoadingScreen()
+        CouplrControllers.sharedInstance.initializeMatchView()
     }
 
     func applicationWillTerminate(application: UIApplication) {

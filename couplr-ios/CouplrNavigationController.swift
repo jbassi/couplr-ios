@@ -36,6 +36,10 @@ class CouplrControllers {
         matchViewController?.showLoadingScreen()
     }
     
+    func initializeMatchView() {
+        matchViewController?.initializeSocialGraphAndMatchGraphControllers()
+    }
+    
     weak var profileViewController:ProfileViewController?
     weak var matchViewController:MatchViewController?
     weak var newsfeedViewController:NewsfeedViewController?
