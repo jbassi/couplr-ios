@@ -13,6 +13,7 @@ class NewsfeedTableViewCell: UITableViewCell {
     let leftCellImage = UIImageView()
     let rightCellImage = UIImageView()
     let cellText = UILabel()
+    let dateLabel = UILabel()
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -31,11 +32,16 @@ class NewsfeedTableViewCell: UITableViewCell {
         leftCellImage.layer.cornerRadius = 30
         leftCellImage.layer.masksToBounds = true
         
-        
-        let cellTextWidth = frame.size.width - (imageSize * 2) - (cellImageInsets * 4)
-        cellText.frame = CGRectMake(cellImageInsets, 0, cellTextWidth, frame.size.height)
+        let cellTextHeight:CGFloat = 30.0
+        let cellTextWidth:CGFloat = frame.size.width - (imageSize * 2) - (cellImageInsets * 4)
+        let cellTextY:CGFloat = (frame.size.height / 2) - cellTextHeight
+        cellText.frame = CGRectMake(cellImageInsets, cellTextY, cellTextWidth, cellTextHeight)
         cellText.adjustsFontSizeToFitWidth = true
         cellText.font = UIFont.systemFontOfSize(20)
+        
+        let dateLabelY:CGFloat = cellText.frame.origin.y + cellTextHeight
+        dateLabel.frame = CGRectMake(cellImageInsets, dateLabelY, cellTextWidth, cellTextHeight)
+        dateLabel.textColor = UIColor.lightGrayColor()
     }
 
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
@@ -44,6 +50,7 @@ class NewsfeedTableViewCell: UITableViewCell {
         addSubview(leftCellImage)
         addSubview(rightCellImage)
         addSubview(cellText)
+        addSubview(dateLabel)
     }
 
     required init(coder aDecoder: NSCoder) {

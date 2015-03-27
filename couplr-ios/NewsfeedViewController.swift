@@ -57,6 +57,7 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
         if let matches:[MatchTuple]? = newsFeedMatches() {
             let match:MatchTuple = matches![indexPath.row]
             cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text
+            cell.selectionStyle = .None
             var cellImage:UIImageView = cell.leftCellImage
             configureCellImageViewWithProfilePicture(&cellImage, match.firstId)
             cellImage = cell.rightCellImage
