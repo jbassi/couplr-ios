@@ -38,16 +38,6 @@ func timeElapsedAsText(timeInterval:NSTimeInterval) -> String {
     }
 }
 
-func configureCellImageViewWithProfilePicture(inout cellImageView:UIImageView, userId:UInt64) {
-    let profileImage = ProfilePictureImageView(pictureURL: profilePictureURLFromID(userId))
-    cellImageView.image = UIImage(named: "sample-1049-at-sign")
-    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-        profileImage.performRequestWith(NSString(string: profilePictureURLFromID(userId)), {
-            cellImageView.image = profileImage.image
-        })
-    })
-}
-
 func afterDelay(seconds: Double, closure: () -> ()) {
     let when = dispatch_time(DISPATCH_TIME_NOW, Int64(seconds * Double(NSEC_PER_SEC)))
     dispatch_after(when, dispatch_get_main_queue(), closure)
@@ -63,8 +53,8 @@ func parseArrayFromJSONData(inputData: NSData) -> Array<NSDictionary> {
     return boardsDictionary
 }
 
-func profilePictureURLFromID(id:UInt64, withWidth:Int = 200, withHeight:Int = 200) -> String {
-    return "\(kFBGraphURLPrefix)\(id)/picture?width=\(withWidth)&height=\(withHeight)"
+func profilePictureURLFromId(id:UInt64, withWidth:Int = 200, withHeight:Int = 200) -> NSURL {
+    return NSURL(string: "\(kFBGraphURLPrefix)\(id)/picture?width=\(withWidth)&height=\(withHeight)")!
 }
 
 func firstNameFromFullName(fullName:String) -> String {

@@ -233,9 +233,9 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
 
         let randomSample:[UInt64] = socialGraphController.currentSample()
         if randomSample.count > 0 {
-            let userID = randomSample[indexPath.row]
+            let userId = randomSample[indexPath.row]
             dispatch_async(dispatch_get_main_queue()) {
-                cell.imageView.performRequestWith(profilePictureURLFromID(userID))
+                cell.imageView.sd_setImageWithURL(profilePictureURLFromId(userId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
             }
         }
         return cell

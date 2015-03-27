@@ -18,12 +18,12 @@ class ProfileViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let rootID = socialGraphController.graph?.root
+        let rootId:UInt64 = socialGraphController.rootId()
         
         profileDetailView = ProfileDetailView(frame: CGRectMake(0, kStatusBarHeight, view.bounds.size.width, kProfileViewControllerDetailViewHeight))
-        profileDetailView!.profilePictureView.performRequestWith(profilePictureURLFromID(rootID!))
-        profileDetailView!.profileNameLabel.text = socialGraphController.nameFromId(rootID!)
+        profileDetailView!.profileNameLabel.text = socialGraphController.nameFromId(rootId)
         profileDetailView!.recentMatchesButton.addTarget(self, action: "showRecentMatches:", forControlEvents: .TouchUpInside)
+        profileDetailView!.profilePictureView.sd_setImageWithURL(profilePictureURLFromId(rootId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
         
         let profileDetailViewTotalHeight = kProfileViewControllerDetailViewHeight + (kStatusBarHeight * 2)
         let matchTableViewHeight = view.bounds.size.height - profileDetailViewTotalHeight - kCouplrNavigationBarButtonHeight

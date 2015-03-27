@@ -10,7 +10,7 @@ import UIKit
 
 class ProfilePictureCollectionViewCell: UICollectionViewCell {
 
-    @IBOutlet weak var imageView: ProfilePictureImageView!
+    @IBOutlet weak var imageView: UIImageView!
     
     var userName: String = ""
     var overrideLayerSelection: Bool = false

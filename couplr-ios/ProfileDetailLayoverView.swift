@@ -196,14 +196,12 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
             if let recentMatchesResult:[MatchTuple]? = recentMatches() {
                 let matchTuple:MatchTuple = recentMatchesResult![indexPath.row]
                 let matchedWithId:UInt64 = matchTuple.firstId == rootId ? matchTuple.secondId : matchTuple.firstId
-                let profileImage = ProfilePictureImageView(pictureURL: profilePictureURLFromID(matchedWithId))
                 cell.selectionStyle = .None
                 cell.cellImage.layer.cornerRadius = 30
                 cell.cellImage.layer.masksToBounds = true
                 cell.cellText.text = socialGraphController.nameFromId(matchedWithId)
                 cell.cellSubText.text = matchGraphController.matchTitleFromId(matchTuple.titleId)?.text
-                var cellImage:UIImageView = cell.cellImage
-                configureCellImageViewWithProfilePicture(&cellImage, matchedWithId)
+                cell.cellImage.sd_setImageWithURL(profilePictureURLFromId(matchedWithId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
             }
             return cell
             
@@ -211,15 +209,12 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ImageTableViewCell
             if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
                 let (matchedWithId:UInt64, voteCount:Int) = matchResult[indexPath.row]
-            
                 cell.selectionStyle = .None
                 cell.cellText.text = socialGraphController.nameFromId(matchedWithId, maxStringLength: 20)
                 cell.cellImage.layer.cornerRadius = 30
                 cell.cellImage.layer.masksToBounds = true
-                var cellImage:UIImageView = cell.cellImage
-                configureCellImageViewWithProfilePicture(&cellImage, matchedWithId)
+                cell.cellImage.sd_setImageWithURL(profilePictureURLFromId(matchedWithId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
                 cell.numberOfTimesVotedLabel.text = Int(voteCount) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : voteCount.description
-                
             }
             return cell
         }

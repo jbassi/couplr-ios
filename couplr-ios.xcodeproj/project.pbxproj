@@ -18,7 +18,6 @@
 		0F37CA2219C53954007A6951 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F37CA2119C53954007A6951 /* ProfileViewController.swift */; };
 		0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F5A034B19C4E06A0050DC9F /* LoginViewController.swift */; };
 		0F6074F51A4FDF2A0045B5C3 /* FacebookSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */; };
-		0F9C98891A539E0A004CAC4D /* ProfilePictureImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */; };
 		0F9F1CBF1A5CFB7300E683A1 /* FXBlurView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F9F1CBE1A5CFB7300E683A1 /* FXBlurView.m */; };
 		0FA10B3F1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */; };
 		0FDD9F6F1A5BA0E700927558 /* ProfileDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */; };
@@ -97,7 +96,6 @@
 		0F5A034B19C4E06A0050DC9F /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		0F5A034E19C4E1860050DC9F /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		0F6074F41A4FDF2A0045B5C3 /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
-		0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePictureImageView.swift; sourceTree = "<group>"; };
 		0F9F1CBD1A5CFB7300E683A1 /* FXBlurView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FXBlurView.h; sourceTree = "<group>"; };
 		0F9F1CBE1A5CFB7300E683A1 /* FXBlurView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FXBlurView.m; sourceTree = "<group>"; };
 		0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfilePictureCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -323,7 +321,6 @@
 				0F9F1CBC1A5CFB7300E683A1 /* FXBlurView */,
 				0FF11BE31A50C63C00C14FDC /* PickerView.swift */,
 				0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */,
-				0F9C98881A539E0A004CAC4D /* ProfilePictureImageView.swift */,
 				0FFBA3031A562D4E00A95F66 /* CouplrNavigationController.swift */,
 				0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */,
 				0F0EB6EA1A5E16B300E2A25B /* LoadingView.swift */,
@@ -505,7 +502,6 @@
 				0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */,
 				0F9F1CBF1A5CFB7300E683A1 /* FXBlurView.m in Sources */,
 				0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */,
-				0F9C98891A539E0A004CAC4D /* ProfilePictureImageView.swift in Sources */,
 				11FDBBB31AC5F206006DFD9B /* SDWebImageDownloaderOperation.m in Sources */,
 				11FDBBB51AC5F206006DFD9B /* SDWebImagePrefetcher.m in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,

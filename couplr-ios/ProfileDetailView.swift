@@ -11,7 +11,7 @@ import QuartzCore
 
 class ProfileDetailView: UIView {
     
-    let profilePictureView = ProfilePictureImageView()
+    let profilePictureView = UIImageView()
     let profileNameLabel = UILabel()
     let recentMatchesButton = UIButton()
     let bottomBorder = CALayer()
