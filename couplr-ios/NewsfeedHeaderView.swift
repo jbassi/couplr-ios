@@ -12,6 +12,7 @@ class NewsfeedHeaderView: UIView {
 
     let headerLabel = UILabel()
     let nameSwitch = UISwitch()
+    let namesLabel = UILabel()
     let bottomBorder = CALayer()
     
     override init(frame: CGRect) {
@@ -25,10 +26,18 @@ class NewsfeedHeaderView: UIView {
         
         nameSwitch.frame = CGRectMake(frameWidth-nameSwitch.frame.width-10, (frameHeight/2)-(nameSwitch.frame.height/2), nameSwitch.frame.width, nameSwitch.frame.height)
         
+        namesLabel.text = "Names:"
+        let namesLabelWidth:CGFloat = 66
+        let namesLabelHeight:CGFloat = 30
+        let namesLabelY:CGFloat = (frameHeight / 2) - (namesLabelHeight / 2)
+        let namesLabelX:CGFloat = frameWidth - nameSwitch.frame.width - namesLabelWidth - 10
+        namesLabel.frame = CGRectMake(namesLabelX, namesLabelY, namesLabelWidth, namesLabelHeight)
+        
         headerLabel.frame = CGRectMake(20, 0, frameWidth-nameSwitch.frame.width-10, frameHeight)
         
         addSubview(headerLabel)
         addSubview(nameSwitch)
+        addSubview(namesLabel)
         layer.addSublayer(bottomBorder)
     }
     

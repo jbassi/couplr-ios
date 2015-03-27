@@ -10,6 +10,13 @@ import UIKit
 
 class NewsfeedTableViewCell: UITableViewCell {
     
+    var leftName: String = ""
+    var rightName: String = ""
+    let rightTransparentLayer = UIView()
+    let leftTransparentLayer = UIView()
+    let leftNameLabel = UILabel()
+    let rightNameLabel = UILabel()
+    
     let leftCellImage = UIImageView()
     let rightCellImage = UIImageView()
     let cellText = UILabel()
@@ -55,6 +62,55 @@ class NewsfeedTableViewCell: UITableViewCell {
 
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    func addTransparentLayerWithName(leftName:String, rightName:String) {
+        rightTransparentLayer.frame = rightCellImage.frame
+        rightTransparentLayer.backgroundColor = UIColor(white: 0.1, alpha: 0.8)
+        rightTransparentLayer.layer.masksToBounds = true
+        rightTransparentLayer.layer.cornerRadius = rightCellImage.layer.cornerRadius
+        
+        leftTransparentLayer.frame = leftCellImage.frame
+        leftTransparentLayer.backgroundColor = UIColor(white: 0.1, alpha: 0.8)
+        leftTransparentLayer.layer.masksToBounds = true
+        leftTransparentLayer.layer.cornerRadius = leftCellImage.layer.cornerRadius
+        
+        leftNameLabel.numberOfLines = 0
+        leftNameLabel.frame = CGRectMake(0, 0, leftTransparentLayer.frame.width, leftTransparentLayer.frame.height)
+        leftNameLabel.textColor = UIColor.whiteColor()
+        leftNameLabel.font = UIFont.boldSystemFontOfSize(12)
+        leftNameLabel.text = leftName
+        leftNameLabel.textAlignment = NSTextAlignment.Center
+        
+        rightNameLabel.numberOfLines = 0
+        rightNameLabel.frame = CGRectMake(0, 0, rightTransparentLayer.frame.width, rightTransparentLayer.frame.height)
+        rightNameLabel.textColor = UIColor.whiteColor()
+        rightNameLabel.font = UIFont.boldSystemFontOfSize(12)
+        rightNameLabel.text = rightName
+        rightNameLabel.textAlignment = NSTextAlignment.Center
+        
+        leftTransparentLayer.addSubview(leftNameLabel)
+        addSubview(leftTransparentLayer)
+        rightTransparentLayer.addSubview(rightNameLabel)
+        addSubview(rightTransparentLayer)
+    }
+    
+    func removeTransparentLayer() {
+        UIView.animateWithDuration(kProfilePictureCollectionViewCellHideAnimationDuration, animations: {
+            self.leftTransparentLayer.backgroundColor = UIColor.clearColor()
+            self.rightTransparentLayer.backgroundColor = UIColor.clearColor()
+            self.leftNameLabel.textColor = UIColor.clearColor()
+            self.rightNameLabel.textColor = UIColor.clearColor()
+            }, completion: { (value:Bool) in
+                self.leftTransparentLayer.removeFromSuperview()
+                self.rightTransparentLayer.removeFromSuperview()
+                self.leftNameLabel.removeFromSuperview()
+                self.rightNameLabel.removeFromSuperview()
+        })
+    }
+    
+    func addTransparentLayer() {
+        addTransparentLayerWithName(leftName, rightName:rightName)
     }
 
 }

@@ -22,6 +22,8 @@ class NewsfeedViewController: UIViewController {
         headerView = NewsfeedHeaderView(frame: CGRectMake(view.frame.origin.x, kStatusBarHeight, view.bounds.size.width, 80))
         headerView!.headerLabel.text = "Newsfeed"
         headerView!.headerLabel.font = UIFont(name: "HelveticaNeue-Light", size: 32)
+
+        headerView!.nameSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)
         
         let headerViewHeight = headerView!.frame.height + kStatusBarHeight + kProfileDetailViewBottomBorderHeight
         let newsfeedTableViewHeight = view.bounds.size.height - headerViewHeight - kCouplrNavigationBarButtonHeight
@@ -40,6 +42,37 @@ class NewsfeedViewController: UIViewController {
             cachedNewsFeedMatches = matchGraphController.newsFeedMatches()
         }
         return self.cachedNewsFeedMatches
+    }
+    
+    func showAllNamesInVisibleCells() {
+        let cellCount = newsfeedTableView!.visibleCells().count - 1
+        for index in 0...cellCount {
+            let indexPath = NSIndexPath(forRow: index, inSection: 0)
+            let randomSample:[UInt64] = socialGraphController.currentSample()
+            let cell = newsfeedTableView!.cellForRowAtIndexPath(indexPath) as NewsfeedTableViewCell
+            
+            if let matches:[MatchTuple]? = newsFeedMatches() {
+                let match:MatchTuple = matches![indexPath.row]
+                 cell.addTransparentLayerWithName(socialGraphController.nameFromId(match.firstId), rightName: socialGraphController.nameFromId(match.secondId))
+            }
+        }
+    }
+    
+    func hideAllNamesInVisibleCells() {
+        let cellCount = newsfeedTableView!.visibleCells().count - 1
+        for index in 0...cellCount {
+            let indexPath = NSIndexPath(forRow: index, inSection: 0)
+            let cell = newsfeedTableView!.cellForRowAtIndexPath(indexPath) as NewsfeedTableViewCell
+            cell.removeTransparentLayer()
+        }
+    }
+    
+    func switchToggled(sender:UISwitch) {
+        if sender.on {
+            showAllNamesInVisibleCells()
+        } else {
+            hideAllNamesInVisibleCells()
+        }
     }
     
 }
@@ -62,6 +95,11 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
             configureCellImageViewWithProfilePicture(&cellImage, match.firstId)
             cellImage = cell.rightCellImage
             configureCellImageViewWithProfilePicture(&cellImage, match.secondId)
+            if headerView!.nameSwitch.on {
+                cell.addTransparentLayerWithName(socialGraphController.nameFromId(match.firstId), rightName: socialGraphController.nameFromId(match.secondId))
+            } else {
+                cell.removeTransparentLayer()
+            }
         }
         return cell
     }
