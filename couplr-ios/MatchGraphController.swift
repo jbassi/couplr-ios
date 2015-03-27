@@ -18,12 +18,16 @@ public class MatchGraphController {
         }
         return MatchGraphSingleton.instance
     }
+    
+    public func reset() {
+        matches = nil
+    }
 
     /**
      * Before the app closes, attempt to flush the unregistered matches
      * to Parse.
      */
-    public func appWillClose() {
+    public func appWillHalt() {
         matches?.flushUnregisteredMatches()
     }
     

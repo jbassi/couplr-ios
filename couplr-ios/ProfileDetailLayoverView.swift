@@ -202,10 +202,8 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
                 cell.cellImage.layer.masksToBounds = true
                 cell.cellText.text = socialGraphController.nameFromId(matchedWithId)
                 cell.cellSubText.text = matchGraphController.matchTitleFromId(matchTuple.titleId)?.text
-                func doLoadCellImage() {
-                    cell.cellImage.image = profileImage.image
-                }
-                profileImage.performRequestWith(NSString(string: profilePictureURLFromID(matchedWithId)), doLoadCellImage)
+                var cellImage:UIImageView = cell.cellImage
+                configureCellImageViewWithProfilePicture(&cellImage, matchedWithId)
             }
             return cell
             
@@ -216,14 +214,10 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
             
                 cell.selectionStyle = .None
                 cell.cellText.text = socialGraphController.nameFromId(matchedWithId, maxStringLength: 20)
-                let profileImage = ProfilePictureImageView(pictureURL: profilePictureURLFromID(matchedWithId))
-                cell.cellImage.image = UIImage(named: "sample-1049-at-sign")
                 cell.cellImage.layer.cornerRadius = 30
                 cell.cellImage.layer.masksToBounds = true
-                func doLoadCellImage() {
-                    cell.cellImage.image = profileImage.image
-                }
-                profileImage.performRequestWith(NSString(string: profilePictureURLFromID(matchedWithId)), doLoadCellImage)
+                var cellImage:UIImageView = cell.cellImage
+                configureCellImageViewWithProfilePicture(&cellImage, matchedWithId)
                 cell.numberOfTimesVotedLabel.text = Int(voteCount) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : voteCount.description
                 
             }

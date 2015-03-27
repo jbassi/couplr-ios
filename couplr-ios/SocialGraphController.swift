@@ -39,6 +39,18 @@ public class SocialGraphController {
         }
         return SocialGraphSingleton.instance
     }
+    
+    /**
+     * Resets all fields to their initial values.
+     */
+    public func reset() {
+        voteHistoryOrPhotoDataLoadProgress = 0
+        graphSerializationSemaphore = dispatch_semaphore_create(1)
+        graphInitializeBeginTime = 0
+        doBuildGraphFromCoreData = false
+        matchesRecordedInSocialGraph = [MatchTuple:Bool]()
+        graph = nil
+    }
 
     /**
      * Makes a request for the current user's ID and compares it against

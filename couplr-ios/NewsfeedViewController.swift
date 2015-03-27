@@ -10,8 +10,11 @@ import UIKit
 
 class NewsfeedViewController: UIViewController {
 
+    let socialGraphController = SocialGraphController.sharedInstance
+    let matchGraphController = MatchGraphController.sharedInstance
     var headerView:NewsfeedHeaderView?
     var newsfeedTableView:UITableView?
+    var cachedNewsFeedMatches:[MatchTuple]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,17 +35,33 @@ class NewsfeedViewController: UIViewController {
         view.addSubview(newsfeedTableView!)
     }
     
+    func newsFeedMatches() -> [MatchTuple]? {
+        if cachedNewsFeedMatches == nil {
+            cachedNewsFeedMatches = matchGraphController.newsFeedMatches()
+        }
+        return self.cachedNewsFeedMatches
+    }
+    
 }
 
 extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 20
+        self.cachedNewsFeedMatches = nil
+        let matches:[MatchTuple]? = newsFeedMatches()
+        return matches == nil ? 0 : matches!.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as NewsfeedTableViewCell
-        
+        if let matches:[MatchTuple]? = newsFeedMatches() {
+            let match:MatchTuple = matches![indexPath.row]
+            cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text
+            var cellImage:UIImageView = cell.leftCellImage
+            configureCellImageViewWithProfilePicture(&cellImage, match.firstId)
+            cellImage = cell.rightCellImage
+            configureCellImageViewWithProfilePicture(&cellImage, match.secondId)
+        }
         return cell
     }
     
