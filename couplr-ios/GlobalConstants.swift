@@ -58,6 +58,7 @@ let kLoadingViewShowAnimationDuration: NSTimeInterval = 0.5
 let kLoadingViewHideAnimationDuration: NSTimeInterval = 0.4
 let kLoadingLabelShowAnimationDuration: NSTimeInterval = 1.0
 let kLoadingLabelHideAnimationDuration: NSTimeInterval = 0.1
+let kMinLoadingDelay: Double = 0.75
 
 /* ProfilePictureCollectionViewCell Constants */
 let kProfilePictureCollectionViewCellHideAnimationDuration = 0.2

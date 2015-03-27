@@ -198,17 +198,21 @@ public class SocialGraphController {
      * loading and matches are ready to be presented.
      */
     public func didInitializeGraph() {
-        delegate?.socialGraphControllerDidLoadSocialGraph(graph!)
-        MatchGraphController.sharedInstance.socialGraphDidLoad()
-        log("Initialized graph (\(graph!.names.count) nodes \(graph!.edgeCount) edges \(graph!.totalEdgeWeight) weight).", withIndent: 1)
-        let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
-        log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
-        self.graph!.updateGenders()
-        if doBuildGraphFromCoreData {
-            didLoadVoteHistoryOrInitializeGraph()
-        } else {
-            graph!.updateGraphDataUsingPhotos()
-        }
+        let timeElapsed:Double = currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime
+        afterDelay(max(kMinLoadingDelay - timeElapsed, 0), {
+            self.delegate?.socialGraphControllerDidLoadSocialGraph(self.graph!)
+            MatchGraphController.sharedInstance.socialGraphDidLoad()
+            log("Initialized graph (\(self.graph!.names.count) nodes \(self.graph!.edgeCount) edges \(self.graph!.totalEdgeWeight) weight).", withIndent: 1)
+            let timeString:String = String(format: "%.3f",
+                currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
+            log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
+            self.graph!.updateGenders()
+            if self.doBuildGraphFromCoreData {
+                self.didLoadVoteHistoryOrInitializeGraph()
+            } else {
+                self.graph!.updateGraphDataUsingPhotos()
+            }
+        })
     }
 
     /**
