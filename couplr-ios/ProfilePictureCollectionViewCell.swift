@@ -20,6 +20,8 @@ class ProfilePictureCollectionViewCell: UICollectionViewCell {
     func addTransparentLayerWithName(name:String) {
         transparentLayer.frame = CGRectMake(4, 4, 92, 92)
         transparentLayer.backgroundColor = UIColor(white: 0.1, alpha: 0.8)
+        transparentLayer.layer.masksToBounds = true
+        transparentLayer.layer.cornerRadius = 10
         
         nameLabel.numberOfLines = 0
         nameLabel.frame = CGRectMake(0, 0, 92, 92)

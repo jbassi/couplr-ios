@@ -222,6 +222,10 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as ProfilePictureCollectionViewCell
         cell.backgroundColor = UIColor.grayColor()
+        cell.layer.masksToBounds = true;
+        cell.layer.cornerRadius = 10;
+        cell.imageView.layer.masksToBounds = true
+        cell.imageView.layer.cornerRadius = 10
 
         let randomSample:[UInt64] = socialGraphController.currentSample()
         if randomSample.count > 0 {

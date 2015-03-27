@@ -94,5 +94,4 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         pickerView.imageName = imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))]
         pickerView.showAnimated(true)
     }
-    
 }
