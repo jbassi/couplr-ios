@@ -81,7 +81,7 @@ class MatchViewController: UIViewController {
         submitButton.layer.masksToBounds = true
         submitButton.addTarget(self, action: "submitMatch", forControlEvents: .TouchUpInside)
         
-        toggleNamesSwitch.frame = CGRectMake(collectionViewX+((buttonWidth+5)*2)+25, buttonY, 94, 27)
+        toggleNamesSwitch.frame = CGRectMake(collectionViewX+((buttonWidth+5)*2)+25, buttonY+5, 94, 27)
         toggleNamesSwitch.on = false
         toggleNamesSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)
         
