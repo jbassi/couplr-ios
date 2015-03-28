@@ -10,12 +10,27 @@ import UIKit
 
 class ProfilePictureCollectionViewCell: UICollectionViewCell {
 
-    @IBOutlet weak var imageView: UIImageView!
+    let imageView = UIImageView()
     
     var userName: String = ""
     var overrideLayerSelection: Bool = false
     let transparentLayer = UIView()
     let nameLabel = UILabel()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        layer.masksToBounds = true;
+        layer.cornerRadius = 10;
+        
+        imageView.layer.masksToBounds = true
+        imageView.layer.cornerRadius = 10
+        imageView.frame = CGRectMake(4, 4, 92, 92)
+        contentView.addSubview(imageView)
+    }
+
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
     
     func addTransparentLayerWithName(name:String) {
         transparentLayer.frame = CGRectMake(4, 4, 92, 92)

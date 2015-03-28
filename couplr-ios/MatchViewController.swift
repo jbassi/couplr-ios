@@ -11,10 +11,6 @@ import Parse
 
 class MatchViewController: UIViewController {
 
-    @IBOutlet weak var matchTitleLabel: UIButton!
-    @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var toggleNamesSwitch: UISwitch!
-
     var selectedTitle:MatchTitle? = nil
     var selectedRow:Int = 0
     var selectedUsers:[UInt64] = [UInt64]()
@@ -25,17 +21,76 @@ class MatchViewController: UIViewController {
     var userPictures: [UInt64:String]?
     var socialGraphLoaded: Bool = false
     var loadingView: LoadingView?
+    
+    var collectionView:UICollectionView?
+    let matchTitleLabel:UIButton = UIButton()
+    let resetButton:UIButton = UIButton()
+    let submitButton:UIButton = UIButton()
+    let toggleNamesSwitch:UISwitch = UISwitch()
 
     let socialGraphController = SocialGraphController.sharedInstance
     let matchGraphController = MatchGraphController.sharedInstance
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let frameWidth:CGFloat = view.frame.width
+        let frameHeight:CGFloat = view.frame.height
+        
+        let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.itemSize = CGSize(width: 100, height: 100)
+        flowLayout.scrollDirection = UICollectionViewScrollDirection.Horizontal
+        flowLayout.minimumInteritemSpacing = 5
+        flowLayout.minimumLineSpacing = 5
+        let collectionViewHeight:CGFloat = 315.0
+        let collectionViewWidth:CGFloat = 315.0
+        let collectionViewX:CGFloat = (frameWidth-collectionViewWidth+5)/2
+        let collectionViewY:CGFloat = (frameHeight-kStatusBarHeight-kCouplrNavigationBarButtonHeight-collectionViewHeight)/2+20
+        let collectionViewFrame:CGRect = CGRectMake(collectionViewX, collectionViewY, collectionViewWidth, collectionViewHeight)
+        collectionView = UICollectionView(frame: collectionViewFrame, collectionViewLayout: flowLayout)
+        collectionView!.registerClass(ProfilePictureCollectionViewCell.self, forCellWithReuseIdentifier: "MatchViewCell")
+        collectionView!.backgroundColor = UIColor.whiteColor()
+        collectionView!.delegate = self
+        collectionView!.dataSource = self
+        collectionView!.allowsMultipleSelection = true
+        
+        let matchTitleLabelHeight:CGFloat = 40
+        let matchTitleLabelWidth:CGFloat = collectionViewWidth - 5
+        let matchTitleLabelY:CGFloat = collectionViewY - matchTitleLabelHeight - 5
+        matchTitleLabel.frame = CGRectMake(collectionViewX, matchTitleLabelY, matchTitleLabelWidth, matchTitleLabelHeight)
+        matchTitleLabel.layer.cornerRadius = 20
+        matchTitleLabel.layer.masksToBounds = true
+        matchTitleLabel.backgroundColor = UIColor.lightGrayColor()
+        matchTitleLabel.addTarget(self, action: "showButtonPressed", forControlEvents: UIControlEvents.TouchUpInside)
+        
+        let buttonWidth:CGFloat = (collectionViewWidth / 3) - 5
+        let buttonHeight:CGFloat = 40
+        let buttonY:CGFloat = collectionViewY + collectionViewHeight + 5
+        
+        resetButton.frame = CGRectMake(collectionViewX, buttonY, buttonWidth, buttonHeight)
+        resetButton.backgroundColor = UIColor.lightGrayColor()
+        resetButton.setTitle("Shuffle", forState: .Normal)
+        resetButton.layer.cornerRadius = 20
+        resetButton.layer.masksToBounds = true
+        resetButton.addTarget(self, action: "shufflePeople", forControlEvents: .TouchUpInside)
+        
+        submitButton.frame = CGRectMake(collectionViewX+buttonWidth+5, buttonY, buttonWidth, buttonHeight)
+        submitButton.backgroundColor = UIColor.lightGrayColor()
+        submitButton.setTitle("Submit", forState: .Normal)
+        submitButton.layer.cornerRadius = 20
+        submitButton.layer.masksToBounds = true
+        submitButton.addTarget(self, action: "submitMatch", forControlEvents: .TouchUpInside)
+        
+        toggleNamesSwitch.frame = CGRectMake(collectionViewX+((buttonWidth+5)*2)+25, buttonY, 94, 27)
         toggleNamesSwitch.on = false
         toggleNamesSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.allowsMultipleSelection = true
+        
+        view.addSubview(collectionView!)
+        view.addSubview(matchTitleLabel)
+        view.addSubview(resetButton)
+        view.addSubview(submitButton)
+        view.addSubview(toggleNamesSwitch)
+        
         showLoadingScreen()
         initializeSocialGraphAndMatchGraphControllers()
     }
@@ -85,11 +140,9 @@ class MatchViewController: UIViewController {
     }
     
     func showAllNames() {
-        let cellCount = collectionView.visibleCells().count - 1
-        for index in 0...cellCount {
-            let indexPath = NSIndexPath(forRow: index, inSection: 0)
+        for cell in collectionView!.visibleCells() as [ProfilePictureCollectionViewCell] {
             let randomSample:[UInt64] = socialGraphController.currentSample()
-            let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
+            let indexPath = collectionView!.indexPathForCell(cell)!
             cell.userName = socialGraphController.nameFromId(randomSample[indexPath.row])
             cell.addTransparentLayer()
             cell.overrideLayerSelection = true
@@ -97,10 +150,9 @@ class MatchViewController: UIViewController {
     }
     
     func hideAllNames() {
-        let cellCount = collectionView.visibleCells().count - 1
-        for index in 0...cellCount {
-            let indexPath = NSIndexPath(forRow: index, inSection: 0)
-            let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
+        for cell in collectionView!.visibleCells() as [ProfilePictureCollectionViewCell] {
+            let randomSample:[UInt64] = socialGraphController.currentSample()
+            let indexPath = collectionView!.indexPathForCell(cell)!
             cell.overrideLayerSelection = false
             if !contains(selectedIndices, indexPath) {
                 cell.removeTransparentLayer()
@@ -108,21 +160,21 @@ class MatchViewController: UIViewController {
         }
     }
 
-    @IBAction func showButtonPressed() {
+    func showButtonPressed() {
         let pickerView = PickerView.createPickerViewInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
         pickerView.dataSource = self
         pickerView.delegate = self
         pickerView.selectRow(selectedRow, inComponent: 0, animated: false)
     }
 
-    @IBAction func shufflePeople() {
+    func shufflePeople() {
         if socialGraphLoaded {
             socialGraphController.updateRandomSample()
             selectedUsers.removeAll(keepCapacity: true)
             selectedIndices.removeAll(keepCapacity: true)
             let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
             dispatch_async(dispatch_get_main_queue()) {
-                self.collectionView.reloadData()
+                self.collectionView?.reloadData()
                 dispatch_async(dispatch_get_main_queue()) {
                     if self.toggleNamesSwitch.on {
                         self.showAllNames()
@@ -134,13 +186,13 @@ class MatchViewController: UIViewController {
         }
     }
     
-    @IBAction func submitMatch() {
+    func submitMatch() {
         if selectedUsers.count == 2 {
             matchGraphController.userDidMatch(selectedUsers[0], toSecondId: selectedUsers[1], withTitleId: selectedTitle!.id)
             log("Matching \(socialGraphController.nameFromId(selectedUsers[0])) with \(socialGraphController.nameFromId(selectedUsers[1])) for \"\(selectedTitle!.text)\"", withFlag: "~")
             selectedUsers.removeAll(keepCapacity: true)
             for index:NSIndexPath in selectedIndices {
-                collectionView.deselectItemAtIndexPath(index, animated: false)
+                collectionView?.deselectItemAtIndexPath(index, animated: false)
             }
             selectedIndices.removeAll(keepCapacity: true)
             shufflePeople()
@@ -226,10 +278,6 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as ProfilePictureCollectionViewCell
         cell.backgroundColor = UIColor.grayColor()
-        cell.layer.masksToBounds = true;
-        cell.layer.cornerRadius = 10;
-        cell.imageView.layer.masksToBounds = true
-        cell.imageView.layer.cornerRadius = 10
 
         let randomSample:[UInt64] = socialGraphController.currentSample()
         if randomSample.count > 0 {
@@ -280,7 +328,7 @@ extension MatchViewController: SocialGraphControllerDelegate {
         dismissLoadingScreen()
         socialGraphController.updateRandomSample()
         dispatch_async(dispatch_get_main_queue()) {
-            self.collectionView.reloadData()
+            self.collectionView!.reloadData()
         }
     }
 }
