@@ -114,4 +114,8 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
         headerView!.nameSwitch.enabled = true
     }
     
+    func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        headerView!.nameSwitch.enabled = true
+    }
+    
 }
