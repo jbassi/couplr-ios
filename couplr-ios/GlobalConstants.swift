@@ -37,6 +37,7 @@ let kStoryboardNewsViewControllerName = "NewsViewController"
 
 /* Facebook API */
 let kMaxAllowedBatchRequestSize:Int = 50
+let kFacebookAPIVersion:String = "v2.2"
 
 /* General TableViewCell Constatns */
 let kTableViewCellHeight: CGFloat = 80
@@ -107,16 +108,15 @@ let kSecondsBeforeNextGraphUpdate:Double = 345600 // In seconds. This is about 4
 let kEnableGraphCaching:Bool = true
 
 /* Recent match view */
-let kMinNumRecentMatches:Int = 8
+let kMinNumRecentMatches:Int = 10
 
-/* Graph paths for statuses and photos. */
-let kStatusGraphPathFields:String = "fields=from,likes,comments.fields(from,likes)"
+/* Graph paths for posts and photos. */
+let kPostGraphPathFields:String = "fields=from,likes,comments.fields(from,likes)"
 let kPhotosGraphPathFields:String = "fields=from,tags.fields(id,name)"
 
 /* News feed */
 let kMaxNumNewsFeedMatches:Int = 25
 let kMaxNumClosestFriends:Int = 25
 
-/* Debugging outputs */
-let kShowRandomWalkDebugOutput:Bool = false
+/* Debugging output */
 let kOutputLogMessages:Bool = false

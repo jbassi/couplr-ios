@@ -290,3 +290,13 @@ func median(list:[Float]) -> Float {
 func lower32Bits(num:UInt64) -> UInt {
     return UInt(num & 0xFFFFFFFF)
 }
+
+extension String {
+    func replace(target: String, withString: String) -> String {
+        return self.stringByReplacingOccurrencesOfString(target, withString: withString, options: NSStringCompareOptions.LiteralSearch, range: nil)
+    }
+}
+
+func isUTF8Compatible(string:String) -> Bool {
+    return NSString(string: string).lengthOfBytesUsingEncoding(NSUTF8StringEncoding) == string.utf16Count
+}

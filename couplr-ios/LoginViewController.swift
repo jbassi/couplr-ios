@@ -23,7 +23,7 @@ class LoginViewController: UIViewController {
         super.viewDidLoad()
         continueButton.hidden = true
         loginView.delegate = self
-        loginView.readPermissions = ["user_friends", "user_status", "user_photos"]
+        loginView.readPermissions = ["user_friends", "user_status", "user_posts", "user_photos"]
     }
     
     override func didReceiveMemoryWarning() {

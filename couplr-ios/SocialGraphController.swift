@@ -22,7 +22,7 @@ public class SocialGraphController {
     var graphInitializeBeginTime:Double = 0
     var doBuildGraphFromCoreData:Bool = false
     var matchesRecordedInSocialGraph:[MatchTuple:Bool] = [MatchTuple:Bool]() // HACK This name is so terrible I can't even.
-    
+
     lazy var managedObjectContext:NSManagedObjectContext? = {
         let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
         if let managedObjectContext = appDelegate.managedObjectContext {
@@ -39,7 +39,7 @@ public class SocialGraphController {
         }
         return SocialGraphSingleton.instance
     }
-    
+
     /**
      * Resets all fields to their initial values.
      */
@@ -77,8 +77,8 @@ public class SocialGraphController {
                     if self.doBuildGraphFromCoreData {
                         self.initializeGraphFromCoreData(root)
                     } else {
-                        self.graph = SocialGraph(root: root, names: Dictionary<UInt64, String>())
-                        self.graph!.updateGraphUsingStatuses()
+                        self.graph = SocialGraph(root: root, nodes: [UInt64:String]())
+                        self.graph!.updateGraphUsingPosts()
                     }
                 }
         } as FBRequestHandler)
@@ -98,7 +98,7 @@ public class SocialGraphController {
             let voteHistory:[(UInt64, UInt64, Int)] = MatchGraphController.sharedInstance.matches!.userVoteHistory
             for (firstId:UInt64, secondId:UInt64, titleId:Int) in voteHistory {
                 // For each match the user makes, connect the matched nodes.
-                if graph!.names[firstId] != nil && graph!.names[secondId] != nil {
+                if graph!.nodes[firstId] != nil && graph!.nodes[secondId] != nil {
                     graph!.connectNode(firstId, toNode: secondId, withWeight: kUserMatchVoteScore)
                 }
             }
@@ -144,10 +144,10 @@ public class SocialGraphController {
      * initial.
      */
     public func nameFromId(id:UInt64, maxStringLength:Int = kMaxNameDisplayLength) -> String {
-        if graph == nil || graph!.names[id] == nil {
-            return ""
+        if graph == nil || graph!.nodes[id] == nil {
+            return String(id)
         }
-        var name:String = graph!.names[id]!
+        var name:String = graph!.nodes[id]!
         if name.utf16Count > maxStringLength {
             name = shortenFullName(name, NameDisplayMode.MiddleInitial)
         }
@@ -156,7 +156,7 @@ public class SocialGraphController {
         }
         return name
     }
-    
+
     /**
      * Returns a list of names from a list of ids. Simply
      * for convenience.
@@ -171,14 +171,14 @@ public class SocialGraphController {
     public func userDidMatch(firstId:UInt64, toSecondId:UInt64) {
         graph?.userDidMatch(firstId, toSecondId: toSecondId)
     }
-    
+
     /**
      * Returns true iff the graph contains the given user id.
      */
     public func containsUser(userId:UInt64) -> Bool {
-        return graph?.names[userId] != nil
+        return graph?.nodes[userId] != nil
     }
-    
+
     /**
      * Returns the root user's id, or 0 if the graph has not
      * been initialized yet.
@@ -189,10 +189,10 @@ public class SocialGraphController {
         }
         return graph!.root
     }
-    
+
     /**
      * Notify this controller that the graph was initialized,
-     * whether it was using Core Data or Facebook statuses and
+     * whether it was using Core Data or Facebook posts and
      * photos. This notifies the MatchViewController and the
      * MatchGraphController that the social graph has finished
      * loading and matches are ready to be presented.
@@ -202,11 +202,10 @@ public class SocialGraphController {
         afterDelay(max(kMinLoadingDelay - timeElapsed, 0), {
             self.delegate?.socialGraphControllerDidLoadSocialGraph(self.graph!)
             MatchGraphController.sharedInstance.socialGraphDidLoad()
-            log("Initialized graph (\(self.graph!.names.count) nodes \(self.graph!.edgeCount) edges \(self.graph!.totalEdgeWeight) weight).", withIndent: 1)
+            log("Initialized graph (\(self.graph!.nodes.count) nodes \(self.graph!.edgeCount) edges \(self.graph!.totalEdgeWeight) weight).", withIndent: 1)
             let timeString:String = String(format: "%.3f",
                 currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
             log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
-            self.graph!.updateGenders()
             if self.doBuildGraphFromCoreData {
                 self.didLoadVoteHistoryOrInitializeGraph()
             } else {
@@ -225,7 +224,7 @@ public class SocialGraphController {
         managedObjectContext!.save(nil)
         log("Flushing the graph to core data...", withFlag: "!")
         RootData.insert(managedObjectContext!, rootId: graph!.root, timeModified: NSDate().timeIntervalSince1970)
-        for (id:UInt64, name:String) in graph!.names {
+        for (id:UInt64, name:String) in graph!.nodes {
             NodeData.insert(managedObjectContext!, nodeId: id, name: name)
         }
         for (node:UInt64, neighbors:[UInt64:Float]) in graph!.edges {
@@ -241,7 +240,7 @@ public class SocialGraphController {
             log("Error when saving to Core Data: \(error!.description)")
         }
     }
-    
+
     /**
      * Returns a list of the given user's closest friends.
      *
@@ -264,7 +263,7 @@ public class SocialGraphController {
         let numClosestFriends:Int = min(maxNumFriends, closestNeighbors.count)
         return Array(closestNeighbors[0..<numClosestFriends]).map({$0.0})
     }
-    
+
     /**
      * Called when the MatchGraphController has received information
      * about a match between two users in the graph. Adds an edge
@@ -272,7 +271,7 @@ public class SocialGraphController {
      * was not the root and an edge had not been previously added.
      */
     public func notifyMatchExistsBetweenUsers(firstUser:UInt64, secondUser:UInt64, withVoter:UInt64) {
-        if graph == nil || withVoter == graph!.root || graph!.names[firstUser] == nil || graph!.names[secondUser] == nil {
+        if graph == nil || withVoter == graph!.root || graph!.nodes[firstUser] == nil || graph!.nodes[secondUser] == nil {
             return
         }
         let pair:MatchTuple = MatchTuple(firstId:firstUser, secondId:secondUser)
@@ -281,7 +280,7 @@ public class SocialGraphController {
             matchesRecordedInSocialGraph[pair] = true
         }
     }
-    
+
     /**
      * Called when the MatchGraphController has finished loading the
      * matches between closest friends. Updates the median edge weight.
@@ -291,25 +290,25 @@ public class SocialGraphController {
             graph!.updateMedianEdgeWeight()
         }
     }
-    
+
     /**
      * Initializes the graph directly from core data.
      */
     private func initializeGraphFromCoreData(rootId:UInt64) {
         log("Initializing graph from core data...", withFlag:"!")
-        var names:[UInt64:String] = [UInt64:String]()
-        let nodes:[NodeData] = NodeData.allObjects(managedObjectContext!)
-        for node in nodes {
-            names[node.id()] = node.name
+        var nodes:[UInt64:String] = [UInt64:String]()
+        for node in NodeData.allObjects(managedObjectContext!) {
+            nodes[node.id()] = node.name
         }
-        self.graph = SocialGraph(root: rootId, names: names)
+        self.graph = SocialGraph(root: rootId, nodes: nodes)
         let edges:[EdgeData] = EdgeData.allObjects(managedObjectContext!)
         for edgeData:EdgeData in edges {
             graph!.connectNode(edgeData.from(), toNode: edgeData.to(), withWeight: edgeData.weight)
         }
+        graph!.loadGendersFromCoreData()
         didInitializeGraph()
     }
-    
+
     /**
      * Removes all graph data from local storage.
      */
