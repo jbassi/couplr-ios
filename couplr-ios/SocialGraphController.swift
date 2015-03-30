@@ -144,10 +144,10 @@ public class SocialGraphController {
      * initial.
      */
     public func nameFromId(id:UInt64, maxStringLength:Int = kMaxNameDisplayLength) -> String {
-        if graph == nil || graph!.nodes[id] == nil {
+        if graph == nil || graph!.names[id] == nil {
             return String(id)
         }
-        var name:String = graph!.nodes[id]!
+        var name:String = graph!.names[id]!
         if name.utf16Count > maxStringLength {
             name = shortenFullName(name, NameDisplayMode.MiddleInitial)
         }
@@ -177,6 +177,14 @@ public class SocialGraphController {
      */
     public func containsUser(userId:UInt64) -> Bool {
         return graph?.nodes[userId] != nil
+    }
+    
+    /**
+     * Returns true iff the given user's id has a corresponding
+     * name.
+     */
+    public func hasNameForUser(userId:UInt64) -> Bool {
+        return graph?.names[userId] != nil
     }
 
     /**
@@ -226,6 +234,9 @@ public class SocialGraphController {
         RootData.insert(managedObjectContext!, rootId: graph!.root, timeModified: NSDate().timeIntervalSince1970)
         for (id:UInt64, name:String) in graph!.nodes {
             NodeData.insert(managedObjectContext!, nodeId: id, name: name)
+        }
+        for (id:UInt64, name:String) in graph!.names {
+            NameData.insert(managedObjectContext!, nodeId: id, name: name)
         }
         for (node:UInt64, neighbors:[UInt64:Float]) in graph!.edges {
             for (neighbor:UInt64, weight:Float) in neighbors {
@@ -305,6 +316,11 @@ public class SocialGraphController {
         for edgeData:EdgeData in edges {
             graph!.connectNode(edgeData.from(), toNode: edgeData.to(), withWeight: edgeData.weight)
         }
+        let names:[NameData] = NameData.allObjects(managedObjectContext!)
+        for name:NameData in names {
+            println(name)
+            graph!.names[name.id()] = name.name
+        }
         graph!.loadGendersFromCoreData()
         didInitializeGraph()
     }
@@ -321,6 +337,9 @@ public class SocialGraphController {
         }
         for edge:EdgeData in EdgeData.allObjects(managedObjectContext!) {
             managedObjectContext!.deleteObject(edge)
+        }
+        for name:NameData in NameData.allObjects(managedObjectContext!) {
+            managedObjectContext!.deleteObject(name)
         }
     }
 

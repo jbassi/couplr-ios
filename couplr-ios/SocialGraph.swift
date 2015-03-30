@@ -35,7 +35,7 @@ let kMinExportEdgeWeight:Float = 0.8                // Only export edges with mo
 let kScaleFactorForExportingRootEdges:Float = 0.25  // Export root edges scaled by this number.
 let kMutualFriendsThreshold:Int = 3                 // This many mutual friends to pull a friend over to the user's graph.
 
-let kGenderBiasRatio:Float = 5.0                    // Make it this much more likely to land on the opposite gender.
+let kGenderBiasRatio:Float = 4.0                    // Make it this much more likely to land on the opposite gender.
 let kWalkWeightUserMatchBoost:Float = 1.5           // The walk weight "bonus" for a node when the user selects a match.
 let kWalkWeightDecayRate:Float = 0.75               // The decay rate for the walk weight bonus.
 let kWalkWeightPenalty:Float = 0.5                  // Constant penalty per step to encourage choosing new nodes.
@@ -90,6 +90,10 @@ public class SocialGraph {
     public init(root:UInt64, nodes:[UInt64:String]) {
         self.root = root
         self.nodes = nodes
+        self.names = [UInt64:String]()
+        for (id:UInt64,name:String) in nodes {
+            self.names[id] = name
+        }
         self.edges = [UInt64:[UInt64:Float]]()
         self.totalEdgeWeight = 0
         self.edgeCount = 0
@@ -132,6 +136,7 @@ public class SocialGraph {
      * value of Gender.Undetermined.
      */
     public func updateNodeWithId(id:UInt64, andName:String, andUpdateGender:Bool = true) {
+        names[id] = andName
         if nodes[id] == nil {
             nodes[id] = andName
             let firstName:String = firstNameFromFullName(andName)
@@ -466,6 +471,8 @@ public class SocialGraph {
     var nodes:[UInt64:String]
     var genders:[String:Gender]
     var currentSample:[UInt64]
+    // Unlike nodes, names does not reflect the graph topology. Operations such as pruning do not affect names.
+    var names:[UInt64:String]
 
     // Edge-based metadata for computing heuristics.
     var totalEdgeWeight:Float

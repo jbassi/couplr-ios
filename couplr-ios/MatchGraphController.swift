@@ -44,7 +44,7 @@ public class MatchGraphController {
         var updateTimesByMatchTuple:[MatchTuple:NSDate] = [MatchTuple:NSDate]()
         for friendId:UInt64 in SocialGraphController.sharedInstance.closestFriendsOfUser(rootId) {
             for (neighborId:UInt64, matchList:MatchList) in matches!.matchListsForUserId(friendId) {
-                if neighborId == rootId || !SocialGraphController.sharedInstance.containsUser(neighborId) {
+                if neighborId == rootId || !SocialGraphController.sharedInstance.hasNameForUser(neighborId) {
                     continue
                 }
                 for (titleId:Int, _:[UInt64]) in matchList.matchesByTitle {

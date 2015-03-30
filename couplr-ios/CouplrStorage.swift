@@ -47,13 +47,7 @@ public class RootData: NSManagedObject {
     }
 }
 
-@objc(NodeData)
-/**
- * Stores an (id, name) pairing for one of the nodes in the
- * social graph.
- */
-public class NodeData: NSManagedObject {
-    
+public class IdNameMapping : NSManagedObject {
     @NSManaged var idBase64:String
     @NSManaged var name:String
     
@@ -65,11 +59,18 @@ public class NodeData: NSManagedObject {
         self.name = name
         self.idBase64 = encodeBase64(nodeId)
     }
-
-    public func toString() -> String {
-        return "Node(id=\(id()), name=\"\(name)\")"
-    }
     
+    public func toString() -> String {
+        return "(id=\(id()), name=\"\(name)\")"
+    }
+}
+
+@objc(NodeData)
+/**
+ * Stores an (id, name) pairing for one of the nodes in the
+ * social graph.
+ */
+public class NodeData : IdNameMapping {
     class func insert(context:NSManagedObjectContext, nodeId:UInt64, name:String) {
         let node:NodeData = NSEntityDescription.insertNewObjectForEntityForName("NodeData", inManagedObjectContext: context) as NodeData
         node.set(nodeId, name: name)
@@ -82,6 +83,29 @@ public class NodeData: NSManagedObject {
             return fetchResults
         }
         log("Could not fetch local nodes with error \"\(error?.description)\"", withFlag: "-")
+        return []
+    }
+}
+
+@objc(NameData)
+/**
+ * Stores an (id, name) pairing. It's identical to NodeData at
+ * the moment, but this could change if we decide to store more
+ * information in NodeData.
+ */
+public class NameData: IdNameMapping {
+    class func insert(context:NSManagedObjectContext, nodeId:UInt64, name:String) {
+        let nameData:NameData = NSEntityDescription.insertNewObjectForEntityForName("NameData", inManagedObjectContext: context) as NameData
+        nameData.set(nodeId, name: name)
+    }
+    
+    class func allObjects(context:NSManagedObjectContext) -> [NameData] {
+        let request = NSFetchRequest(entityName: "NameData")
+        var error:NSError? = nil
+        if let fetchResults = context.executeFetchRequest(request, error: &error) as? [NameData] {
+            return fetchResults
+        }
+        log("Could not fetch local names with error \"\(error?.description)\"", withFlag: "-")
         return []
     }
 }

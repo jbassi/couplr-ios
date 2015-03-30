@@ -200,7 +200,7 @@ public class MatchGraph {
         var matchCountsByTitle:[Int:Int] = [Int:Int]()
         for (neighbor:UInt64, list:MatchList) in matches[userId]! {
             // HACK Find a better way of preventing unknown users from showing up in matches.
-            if !SocialGraphController.sharedInstance.containsUser(neighbor) {
+            if !SocialGraphController.sharedInstance.hasNameForUser(neighbor) {
                 continue
             }
             for (titleId:Int, voters:[UInt64]) in list.matchesByTitle {

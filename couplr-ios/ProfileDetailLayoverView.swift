@@ -138,7 +138,7 @@ class ProfileDetailLayoverView: UIView {
             (tupleAndTime:(MatchTuple,NSDate)) -> Bool in
             let tuple:MatchTuple = tupleAndTime.0
             let matchedWithId:UInt64 = tuple.firstId == rootId ? tuple.secondId : tuple.firstId
-            return self.socialGraphController.containsUser(matchedWithId)
+            return self.socialGraphController.hasNameForUser(matchedWithId)
         }).map{ $0.0 }
         for u:MatchTuple in tuples {
             var shouldAddMatch:Bool = true
