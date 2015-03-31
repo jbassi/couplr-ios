@@ -30,7 +30,7 @@ extension SocialGraph {
         var samples:[UInt64:Bool] = [UInt64:Bool]()
         var nextStep:UInt64 = root
         while samples.count < size {
-            if nextStep != root && true {// randomFloat() < randomHopProbability {
+            if nextStep != root && randomFloat() < randomHopProbability {
                 let currentStep = nextStep
                 nextStep = sampleRandomNode(samples)
                 if kShowRandomWalkDebugOutput {

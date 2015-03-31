@@ -35,6 +35,9 @@ Parse/
 # Temporary files
 sample_*.tmp
 testflight.html
+analytics/images/
+analytics/data/
+*.pyc
 
 # Network captures
 *.pcapng

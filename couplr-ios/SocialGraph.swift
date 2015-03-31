@@ -29,7 +29,7 @@ let kMinPhotoPairwiseWeight:Float = 0.1             // Only add edges from photo
 let kSamplingWeightLimit:Float = 10                 // The coefficient for the sigmoid function.
 let kSigmoidExponentialBase:Float = 2.0             // The exponential base for the sigmoid function.
 let kRandomSampleCount:Int = 9                      // The number of people to randomly sample.
-let kExpectedNumRandomHops:Float = 1.2              // The expected number of random hops when performing random walk sampling.
+let kExpectedNumRandomHops:Float = 1.0              // The expected number of random hops when performing random walk sampling.
 
 let kMaxGraphDataQueries:Int = 5                    // Max number of friends to query graph data from.
 let kMinExportEdgeWeight:Float = 0.75               // Only export edges with more than this weight.
@@ -112,20 +112,35 @@ public class SocialGraph {
      * Returns a string representation of this graph, displaying its edges.
      */
     public func toString() -> String {
-        var out:String = "SocialGraph({\n"
-        out += "    node count   : \(self.nodes.count)\n"
-        out += "    edge count   : \(edgeCount)\n"
-        out += "    total weight : \(totalEdgeWeight)\n\n"
-        for (node, neighbors) in edges {
-            var nodeName:String = nodes[node] != nil ? nodes[node]! : String(node)
-            out += "    \(nodeName) = [\n"
-            for (neighbor, weight) in neighbors {
-                var neighborName:String = (nodes[neighbor] != nil) ? nodes[neighbor]! : String(neighbor)
-                out += "        (\(nodeName) -> \(neighborName)) = \(weight),\n"
+        var out:String = "{"
+        out += "\"node_count\":\(self.nodes.count),"
+        out += "\"edge_count\":\(edgeCount),"
+        out += "\"total_weight\":\(totalEdgeWeight),"
+        out += "\"root\":\"\(root)\","
+        out += "\"edges\":{"
+        for (outerIndex:Int, (node:UInt64, neighbors)) in enumerate(edges) {
+            out += "\"\(String(node))\":{"
+            for (innerIndex:Int, (neighbor:UInt64, weight:Float)) in enumerate(neighbors) {
+                out += "\"\(neighbor)\":\(weight)"
+                if innerIndex != neighbors.count - 1 {
+                    out += ","
+                }
             }
-            out += "    ]\n"
+            out += "}"
+            if outerIndex != edges.count - 1 {
+                out += ","
+            }
         }
-        out += "})"
+        out += "},"
+        out += "\"nodes\":{"
+        for (index:Int, (node:UInt64, _)) in enumerate(edges) {
+            out += "\"\(String(node))\":\"\(names[node]!)\""
+            if index != edges.count - 1 {
+                out += ","
+            }
+        }
+        out += "}"
+        out += "}"
         return out
     }
 
