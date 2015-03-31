@@ -156,7 +156,9 @@ extension SocialGraph {
             let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
             log("Time since startup: \(timeString) sec", withIndent: 2, withNewline: true)
             updateGenders()
-            updateMedianEdgeWeight()
+            if kUseMedianAsWeightBaseline {
+                updateMedianEdgeWeight()
+            }
             log("Vertex count: \(nodes.count)", withIndent: 2)
             log("Edge count: \(edgeCount)", withIndent: 2)
             log("Total weight: \(totalEdgeWeight)", withIndent: 2)

@@ -51,9 +51,9 @@
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
 		F4973F0B1A50E31700FEA3B0 /* SocialGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */; };
 		F4C911BB1A5A764300D2CB11 /* MatchGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */; };
-		F4EA6F201AC87398004D6133 /* GraphPruningUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EA6F1F1AC87398004D6133 /* GraphPruningUtilities.swift */; };
-		F4EA6F221AC87426004D6133 /* GraphUpdateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EA6F211AC87426004D6133 /* GraphUpdateUtilities.swift */; };
-		F4EA6F241AC8754E004D6133 /* GraphSamplingUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EA6F231AC8754E004D6133 /* GraphSamplingUtilities.swift */; };
+		F4EA6F201AC87398004D6133 /* SocialGraphPruningUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EA6F1F1AC87398004D6133 /* SocialGraphPruningUtilities.swift */; };
+		F4EA6F221AC87426004D6133 /* SocialGraphUpdateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EA6F211AC87426004D6133 /* SocialGraphUpdateUtilities.swift */; };
+		F4EA6F241AC8754E004D6133 /* SocialGraphSamplingUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EA6F231AC8754E004D6133 /* SocialGraphSamplingUtilities.swift */; };
 		F4EE3AA41A5786F100A49F32 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4EE3AA31A5786F100A49F32 /* AudioToolbox.framework */; };
 		F4EE3AA61A5786FA00A49F32 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4EE3AA51A5786FA00A49F32 /* CFNetwork.framework */; };
 		F4EE3AA81A57870300A49F32 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4EE3AA71A57870300A49F32 /* CoreGraphics.framework */; };
@@ -150,9 +150,9 @@
 		F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphController.swift; sourceTree = "<group>"; };
 		F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraph.swift; sourceTree = "<group>"; };
 		F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraph.swift; sourceTree = "<group>"; };
-		F4EA6F1F1AC87398004D6133 /* GraphPruningUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphPruningUtilities.swift; sourceTree = "<group>"; };
-		F4EA6F211AC87426004D6133 /* GraphUpdateUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphUpdateUtilities.swift; sourceTree = "<group>"; };
-		F4EA6F231AC8754E004D6133 /* GraphSamplingUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphSamplingUtilities.swift; sourceTree = "<group>"; };
+		F4EA6F1F1AC87398004D6133 /* SocialGraphPruningUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphPruningUtilities.swift; sourceTree = "<group>"; };
+		F4EA6F211AC87426004D6133 /* SocialGraphUpdateUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphUpdateUtilities.swift; sourceTree = "<group>"; };
+		F4EA6F231AC8754E004D6133 /* SocialGraphSamplingUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphSamplingUtilities.swift; sourceTree = "<group>"; };
 		F4EE3AA31A5786F100A49F32 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		F4EE3AA51A5786FA00A49F32 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		F4EE3AA71A57870300A49F32 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -403,9 +403,9 @@
 		F4EA6F1E1AC87380004D6133 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				F4EA6F1F1AC87398004D6133 /* GraphPruningUtilities.swift */,
-				F4EA6F211AC87426004D6133 /* GraphUpdateUtilities.swift */,
-				F4EA6F231AC8754E004D6133 /* GraphSamplingUtilities.swift */,
+				F4EA6F1F1AC87398004D6133 /* SocialGraphPruningUtilities.swift */,
+				F4EA6F211AC87426004D6133 /* SocialGraphUpdateUtilities.swift */,
+				F4EA6F231AC8754E004D6133 /* SocialGraphSamplingUtilities.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -512,7 +512,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				11FDBBBC1AC5F206006DFD9B /* UIView+WebCacheOperation.m in Sources */,
-				F4EA6F241AC8754E004D6133 /* GraphSamplingUtilities.swift in Sources */,
+				F4EA6F241AC8754E004D6133 /* SocialGraphSamplingUtilities.swift in Sources */,
 				11E587131AC3B85100D61CDB /* NewsfeedViewController.swift in Sources */,
 				F4F0DCE91A63335B007FC931 /* CouplrStorage.swift in Sources */,
 				11276E361AC4F5FE00ADD063 /* NewsfeedTableViewCell.swift in Sources */,
@@ -535,11 +535,11 @@
 				11996CB81AC4D1B400C45DB0 /* NewsfeedHeaderView.swift in Sources */,
 				11CF0BDA1AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift in Sources */,
 				F4F0DC7D1A630DBA007FC931 /* CouplrData.xcdatamodeld in Sources */,
-				F4EA6F221AC87426004D6133 /* GraphUpdateUtilities.swift in Sources */,
+				F4EA6F221AC87426004D6133 /* SocialGraphUpdateUtilities.swift in Sources */,
 				0F37CA2219C53954007A6951 /* ProfileViewController.swift in Sources */,
 				11FDBBAF1AC5F206006DFD9B /* SDImageCache.m in Sources */,
 				11E587111AC3A92F00D61CDB /* ImageTitleTableViewCell.swift in Sources */,
-				F4EA6F201AC87398004D6133 /* GraphPruningUtilities.swift in Sources */,
+				F4EA6F201AC87398004D6133 /* SocialGraphPruningUtilities.swift in Sources */,
 				11FDBBB41AC5F206006DFD9B /* SDWebImageManager.m in Sources */,
 				11FDBBB91AC5F206006DFD9B /* UIImage+WebP.m in Sources */,
 				0FA10B3F1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift in Sources */,

@@ -297,7 +297,7 @@ public class SocialGraphController {
      * matches between closest friends. Updates the median edge weight.
      */
     public func didLoadMatchesForClosestFriends() {
-        if graph != nil {
+        if graph != nil && kUseMedianAsWeightBaseline {
             graph!.updateMedianEdgeWeight()
         }
     }
@@ -318,7 +318,6 @@ public class SocialGraphController {
         }
         let names:[NameData] = NameData.allObjects(managedObjectContext!)
         for name:NameData in names {
-            println(name)
             graph!.names[name.id()] = name.name
         }
         graph!.loadGendersFromCoreData()

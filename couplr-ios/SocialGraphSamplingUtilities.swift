@@ -14,29 +14,37 @@ extension SocialGraph {
      * graph starting at the root user.
      */
     public func updateRandomSample(size:Int = kRandomSampleCount) {
-        currentSample.removeAll(keepCapacity: true)
-        var sample:NSMutableSet = NSMutableSet()
-        var nextStep:UInt64 = root
-        while sample.count < size {
-            nextStep = takeRandomStepFrom(nextStep, withNodesTraversed: sample)
-            if nextStep == 0 { // Random walk reached a dead end.
-                nextStep = sampleRandomNode(sample)
-            }
-            sample.addObject(nextStep.description)
-        }
-        for idAsObject:AnyObject in sample {
-            let id:UInt64 = uint64FromAnyObject(idAsObject)
-            currentSample.append(id)
-        }
+        currentSample = randomWalkSample(size)
         if kShowRandomWalkDebugOutput {
             println("    Done. Final random walk result...")
-            for idAsObject:AnyObject in sample {
-                let id:UInt64 = uint64FromAnyObject(idAsObject)
-                println("        \(nodes[id]!) (\(id))")
+            for id:UInt64 in currentSample {
+                println("        \(names[id]!) (\(id))")
             }
             println()
         }
-        updateWalkWeightMultipliersAfterRandomSample()
+        updateWalkWeightMultipliers()
+    }
+    
+    private func randomWalkSample(size:Int, expectedNumRandomHops:Float = kExpectedNumRandomHops) -> [UInt64] {
+        let randomHopProbability:Float = expectedNumRandomHops / Float(size - 1)
+        var samples:[UInt64:Bool] = [UInt64:Bool]()
+        var nextStep:UInt64 = root
+        while samples.count < size {
+            if nextStep != root && true {// randomFloat() < randomHopProbability {
+                let currentStep = nextStep
+                nextStep = sampleRandomNode(samples)
+                if kShowRandomWalkDebugOutput {
+                    println("    [\(samples.count + 1)] Randomly hopping from \(names[currentStep]!) to \(names[nextStep]!)")
+                }
+            } else {
+                nextStep = takeRandomStepFrom(nextStep, withNodesTraversed: samples)
+                if nextStep == 0 { // Random walk reached a dead end.
+                    nextStep = sampleRandomNode(samples)
+                }
+            }
+            samples[nextStep] = true
+        }
+        return Array(samples.keys)
     }
     
     /**
@@ -44,22 +52,22 @@ extension SocialGraph {
      * to a new neighboring node that does not already appear in the list of previous
      * nodes and is not the root. If there is no such node, returns 0.
      */
-    private func takeRandomStepFrom(node:UInt64, withNodesTraversed:NSMutableSet) -> UInt64 {
+    private func takeRandomStepFrom(node:UInt64, withNodesTraversed:[UInt64:Bool]) -> UInt64 {
         var possibleNextNodes:[(UInt64, Float)] = [(UInt64, Float)]()
         var originalNormalizedWeights:[Float] = [Float]() // Debugging purposes.
-        let currentGender:Gender = node == root ? Gender.Undetermined : genderFromID(node)
+        let currentGender:Gender = node == root ? Gender.Undetermined : genderFromId(node)
         var sameGenderScoreSum:Float = 0
         var differentGenderScoreSum:Float = 0
         let meanNonRootWeight:Float = baselineEdgeWeight()
         // Compute sampling weights prior to gender renormalization.
         for (neighbor:UInt64, weight:Float) in self.edges[node]! {
-            if neighbor == root || withNodesTraversed.containsObject(neighbor.description) {
+            if neighbor == root || withNodesTraversed[neighbor] != nil {
                 continue
             }
             let neighborScore:Float = sampleWeightForScore(weight - meanNonRootWeight)
             possibleNextNodes.append((neighbor, neighborScore))
             originalNormalizedWeights.append(weight - meanNonRootWeight)
-            let gender:Gender = genderFromID(neighbor)
+            let gender:Gender = genderFromId(neighbor)
             if currentGender == Gender.Undetermined || gender == Gender.Undetermined {
                 continue
             } else if gender == currentGender {
@@ -74,7 +82,7 @@ extension SocialGraph {
             let newDifferentGenderScoreSum:Float = kGenderBiasRatio * newSameGenderScoreSum
             for index in 0..<possibleNextNodes.count {
                 let (neighbor:UInt64, weight:Float) = possibleNextNodes[index]
-                let gender:Gender = genderFromID(neighbor)
+                let gender:Gender = genderFromId(neighbor)
                 if gender != Gender.Undetermined {
                     if gender == currentGender {
                         possibleNextNodes[index].1 *= newSameGenderScoreSum / sameGenderScoreSum
@@ -93,7 +101,7 @@ extension SocialGraph {
             if withNodesTraversed.count == 0 {
                 println("[!] Beginning random walk...")
             }
-            print("    [\(withNodesTraversed.count + 1)] Now at \(nodes[node]!) (\(genderFromID(node).toString()))\n")
+            print("    [\(withNodesTraversed.count + 1)] Now at \(nodes[node]!) (\(genderFromId(node).toString()))\n")
             if possibleNextNodes.count == 0 {
                 println("        No unvisited neighbors to step to!")
             } else {
@@ -142,17 +150,14 @@ extension SocialGraph {
      * Computes the walk weight multiplier for a node. By default, this is 1 (no change).
      */
     public func walkWeightBonusForNode(id:UInt64) -> Float {
-        if walkWeightMultipliers[id] == nil {
-            return 0
-        }
-        return walkWeightMultipliers[id]!
+        return walkWeightMultipliers[id] == nil ? 0 : walkWeightMultipliers[id]!
     }
     
     /**
      * Update walk weight multipliers. This means decaying all existing multipliers and
      * applying a penalty to all nodes chosen in the current random sample.
      */
-    private func updateWalkWeightMultipliersAfterRandomSample() {
+    private func updateWalkWeightMultipliers() {
         for (node:UInt64, multiplier:Float) in walkWeightMultipliers {
             walkWeightMultipliers[node] = kWalkWeightDecayRate * multiplier
         }
@@ -182,10 +187,10 @@ extension SocialGraph {
     /**
      * Randomly samples a node out of the root user's neighbors.
      */
-    private func sampleRandomNode(withNodesTraversed:NSMutableSet, andIgnoreRoot:Bool = true) -> UInt64 {
+    private func sampleRandomNode(withNodesTraversed:[UInt64:Bool]) -> UInt64 {
         let possibleNextNodes:[UInt64] = Array(edges[root]!.keys.filter {
             (neighbor:UInt64) -> Bool in
-            return !withNodesTraversed.containsObject(neighbor.description) && (!andIgnoreRoot || neighbor != self.root)
+            return withNodesTraversed[neighbor] == nil
         })
         return possibleNextNodes[randomInt(possibleNextNodes.count)]
     }

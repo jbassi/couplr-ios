@@ -14,7 +14,7 @@ let kUnconnectedEdgeWeight:Float = -1000.0          // The weight of an unconnec
 let kMinNumPosts:Int = 150                          // Number of posts to query.
 let kMaxNumPhotos:Int = 200                         // Number of photos to query.
 let kMaxPhotoGroupSize:Int = 15                     // Max number of people considered in a photo.
-let kMinGraphEdgeWeight:Float = 0.4                 // The minimum edge weight threshold when cleaning the graph.
+let kMinGraphEdgeWeight:Float = 0.25                // The minimum edge weight threshold when cleaning the graph.
 let kMatchExistsBetweenUsersWeight:Float = 1        // The connection weight between two users who are matched at least once.
 let kUserMatchVoteScore:Float = 1.0                 // Score for the user voting on title for a match.
 // Like and comment scores.
@@ -27,17 +27,19 @@ let kMaxPairwisePhotoScore:Float = 2.0              // A base photo score for a 
 let kMinPhotoPairwiseWeight:Float = 0.1             // Only add edges from photo data with at least this weight.
 
 let kSamplingWeightLimit:Float = 10                 // The coefficient for the sigmoid function.
-let kSigmoidExponentialBase:Float = 2.5             // The exponential base for the sigmoid function.
+let kSigmoidExponentialBase:Float = 2.0             // The exponential base for the sigmoid function.
 let kRandomSampleCount:Int = 9                      // The number of people to randomly sample.
+let kExpectedNumRandomHops:Float = 1.2              // The expected number of random hops when performing random walk sampling.
 
-let kMaxGraphDataQueries:Int = 4                    // Max number of friends to query graph data from.
-let kMinExportEdgeWeight:Float = 0.8                // Only export edges with more than this weight.
+let kMaxGraphDataQueries:Int = 5                    // Max number of friends to query graph data from.
+let kMinExportEdgeWeight:Float = 0.75               // Only export edges with more than this weight.
 let kScaleFactorForExportingRootEdges:Float = 0.25  // Export root edges scaled by this number.
 let kMutualFriendsThreshold:Int = 3                 // This many mutual friends to pull a friend over to the user's graph.
+let kUseMedianAsWeightBaseline:Bool = false         // Whether to use median for the baseline (if false, mean is used).
 
 let kGenderBiasRatio:Float = 4.0                    // Make it this much more likely to land on the opposite gender.
 let kWalkWeightUserMatchBoost:Float = 1.5           // The walk weight "bonus" for a node when the user selects a match.
-let kWalkWeightDecayRate:Float = 0.75               // The decay rate for the walk weight bonus.
+let kWalkWeightDecayRate:Float = 0.5                // The decay rate for the walk weight bonus.
 let kWalkWeightPenalty:Float = 0.5                  // Constant penalty per step to encourage choosing new nodes.
 // Debugging output
 let kShowRandomWalkDebugOutput:Bool = false
@@ -426,7 +428,7 @@ public class SocialGraph {
      * to map ID -> name -> first name -> gender. Returns Gender.Undetermined if ID
      * lookup failed.
      */
-    public func genderFromID(id:UInt64) -> Gender {
+    public func genderFromId(id:UInt64) -> Gender {
         if let name:String = nodes[id] {
             let firstName:String = firstNameFromFullName(name)
             return genders[firstName] == nil ? Gender.Undetermined : genders[firstName]!
@@ -447,7 +449,7 @@ public class SocialGraph {
             if id == root {
                 continue
             }
-            let gender:Gender = genderFromID(id)
+            let gender:Gender = genderFromId(id)
             switch gender {
             case .Undetermined:
                 ucount++
