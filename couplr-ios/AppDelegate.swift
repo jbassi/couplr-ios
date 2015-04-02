@@ -14,9 +14,14 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var profileView:ProfileViewController?
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        window = UIWindow(frame: UIScreen.mainScreen().bounds)
+        let loginViewController = LoginViewController()
+        
+        self.window?.rootViewController = loginViewController
+        self.window?.makeKeyAndVisible()
+        
         Parse.setApplicationId(kParseApplicationID, clientKey: kParseClientKey)
         FBLoginView.self
         FBProfilePictureView.self

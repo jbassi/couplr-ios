@@ -25,7 +25,7 @@ class CouplrLoginErrorHandler: NSObject {
                     alertMessage = "Your current session is no longer valid. Please log in again."
                 case FBErrorCategory.UserCancelled:
                     alertTitle = "Session Error"
-                    alertMessage = "Please login with Facebook to use Couplr."
+                    alertMessage = "Please log in with Facebook to use Couplr."
                 default:
                     alertTitle = "Unknown Error"
                     alertMessage = "Error: Please try again later."

@@ -33,11 +33,19 @@ class CouplrControllers {
     }
     
     func showMatchViewLoadingScreen() {
-        matchViewController?.showLoadingScreen()
+        if let matchView = matchViewController? {
+            if matchView.isViewLoaded() {
+                matchViewController?.showLoadingScreen()
+            }
+        }
     }
     
     func initializeMatchView() {
-        matchViewController?.initializeSocialGraphAndMatchGraphControllers()
+        if let matchView = matchViewController? {
+            if matchView.isViewLoaded() {
+                matchViewController?.initializeSocialGraphAndMatchGraphControllers()
+            }
+        }
     }
     
     weak var profileViewController:ProfileViewController?
@@ -69,19 +77,7 @@ class CouplrNavigationController: UINavigationController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        let storyboard = UIStoryboard(name: kStoryboardName, bundle: nil)
-        let matchView = storyboard.instantiateViewControllerWithIdentifier(kStoryboardMatchViewControllerName) as MatchViewController
-        let profileView = storyboard.instantiateViewControllerWithIdentifier(kStoryboardProfileViewControllerName) as ProfileViewController
-        let newsfeedView = storyboard.instantiateViewControllerWithIdentifier(kStoryboardNewsViewControllerName) as NewsfeedViewController
-        
-        CouplrControllers.sharedInstance.navigationController = self
-        CouplrControllers.sharedInstance.profileViewController = profileView
-        CouplrControllers.sharedInstance.matchViewController = matchView
-        CouplrControllers.sharedInstance.newsfeedViewController = newsfeedView
-        
-        viewControllerArray.append(profileView)
-        viewControllerArray.append(matchView)
-        viewControllerArray.append(newsfeedView)
+        setNavigationBarHidden(true, animated: false)
         
         buttonArray.append(profileViewButton)
         buttonArray.append(matchViewButton)

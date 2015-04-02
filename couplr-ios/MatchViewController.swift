@@ -327,8 +327,10 @@ extension MatchViewController: SocialGraphControllerDelegate {
         socialGraphLoaded = true
         dismissLoadingScreen()
         socialGraphController.updateRandomSample()
-        dispatch_async(dispatch_get_main_queue()) {
-            self.collectionView!.reloadData()
+        if isViewLoaded() {
+            dispatch_async(dispatch_get_main_queue()) {
+                self.collectionView!.reloadData()
+            }
         }
     }
 }

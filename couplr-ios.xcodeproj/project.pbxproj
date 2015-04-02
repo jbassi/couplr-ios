@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		0F0EB6EB1A5E16B300E2A25B /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F0EB6EA1A5E16B300E2A25B /* LoadingView.swift */; };
 		0F1B9EE319C4DD7A00CD64FD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1B9EE219C4DD7A00CD64FD /* AppDelegate.swift */; };
-		0F1B9EEA19C4DD7A00CD64FD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0F1B9EE819C4DD7A00CD64FD /* Main.storyboard */; };
 		0F1B9EEC19C4DD7A00CD64FD /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0F1B9EEB19C4DD7A00CD64FD /* Images.xcassets */; };
 		0F1B9EEF19C4DD7A00CD64FD /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0F1B9EED19C4DD7A00CD64FD /* LaunchScreen.xib */; };
 		0F24FB401A53BD5C00201C31 /* SocialGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F24FB3F1A53BD5C00201C31 /* SocialGraphController.swift */; };
@@ -88,7 +87,6 @@
 		0F1B9EDD19C4DD7A00CD64FD /* couplr-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "couplr-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F1B9EE119C4DD7A00CD64FD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0F1B9EE219C4DD7A00CD64FD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0F1B9EE919C4DD7A00CD64FD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0F1B9EEB19C4DD7A00CD64FD /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		0F1B9EEE19C4DD7A00CD64FD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		0F1B9EF419C4DD7A00CD64FD /* couplr-iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "couplr-iosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -236,7 +234,6 @@
 				0F859B4319C4EB09000FB737 /* Login */,
 				0F1B9EE219C4DD7A00CD64FD /* AppDelegate.swift */,
 				0F5A034E19C4E1860050DC9F /* Bridging-Header.h */,
-				0F1B9EE819C4DD7A00CD64FD /* Main.storyboard */,
 				0F1B9EED19C4DD7A00CD64FD /* LaunchScreen.xib */,
 				0F1B9EEB19C4DD7A00CD64FD /* Images.xcassets */,
 				0F1B9F0419C4DE0C00CD64FD /* Frameworks */,
@@ -491,7 +488,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0F1B9EEA19C4DD7A00CD64FD /* Main.storyboard in Resources */,
 				0F1B9EEF19C4DD7A00CD64FD /* LaunchScreen.xib in Resources */,
 				0F1B9EEC19C4DD7A00CD64FD /* Images.xcassets in Resources */,
 			);
@@ -577,14 +573,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		0F1B9EE819C4DD7A00CD64FD /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				0F1B9EE919C4DD7A00CD64FD /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		0F1B9EED19C4DD7A00CD64FD /* LaunchScreen.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
