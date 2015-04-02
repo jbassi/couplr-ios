@@ -26,6 +26,7 @@ class MatchViewController: UIViewController {
     let matchTitleLabel:UIButton = UIButton()
     let resetButton:UIButton = UIButton()
     let submitButton:UIButton = UIButton()
+    let settingsButton:UIButton = UIButton()
     let toggleNamesSwitch:UISwitch = UISwitch()
 
     let socialGraphController = SocialGraphController.sharedInstance
@@ -81,15 +82,21 @@ class MatchViewController: UIViewController {
         submitButton.layer.masksToBounds = true
         submitButton.addTarget(self, action: "submitMatch", forControlEvents: .TouchUpInside)
         
-        toggleNamesSwitch.frame = CGRectMake(collectionViewX+((buttonWidth+5)*2)+25, buttonY+5, 94, 27)
+        toggleNamesSwitch.frame.origin = CGPointMake(collectionViewX+((buttonWidth+5)*2), buttonY+5)
         toggleNamesSwitch.on = false
         toggleNamesSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)
+        
+        let settingsButtonX:CGFloat = toggleNamesSwitch.frame.origin.x + toggleNamesSwitch.frame.width + 2
+        settingsButton.frame = CGRectMake(settingsButtonX, buttonY+3, 45, 35)
+        settingsButton.setImage(UIImage(named: "settings"), forState: .Normal)
+        settingsButton.addTarget(self, action: "settingsToggled:", forControlEvents: .TouchUpInside)
         
         view.addSubview(collectionView!)
         view.addSubview(matchTitleLabel)
         view.addSubview(resetButton)
         view.addSubview(submitButton)
         view.addSubview(toggleNamesSwitch)
+        view.addSubview(settingsButton)
         
         showLoadingScreen()
         initializeSocialGraphAndMatchGraphControllers()
@@ -137,6 +144,10 @@ class MatchViewController: UIViewController {
         } else {
             hideAllNames()
         }
+    }
+    
+    func settingsToggled(sender: UIButton) {
+        CouplrControllers.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
     }
     
     func showAllNames() {

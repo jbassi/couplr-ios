@@ -22,15 +22,22 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        continueButton.hidden = true
         loginView.delegate = self
         loginView.readPermissions = ["user_friends", "user_status", "user_posts", "user_photos"]
         let loginViewX:CGFloat = (view.bounds.width / 2) - (loginView.bounds.width / 2)
         let loginViewY:CGFloat = (view.bounds.height / 2) - (loginView.bounds.height / 2)
         loginView.frame.origin = CGPointMake(loginViewX, loginViewY)
         
+        continueButton.hidden = true
+        let continueButtonX:CGFloat = (view.bounds.width / 2) - (loginView.frame.width / 2)
+        let continueButtonY:CGFloat = (view.bounds.height / 2) + (loginView.frame.height / 2)
+        continueButton.frame = CGRectMake(continueButtonX, continueButtonY, loginView.frame.width, loginView.frame.height)
+        continueButton.setTitleColor(UIColor.blueColor(), forState: .Normal)
+        continueButton.addTarget(self, action: "continueButtonPressed:", forControlEvents: .TouchUpInside)
+        
         view.backgroundColor = UIColor.whiteColor()
         view.addSubview(loginView)
+        view.addSubview(continueButton)
     }
 
     override func viewDidAppear(animated: Bool) {
@@ -79,6 +86,10 @@ class LoginViewController: UIViewController {
         couplrNavigationController.modalTransitionStyle = .FlipHorizontal
         presentViewController(couplrNavigationController, animated: true, completion: nil)
     }
+    
+    func continueButtonPressed(sender: UIButton) {
+        loadAppViewsAndPresentNavigationController()
+    }
 
 }
 
@@ -99,6 +110,7 @@ extension LoginViewController: FBLoginViewDelegate {
     func loginViewFetchedUserInfo(loginView : FBLoginView!, user: FBGraphUser) {
         var buttonTitle: String = "Continue As \(user.name)..."
         continueButton.setTitle(buttonTitle, forState: UIControlState.Normal)
+        continueButton.sizeToFit()
         continueButton.hidden = false
     }
     
