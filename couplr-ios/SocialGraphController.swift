@@ -208,6 +208,10 @@ public class SocialGraphController {
      * loading and matches are ready to be presented.
      */
     public func didInitializeGraph() {
+        if self.graph!.nodes.count <= 10 {
+            showLoginWithAlertViewErrorMessage("Unfortunately, we could not find enough friends for you to match!", "Social network too small.")
+            return
+        }
         let timeElapsed:Double = currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime
         afterDelay(max(kMinLoadingDelay - timeElapsed, 0), {
             self.delegate?.socialGraphControllerDidLoadSocialGraph(self.graph!)
