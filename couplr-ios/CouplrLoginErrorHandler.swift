@@ -8,6 +8,14 @@
 
 import UIKit
 
+func showLoginWithAlertViewErrorMessage(message: String, alertTitle:String) {
+    let alertView = UIAlertView(title: alertTitle, message: message, delegate: nil, cancelButtonTitle: "OK")
+    alertView.show()
+    
+    CouplrControllers.sharedInstance.matchViewController?.dismissLoadingScreen()
+    CouplrControllers.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+}
+
 class CouplrLoginErrorHandler: NSObject {
     class func handleError(error: NSError?) {
         if(error != nil) {
@@ -32,8 +40,7 @@ class CouplrLoginErrorHandler: NSObject {
                 }
             }
             
-            let alertView = UIAlertView(title: alertTitle, message: alertMessage, delegate: nil, cancelButtonTitle: "OK")
-            alertView.show()
+            showLoginWithAlertViewErrorMessage(alertMessage, alertTitle)
         }
     }
 }
