@@ -80,6 +80,8 @@ public class SocialGraphController {
                         self.graph = SocialGraph(root: root, nodes: [UInt64:String]())
                         self.graph!.updateGraphUsingPosts()
                     }
+                } else {
+                    showLoginWithAlertViewErrorMessage("We weren't able to find out who you are! Try logging in again.", "Something went wrong.")
                 }
         } as FBRequestHandler)
     }

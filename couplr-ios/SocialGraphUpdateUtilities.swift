@@ -50,7 +50,7 @@ extension SocialGraph {
         if pagingURL == nil {
             pagingURL = "me/feed?limit=\(kMinNumPosts)&\(kPostGraphPathFields)"
         } else {
-            pagingURL = pagingURL!.replace("https://graph.facebook.com/\(kFacebookAPIVersion)/", withString: "")
+            pagingURL = pagingURL!.replace("\(kFBGraphURLPrefix)\(kFacebookAPIVersion)/", withString: "")
         }
         FBRequestConnection.startWithGraphPath(pagingURL!,
             completionHandler: { (connection, result, error) -> Void in
@@ -67,15 +67,15 @@ extension SocialGraph {
                         self.updateGraphUsingPosts(minNumPosts: minNumPosts, numQueriedPosts: numQueriedPosts + postData.count, pagingURL: nextRequestURL)
                     } else {
                         log("There are no new posts to fetch", withFlag: "+", withIndent: 1)
-                        // Don't prune the graph just yet, since we need all the people we can get.
                         SocialGraphController.sharedInstance.didInitializeGraph()
                     }
                 } else {
                     log("Critical error: \"\(error.description)\" when loading posts!", withFlag: "-", withNewline: true, withIndent: 1)
                     if numQueriedPosts > 0 {
                         log("Continuing graph initialization with incomplete data...", withFlag: "-", withIndent: 1)
-                        // Don't prune the graph just yet, since we need all the people we can get.
                         SocialGraphController.sharedInstance.didInitializeGraph()
+                    } else {
+                        showLoginWithAlertViewErrorMessage("Try logging in again!", "Something went wrong.")
                     }
                 }
             } as FBRequestHandler)
@@ -139,6 +139,7 @@ extension SocialGraph {
                     SocialGraphController.sharedInstance.didLoadVoteHistoryOrInitializeGraph()
                 } else {
                     log("Photos request failed with error \"\(error!.description)\"", withIndent: 1, withFlag: "-", withNewline: true)
+                    showLoginWithAlertViewErrorMessage("Try logging in again.", "Something went wrong.")
                 }
             } as FBRequestHandler)
     }

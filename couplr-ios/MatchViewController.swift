@@ -114,6 +114,8 @@ class MatchViewController: UIViewController {
                 let titleList:[MatchTitle] = self.matchGraphController.matchTitles()
                 self.matchTitleLabel.setTitle(titleList[0].text, forState: UIControlState.Normal)
                 self.selectedTitle = titleList[0]
+            } else {
+                showLoginWithAlertViewErrorMessage("We could not connect to our servers from here!", "Something went wrong.")
             }
         })
     }
