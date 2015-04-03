@@ -59,6 +59,7 @@ class CouplrNavigationController: UINavigationController {
     var navigationSelectionBar = UIView()
     var customNavigationBar = UIView()
     
+    var animating: Bool = false
     var viewControllerArray = Array<UIViewController>()
     var buttonArray = Array<UIButton>()
     var pageViewController: UIPageViewController?
@@ -166,9 +167,10 @@ class CouplrNavigationController: UINavigationController {
     func tapSegmentButton(button: UIButton) {
         let offset = button.tag - lastPageIndex
         
-        if button.tag != currentPageIndex {
+        if button.tag != currentPageIndex && !animating {
             if offset > 0 {
                 // Positive direction
+                animating = true
                 for i in (currentPageIndex+1)...(button.tag) {
                     pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Forward, animated: true, completion: {(completed:Bool) in
                         if completed {
@@ -176,10 +178,13 @@ class CouplrNavigationController: UINavigationController {
                             self.buttonArray[self.lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
                             self.lastPageIndex = button.tag
                             self.buttonArray[button.tag].titleLabel?.font = kCouplrNavigationButtonBoldFont
+                            if i == button.tag {
+                                self.animating = false
+                            }
                         }
                     })
                 }
-            } else {
+            } else if !animating {
                 // Negative direction
                 for i in reverse(button.tag...(currentPageIndex-1)) {
                     pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Reverse, animated: true, completion: {(completed:Bool) in
@@ -188,6 +193,9 @@ class CouplrNavigationController: UINavigationController {
                             self.buttonArray[self.lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
                             self.lastPageIndex = button.tag
                             self.buttonArray[button.tag].titleLabel?.font = kCouplrNavigationButtonBoldFont
+                            if i == button.tag {
+                                self.animating = false
+                            }
                         }
                     })
                 }
