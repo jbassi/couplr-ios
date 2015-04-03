@@ -152,6 +152,11 @@ class MatchViewController: UIViewController {
         }
     }
     
+    func resetToggleNamesSwitch() {
+        toggleNamesSwitch.on = false
+        hideAllNames()
+    }
+    
     func settingsToggled(sender: UIButton) {
         CouplrControllers.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
     }
