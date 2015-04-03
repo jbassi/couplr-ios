@@ -52,4 +52,4 @@ def save_graph_as_image(graphName):
     return graph
 
 if __name__ == "__main__":
-    graph = save_graph_as_image("10204809301328264")
+    pass

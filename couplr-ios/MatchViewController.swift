@@ -112,8 +112,12 @@ class MatchViewController: UIViewController {
             if !didError {
                 self.socialGraphController.initializeGraph()
                 let titleList:[MatchTitle] = self.matchGraphController.matchTitles()
-                self.matchTitleLabel.setTitle(titleList[0].text, forState: UIControlState.Normal)
-                self.selectedTitle = titleList[0]
+                if titleList.count == 0 {
+                    showLoginWithAlertViewErrorMessage("Our servers are overloaded! Try again later.", "Something went wrong.")
+                } else {
+                    self.matchTitleLabel.setTitle(titleList[0].text, forState: UIControlState.Normal)
+                    self.selectedTitle = titleList[0]
+                }
             } else {
                 showLoginWithAlertViewErrorMessage("We could not connect to our servers from here!", "Something went wrong.")
             }

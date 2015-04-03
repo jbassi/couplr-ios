@@ -61,9 +61,9 @@ extension SocialGraph {
                         let post:AnyObject! = postData[index]!
                         self.updateGraphUsingPost(post)
                     }
-                    let paging:AnyObject! = result["paging"]!
-                    if paging["next"] != nil {
-                        let nextRequestURL:String = paging["next"]! as String
+                    let paging:AnyObject? = result["paging"]
+                    if paging != nil && paging!["next"] != nil {
+                        let nextRequestURL:String = paging!["next"]! as String
                         self.updateGraphUsingPosts(minNumPosts: minNumPosts, numQueriedPosts: numQueriedPosts + postData.count, pagingURL: nextRequestURL)
                     } else {
                         log("There are no new posts to fetch", withFlag: "+", withIndent: 1)
@@ -133,8 +133,10 @@ extension SocialGraph {
                         previousPhotoGroup = photoGroup
                     }
                     log("Received \(allPhotos.count) photos (+\(self.nodes.count - oldVertexCount) nodes, +\(self.edgeCount - oldEdgeCount) edges, +\(self.totalEdgeWeight - oldEdgeWeight) weight).", withIndent:1, withNewline:true)
-                    self.pruneGraphByMinWeightThreshold()
-                    self.pruneGraphByIsolationFromRoot()
+                    if self.nodes.count > 50 {
+                        self.pruneGraphByMinWeightThreshold()
+                        self.pruneGraphByIsolationFromRoot()
+                    }
                     SocialGraphController.sharedInstance.flushGraphToCoreData()
                     SocialGraphController.sharedInstance.didLoadVoteHistoryOrInitializeGraph()
                 } else {

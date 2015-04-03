@@ -284,8 +284,11 @@ public class SocialGraph {
         let addGenders:(NSData?, NSURLResponse?, NSError?) -> Void = {
             (data:NSData?, response:NSURLResponse?, error:NSError?) in
             if error == nil {
-                var parsingError:NSError? = nil
-                let rawGenderData:AnyObject = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions(0), error: &parsingError)!
+                var parsingError:NSError? = NSError()
+                let rawGenderData:AnyObject? = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions(0), error: &parsingError)
+                if rawGenderData == nil {
+                    return
+                }
                 if let genderData = rawGenderData as? [String : AnyObject] {
                     for (firstName:String, genderIndicator:AnyObject) in genderData {
                         let gender = Gender.fromString(genderIndicator.description!)
