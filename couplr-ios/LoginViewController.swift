@@ -18,6 +18,7 @@ class LoginViewController: UIViewController {
     var viewIsVisible: Bool = false
 
     let socialGraphController = SocialGraphController.sharedInstance
+    let matchGraphController = MatchGraphController.sharedInstance
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -85,6 +86,9 @@ class LoginViewController: UIViewController {
         
         couplrNavigationController.modalTransitionStyle = .FlipHorizontal
         presentViewController(couplrNavigationController, animated: true, completion: nil)
+        
+        socialGraphController.reset()
+        matchGraphController.reset()
     }
     
     func continueButtonPressed(sender: UIButton) {
