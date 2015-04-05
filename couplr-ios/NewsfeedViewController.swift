@@ -75,6 +75,35 @@ class NewsfeedViewController: UIViewController {
 
 extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        self.cachedNewsFeedMatches = nil
+        let matches:[(MatchTuple, NSDate)]? = newsFeedMatches()
+        
+        if let numberOfMatches = matches?.count {
+            if numberOfMatches > 0 {
+                tableView.separatorStyle = .SingleLine
+                headerView!.nameSwitch.enabled = true
+                return 1
+            } else {
+                let messageLabel = UILabel(frame: CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height))
+                messageLabel.text = kEmptyTableViewMessage
+                messageLabel.textColor = UIColor.blackColor()
+                messageLabel.numberOfLines = 0
+                messageLabel.textAlignment = .Center
+                messageLabel.sizeToFit()
+                
+                tableView.backgroundView = messageLabel;
+                tableView.separatorStyle = .None;
+                
+                headerView!.nameSwitch.enabled = false
+                
+                return 0
+            }
+        }
+        
+        return 0
+    }
+    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         self.cachedNewsFeedMatches = nil
         let matches:[(MatchTuple, NSDate)]? = newsFeedMatches()

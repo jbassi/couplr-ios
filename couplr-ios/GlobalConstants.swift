@@ -29,11 +29,8 @@ let kCouplrNavigationBarButtonHeight: CGFloat = 50.0
 let kCouplrNavigationBarSelectionIndicatorHeight: CGFloat = 4.0
 let kCouplrNavigationBarSelectionIndicatorCornerRadius: CGFloat = 2.5
 
-/* Storyboard View Names */
-let kStoryboardName = "Main"
-let kStoryboardMatchViewControllerName = "MatchViewController"
-let kStoryboardProfileViewControllerName = "ProfileViewController"
-let kStoryboardNewsViewControllerName = "NewsViewController"
+/* Empyt TableView Strings */
+let kEmptyTableViewMessage = "It looks like cupid is on hiatus. Please check back later!"
 
 /* Facebook API */
 let kMaxAllowedBatchRequestSize:Int = 50

@@ -47,6 +47,30 @@ class ProfileViewController: UIViewController {
 
 extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        let rootId:UInt64 = socialGraphController.rootId()
+        if rootId == 0 {
+            log("Warning: root user must be known before loading profile view.", withFlag:"?")
+            return 0
+        }
+        if matchGraphController.sortedMatchesForUser(rootId).count > 0 {
+            tableView.separatorStyle = .SingleLine
+            return 1
+        } else {
+            let messageLabel = UILabel(frame: CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height))
+            messageLabel.text = kEmptyTableViewMessage
+            messageLabel.textColor = UIColor.blackColor()
+            messageLabel.numberOfLines = 0
+            messageLabel.textAlignment = .Center
+            messageLabel.sizeToFit()
+            
+            tableView.backgroundView = messageLabel;
+            tableView.separatorStyle = .None;
+            
+            return 0
+        }
+    }
+    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let rootId:UInt64 = socialGraphController.rootId()
         if rootId == 0 {

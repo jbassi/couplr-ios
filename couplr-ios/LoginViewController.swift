@@ -30,9 +30,10 @@ class LoginViewController: UIViewController {
         loginView.frame.origin = CGPointMake(loginViewX, loginViewY)
         
         continueButton.hidden = true
-        let continueButtonX:CGFloat = (view.bounds.width / 2) - (loginView.frame.width / 2)
         let continueButtonY:CGFloat = (view.bounds.height / 2) + (loginView.frame.height / 2)
-        continueButton.frame = CGRectMake(continueButtonX, continueButtonY, loginView.frame.width, loginView.frame.height)
+        continueButton.frame = CGRectMake(0, continueButtonY, view.frame.size.width, 50)
+        continueButton.titleLabel?.adjustsFontSizeToFitWidth = true
+        continueButton.titleLabel?.textAlignment = .Center
         continueButton.setTitleColor(UIColor.blueColor(), forState: .Normal)
         continueButton.addTarget(self, action: "continueButtonPressed:", forControlEvents: .TouchUpInside)
         
@@ -114,7 +115,6 @@ extension LoginViewController: FBLoginViewDelegate {
     func loginViewFetchedUserInfo(loginView : FBLoginView!, user: FBGraphUser) {
         var buttonTitle: String = "Continue As \(user.name)..."
         continueButton.setTitle(buttonTitle, forState: UIControlState.Normal)
-        continueButton.sizeToFit()
         continueButton.hidden = false
     }
     

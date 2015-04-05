@@ -174,6 +174,31 @@ class ProfileDetailLayoverView: UIView {
 
 extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
     
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        if useRecentMatches {
+            self.recentMatchesResult = nil // Reset the recent matches upon rendering a new view.
+            if let recentMatchesResult:[MatchTuple]? = recentMatches() {
+                if recentMatchesResult?.count > 0 {
+                    tableView.separatorStyle = .SingleLine
+                    return 1
+                } else {
+                    let messageLabel = UILabel(frame: CGRectMake(0, 0, bounds.size.width, bounds.size.height))
+                    messageLabel.text = kEmptyTableViewMessage
+                    messageLabel.textColor = UIColor.blackColor()
+                    messageLabel.numberOfLines = 0
+                    messageLabel.textAlignment = .Center
+                    messageLabel.sizeToFit()
+                    
+                    tableView.backgroundView = messageLabel;
+                    tableView.separatorStyle = .None;
+                    
+                    return 0
+                }
+            }
+        }
+        return 1
+    }
+    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if useRecentMatches {
             self.recentMatchesResult = nil // Reset the recent matches upon rendering a new view.
