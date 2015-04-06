@@ -26,7 +26,7 @@ class MatchViewController: UIViewController {
     let matchTitleLabel:UIButton = UIButton()
     let resetButton:UIButton = UIButton()
     let submitButton:UIButton = UIButton()
-    let settingsButton:UIButton = UIButton()
+    let settingsButton:UIButton = UIButton.buttonWithType(UIButtonType.DetailDisclosure) as UIButton
     let toggleNamesSwitch:UISwitch = UISwitch()
 
     let socialGraphController = SocialGraphController.sharedInstance
@@ -59,7 +59,7 @@ class MatchViewController: UIViewController {
         let matchTitleLabelWidth:CGFloat = collectionViewWidth - 5
         let matchTitleLabelY:CGFloat = collectionViewY - matchTitleLabelHeight - 5
         matchTitleLabel.frame = CGRectMake(collectionViewX, matchTitleLabelY, matchTitleLabelWidth, matchTitleLabelHeight)
-        matchTitleLabel.layer.cornerRadius = 20
+        matchTitleLabel.layer.cornerRadius = 10
         matchTitleLabel.layer.masksToBounds = true
         matchTitleLabel.backgroundColor = UIColor.lightGrayColor()
         matchTitleLabel.addTarget(self, action: "showButtonPressed", forControlEvents: UIControlEvents.TouchUpInside)
@@ -71,14 +71,14 @@ class MatchViewController: UIViewController {
         resetButton.frame = CGRectMake(collectionViewX, buttonY, buttonWidth, buttonHeight)
         resetButton.backgroundColor = UIColor.lightGrayColor()
         resetButton.setTitle("Shuffle", forState: .Normal)
-        resetButton.layer.cornerRadius = 20
+        resetButton.layer.cornerRadius = 10
         resetButton.layer.masksToBounds = true
         resetButton.addTarget(self, action: "shufflePeople", forControlEvents: .TouchUpInside)
         
         submitButton.frame = CGRectMake(collectionViewX+buttonWidth+5, buttonY, buttonWidth, buttonHeight)
         submitButton.backgroundColor = UIColor.lightGrayColor()
         submitButton.setTitle("Submit", forState: .Normal)
-        submitButton.layer.cornerRadius = 20
+        submitButton.layer.cornerRadius = 10
         submitButton.layer.masksToBounds = true
         submitButton.addTarget(self, action: "submitMatch", forControlEvents: .TouchUpInside)
         
@@ -88,7 +88,6 @@ class MatchViewController: UIViewController {
         
         let settingsButtonX:CGFloat = toggleNamesSwitch.frame.origin.x + toggleNamesSwitch.frame.width + 2
         settingsButton.frame = CGRectMake(settingsButtonX, buttonY+3, 45, 35)
-        settingsButton.setImage(UIImage(named: "settings"), forState: .Normal)
         settingsButton.addTarget(self, action: "settingsToggled:", forControlEvents: .TouchUpInside)
         
         view.addSubview(collectionView!)
