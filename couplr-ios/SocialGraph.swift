@@ -42,7 +42,7 @@ let kWalkWeightUserMatchBoost:Float = 1.5           // The walk weight "bonus" f
 let kWalkWeightDecayRate:Float = 0.5                // The decay rate for the walk weight bonus.
 let kWalkWeightPenalty:Float = 0.5                  // Constant penalty per step to encourage choosing new nodes.
 // Debugging output
-let kShowRandomWalkDebugOutput:Bool = true
+let kShowRandomWalkDebugOutput:Bool = false
 
 // MARK: - Gender enum
 
