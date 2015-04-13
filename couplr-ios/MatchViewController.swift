@@ -140,14 +140,17 @@ class MatchViewController: UIViewController {
     override func motionEnded(motion: UIEventSubtype, withEvent event: UIEvent) {
         if motion == UIEventSubtype.MotionShake {
             shufflePeople()
+            UserSessionTracker.sharedInstance.notify("shuffled people")
         }
     }
     
     func switchToggled(sender: UISwitch) {
         if sender.on {
             showAllNames()
+            UserSessionTracker.sharedInstance.notify("toggled names on")
         } else {
             hideAllNames()
+            UserSessionTracker.sharedInstance.notify("toggled names off")
         }
     }
     
@@ -158,6 +161,7 @@ class MatchViewController: UIViewController {
     
     func settingsToggled(sender: UIButton) {
         CouplrControllers.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+        UserSessionTracker.sharedInstance.notify("settings toggled")
     }
     
     func showAllNames() {
@@ -186,6 +190,7 @@ class MatchViewController: UIViewController {
         pickerView.dataSource = self
         pickerView.delegate = self
         pickerView.selectRow(selectedRow, inComponent: 0, animated: false)
+        UserSessionTracker.sharedInstance.notify("opened title select")
     }
 
     func shufflePeople() {
@@ -218,6 +223,9 @@ class MatchViewController: UIViewController {
             selectedIndices.removeAll(keepCapacity: true)
             shufflePeople()
             shuffleTitle()
+            UserSessionTracker.sharedInstance.notify("submitted match")
+        } else {
+            UserSessionTracker.sharedInstance.notify("attempted match submit (<2 users)")
         }
     }
     
@@ -261,6 +269,7 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
         let titles:[MatchTitle] = matchGraphController.matchTitles()
         selectedTitle = titles[row]
         selectedRow = row
+        UserSessionTracker.sharedInstance.notify("selected title id \(titles[row].id)")
         matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
     }
     
@@ -311,6 +320,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     }
 
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        UserSessionTracker.sharedInstance.notify("selected match \(indexPath.row)")
         if selectedUsers.count < 2 {
             let cell = collectionView.cellForItemAtIndexPath(indexPath) as! ProfilePictureCollectionViewCell
             let randomSample:[UInt64] = socialGraphController.currentSample()
@@ -325,6 +335,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     }
 
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+        UserSessionTracker.sharedInstance.notify("deselected match \(indexPath.row)")
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as! ProfilePictureCollectionViewCell
         cell.backgroundColor = UIColor.grayColor()
         let randomSample:[UInt64] = socialGraphController.currentSample()
@@ -347,6 +358,7 @@ extension MatchViewController: SocialGraphControllerDelegate {
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph) {
         socialGraphLoaded = true
         dismissLoadingScreen()
+        UserSessionTracker.sharedInstance.notify("initialized social graph")
         socialGraphController.updateRandomSample()
         if isViewLoaded() {
             dispatch_async(dispatch_get_main_queue()) {

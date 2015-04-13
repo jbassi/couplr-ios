@@ -181,6 +181,7 @@ class CouplrNavigationController: UINavigationController {
                             if i == button.tag {
                                 self.animating = false
                             }
+                            UserSessionTracker.sharedInstance.notify("tapped on \(self.pageNameFromIndex(i))")
                         }
                     })
                 }
@@ -196,6 +197,7 @@ class CouplrNavigationController: UINavigationController {
                             if i == button.tag {
                                 self.animating = false
                             }
+                            UserSessionTracker.sharedInstance.notify("tapped on \(self.pageNameFromIndex(i))")
                         }
                     })
                 }
@@ -210,6 +212,15 @@ class CouplrNavigationController: UINavigationController {
             }
         }
         return NSNotFound
+    }
+    
+    func pageNameFromIndex(index:NSInteger) -> String {
+        if index == 0 {
+            return "Profile"
+        } else if index == 1 {
+            return "Matches"
+        }
+        return index == 2 ? "Newsfeed" : "No such page"
     }
 
 }
@@ -248,6 +259,7 @@ extension CouplrNavigationController: UIPageViewControllerDelegate, UIPageViewCo
             self.buttonArray[lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
             self.buttonArray[currentPageIndex].titleLabel?.font = kCouplrNavigationButtonBoldFont
             lastPageIndex = currentPageIndex
+            UserSessionTracker.sharedInstance.notify("scrolled to \(self.pageNameFromIndex(currentPageIndex))")
         }
     }
     

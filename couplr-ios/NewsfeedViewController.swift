@@ -66,8 +66,10 @@ class NewsfeedViewController: UIViewController {
     func switchToggled(sender:UISwitch) {
         if sender.on {
             showAllNamesInVisibleCells()
+            UserSessionTracker.sharedInstance.notify("toggled newsfeed names on")
         } else {
             hideAllNamesInVisibleCells()
+            UserSessionTracker.sharedInstance.notify("toggled newsfeed names off")
         }
     }
     

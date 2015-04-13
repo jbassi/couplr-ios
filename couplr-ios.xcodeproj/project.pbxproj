@@ -47,6 +47,7 @@
 		11FDBBBA1AC5F206006DFD9B /* UIImageView+HighlightedWebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBA81AC5F206006DFD9B /* UIImageView+HighlightedWebCache.m */; };
 		11FDBBBB1AC5F206006DFD9B /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBAA1AC5F206006DFD9B /* UIImageView+WebCache.m */; };
 		11FDBBBC1AC5F206006DFD9B /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBAC1AC5F206006DFD9B /* UIView+WebCacheOperation.m */; };
+		F45AF54F1ADB916A0051FA90 /* UserAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */; };
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
 		F4973F0B1A50E31700FEA3B0 /* SocialGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */; };
 		F4C911BB1A5A764300D2CB11 /* MatchGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */; };
@@ -145,6 +146,7 @@
 		11FDBBAA1AC5F206006DFD9B /* UIImageView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+WebCache.m"; sourceTree = "<group>"; };
 		11FDBBAB1AC5F206006DFD9B /* UIView+WebCacheOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+WebCacheOperation.h"; sourceTree = "<group>"; };
 		11FDBBAC1AC5F206006DFD9B /* UIView+WebCacheOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+WebCacheOperation.m"; sourceTree = "<group>"; };
+		F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserAnalytics.swift; sourceTree = "<group>"; };
 		F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphController.swift; sourceTree = "<group>"; };
 		F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraph.swift; sourceTree = "<group>"; };
 		F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraph.swift; sourceTree = "<group>"; };
@@ -306,6 +308,7 @@
 			children = (
 				0FF11BDB1A50C42D00C14FDC /* UtilityFunctions.swift */,
 				0FF11BDD1A50C45600C14FDC /* GlobalConstants.swift */,
+				F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -528,6 +531,7 @@
 				11FDBBB71AC5F206006DFD9B /* UIImage+GIF.m in Sources */,
 				0F0EB6EB1A5E16B300E2A25B /* LoadingView.swift in Sources */,
 				0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */,
+				F45AF54F1ADB916A0051FA90 /* UserAnalytics.swift in Sources */,
 				11996CB81AC4D1B400C45DB0 /* NewsfeedHeaderView.swift in Sources */,
 				11CF0BDA1AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift in Sources */,
 				F4F0DC7D1A630DBA007FC931 /* CouplrData.xcdatamodeld in Sources */,

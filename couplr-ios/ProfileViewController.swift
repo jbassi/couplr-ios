@@ -41,6 +41,7 @@ class ProfileViewController: UIViewController {
         let pickerView = ProfileDetailLayoverView.createDetailLayoverInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
         pickerView.useRecentMatches = true
         pickerView.showAnimated(true)
+        UserSessionTracker.sharedInstance.notify("viewed recent matches")
     }
     
 }
@@ -117,5 +118,6 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         pickerView.title = matchGraphController.matchTitleFromId(titleId)!
         pickerView.imageName = imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))]
         pickerView.showAnimated(true)
+        UserSessionTracker.sharedInstance.notify("selected profile entry \(indexPath.row)")
     }
 }

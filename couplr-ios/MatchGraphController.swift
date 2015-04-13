@@ -29,6 +29,7 @@ public class MatchGraphController {
      */
     public func appWillHalt() {
         matches?.flushUnregisteredMatches()
+        UserSessionTracker.sharedInstance.flushUserSession()
     }
     
     /**
