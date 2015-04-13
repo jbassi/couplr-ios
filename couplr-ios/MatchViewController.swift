@@ -154,9 +154,13 @@ class MatchViewController: UIViewController {
         }
     }
     
-    func resetToggleNamesSwitch() {
-        toggleNamesSwitch.on = false
+    func resetToggleNamesSwitchAndSelectedMatches() {
         hideAllNames()
+        selectedTitle = nil
+        selectedRow = 0
+        selectedUsers.removeAll(keepCapacity: true)
+        selectedIndices.removeAll(keepCapacity: true)
+        toggleNamesSwitch.on = false
     }
     
     func settingsToggled(sender: UIButton) {
@@ -236,7 +240,6 @@ class MatchViewController: UIViewController {
         selectedTitle = titleList[randomIndex]
         selectedRow = randomIndex
         matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
-
     }
 
     func showLoadingScreen() {

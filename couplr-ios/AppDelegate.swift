@@ -43,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
         MatchGraphController.sharedInstance.appWillHalt()
         CouplrControllers.sharedInstance.navigationController?.resetNavigation()
-        CouplrControllers.sharedInstance.matchViewController?.resetToggleNamesSwitch()
+        CouplrControllers.sharedInstance.matchViewController?.resetToggleNamesSwitchAndSelectedMatches()
         MatchGraphController.sharedInstance.reset()
         SocialGraphController.sharedInstance.reset()
     }
