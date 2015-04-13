@@ -11,7 +11,7 @@ import CoreData
 
 // MARK: - Social graph parameters
 let kUnconnectedEdgeWeight:Float = -1000.0          // The weight of an unconnected "edge".
-let kMinNumPosts:Int = 150                          // Number of posts to query.
+let kMinNumPosts:Int = 100                          // Number of posts to query.
 let kMaxNumPhotos:Int = 200                         // Number of photos to query.
 let kMaxPhotoGroupSize:Int = 15                     // Max number of people considered in a photo.
 let kMinGraphEdgeWeight:Float = 0.25                // The minimum edge weight threshold when cleaning the graph.
@@ -34,7 +34,7 @@ let kExpectedNumRandomHops:Float = 1.0              // The expected number of ra
 let kMaxGraphDataQueries:Int = 5                    // Max number of friends to query graph data from.
 let kMinExportEdgeWeight:Float = 0.75               // Only export edges with more than this weight.
 let kScaleFactorForExportingRootEdges:Float = 0.25  // Export root edges scaled by this number.
-let kMutualFriendsThreshold:Int = 3                 // This many mutual friends to pull a friend over to the user's graph.
+let kMutualFriendsThreshold:Int = 5                 // This many mutual friends to pull a friend over to the user's graph.
 let kUseMedianAsWeightBaseline:Bool = false         // Whether to use median for the baseline (if false, mean is used).
 
 let kGenderBiasRatio:Float = 4.0                    // Make it this much more likely to land on the opposite gender.
@@ -42,7 +42,7 @@ let kWalkWeightUserMatchBoost:Float = 1.5           // The walk weight "bonus" f
 let kWalkWeightDecayRate:Float = 0.5                // The decay rate for the walk weight bonus.
 let kWalkWeightPenalty:Float = 0.5                  // Constant penalty per step to encourage choosing new nodes.
 // Debugging output
-let kShowRandomWalkDebugOutput:Bool = false
+let kShowRandomWalkDebugOutput:Bool = true
 
 // MARK: - Gender enum
 

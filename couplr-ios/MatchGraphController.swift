@@ -197,7 +197,7 @@ public class MatchGraphController {
     public func didFinishLoadingExtendedSocialGraph() {
         let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
         let friends:[UInt64] = SocialGraphController.sharedInstance.closestFriendsOfUser(rootId)
-        matches?.fetchMatchesForIds(friends, {
+        matches?.fetchMatchesForIds(friends, callback: {
             (didError:Bool) -> Void in
             if !didError {
                 SocialGraphController.sharedInstance.didLoadMatchesForClosestFriends()

@@ -32,7 +32,7 @@ public class RootData: NSManagedObject {
     }
     
     class func insert(context:NSManagedObjectContext, rootId:UInt64, timeModified:Double) {
-        let root = NSEntityDescription.insertNewObjectForEntityForName("RootData", inManagedObjectContext: context) as RootData
+        let root = NSEntityDescription.insertNewObjectForEntityForName("RootData", inManagedObjectContext: context) as! RootData
         root.set(rootId, timeModified: timeModified)
     }
     
@@ -72,7 +72,7 @@ public class IdNameMapping : NSManagedObject {
  */
 public class NodeData : IdNameMapping {
     class func insert(context:NSManagedObjectContext, nodeId:UInt64, name:String) {
-        let node:NodeData = NSEntityDescription.insertNewObjectForEntityForName("NodeData", inManagedObjectContext: context) as NodeData
+        let node:NodeData = NSEntityDescription.insertNewObjectForEntityForName("NodeData", inManagedObjectContext: context) as! NodeData
         node.set(nodeId, name: name)
     }
     
@@ -95,7 +95,7 @@ public class NodeData : IdNameMapping {
  */
 public class NameData: IdNameMapping {
     class func insert(context:NSManagedObjectContext, nodeId:UInt64, name:String) {
-        let nameData:NameData = NSEntityDescription.insertNewObjectForEntityForName("NameData", inManagedObjectContext: context) as NameData
+        let nameData:NameData = NSEntityDescription.insertNewObjectForEntityForName("NameData", inManagedObjectContext: context) as! NameData
         nameData.set(nodeId, name: name)
     }
     
@@ -140,7 +140,7 @@ public class EdgeData: NSManagedObject {
     }
     
     class func insert(context:NSManagedObjectContext, fromId:UInt64, toId:UInt64, weight:Float) {
-        let edge:EdgeData = NSEntityDescription.insertNewObjectForEntityForName("EdgeData", inManagedObjectContext: context) as EdgeData
+        let edge:EdgeData = NSEntityDescription.insertNewObjectForEntityForName("EdgeData", inManagedObjectContext: context) as! EdgeData
         edge.set(fromId, toId: toId, weight: weight)
     }
     
@@ -176,7 +176,7 @@ public class GenderData: NSManagedObject {
     }
     
     class func insert(context:NSManagedObjectContext, name:String, gender:Gender) {
-        let genderData:GenderData = NSEntityDescription.insertNewObjectForEntityForName("GenderData", inManagedObjectContext: context) as GenderData
+        let genderData:GenderData = NSEntityDescription.insertNewObjectForEntityForName("GenderData", inManagedObjectContext: context) as! GenderData
         genderData.set(name, gender: gender)
     }
     

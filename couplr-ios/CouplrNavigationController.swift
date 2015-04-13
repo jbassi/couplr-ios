@@ -33,7 +33,7 @@ class CouplrControllers {
     }
     
     func showMatchViewLoadingScreen() {
-        if let matchView = matchViewController? {
+        if let matchView = matchViewController {
             if matchView.isViewLoaded() {
                 matchViewController?.showLoadingScreen()
             }
@@ -41,7 +41,7 @@ class CouplrControllers {
     }
     
     func initializeMatchView() {
-        if let matchView = matchViewController? {
+        if let matchView = matchViewController {
             if matchView.isViewLoaded() {
                 matchViewController?.initializeSocialGraphAndMatchGraphControllers()
             }
@@ -156,7 +156,7 @@ class CouplrNavigationController: UINavigationController {
     }
     
     func syncScrollView() {
-        for view in pageViewController?.view.subviews as [UIView] {
+        for view in pageViewController?.view.subviews as! [UIView] {
             if view.isKindOfClass(UIScrollView) {
                 pageScrollView = view as? UIScrollView
                 pageScrollView!.delegate = self
@@ -244,7 +244,7 @@ extension CouplrNavigationController: UIPageViewControllerDelegate, UIPageViewCo
     
     func pageViewController(pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [AnyObject], transitionCompleted completed: Bool) {
         if completed {
-            currentPageIndex = indexOfViewController(pageViewController.viewControllers.last as UIViewController)
+            currentPageIndex = indexOfViewController(pageViewController.viewControllers.last as! UIViewController)
             self.buttonArray[lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
             self.buttonArray[currentPageIndex].titleLabel?.font = kCouplrNavigationButtonBoldFont
             lastPageIndex = currentPageIndex

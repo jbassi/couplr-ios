@@ -123,8 +123,8 @@ extension SocialGraph {
                     let multiplierAsString = String(format: "%.2f", walkWeightBonusForNode(neighbor))
                     let weightAsString:String = String(format: "%.2f", originalNormalizedWeights[index])
                     var nameAsPaddedString:String = nodes[neighbor]!
-                    if nameAsPaddedString.utf16Count < 30 {
-                        for index in nameAsPaddedString.utf16Count..<30 {
+                    if nameAsPaddedString.lengthOfBytesUsingEncoding(NSUTF8StringEncoding) < 30 {
+                        for index in nameAsPaddedString.lengthOfBytesUsingEncoding(NSUTF8StringEncoding)..<30 {
                             nameAsPaddedString += " "
                         }
                     }

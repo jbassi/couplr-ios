@@ -63,7 +63,7 @@ extension SocialGraph {
                     }
                     let paging:AnyObject? = result["paging"]
                     if paging != nil && paging!["next"] != nil {
-                        let nextRequestURL:String = paging!["next"]! as String
+                        let nextRequestURL:String = paging!["next"]! as! String
                         self.updateGraphUsingPosts(minNumPosts: minNumPosts, numQueriedPosts: numQueriedPosts + postData.count, pagingURL: nextRequestURL)
                     } else {
                         log("There are no new posts to fetch", withFlag: "+", withIndent: 1)

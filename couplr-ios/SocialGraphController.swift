@@ -24,7 +24,7 @@ public class SocialGraphController {
     var matchesRecordedInSocialGraph:[MatchTuple:Bool] = [MatchTuple:Bool]() // HACK This name is so terrible I can't even.
 
     lazy var managedObjectContext:NSManagedObjectContext? = {
-        let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         if let managedObjectContext = appDelegate.managedObjectContext {
             return managedObjectContext
         }
@@ -63,7 +63,7 @@ public class SocialGraphController {
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let root:UInt64 = uint64FromAnyObject(result["id"])
-                    MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root], {
+                    MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root], callback: {
                         (didError:Bool) -> Void in
                         if !didError {
                             dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -150,10 +150,10 @@ public class SocialGraphController {
             return String(id)
         }
         var name:String = graph!.names[id]!
-        if name.utf16Count > maxStringLength {
+        if name.lengthOfBytesUsingEncoding(NSUTF8StringEncoding) > maxStringLength {
             name = shortenFullName(name, NameDisplayMode.MiddleInitial)
         }
-        if name.utf16Count > maxStringLength {
+        if name.lengthOfBytesUsingEncoding(NSUTF8StringEncoding) > maxStringLength {
             name = shortenFullName(name, NameDisplayMode.LastInitialNoMiddle)
         }
         return name

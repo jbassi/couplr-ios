@@ -49,7 +49,7 @@ func randomFloat() -> Float {
 
 func parseArrayFromJSONData(inputData: NSData) -> Array<NSDictionary> {
     var error: NSError?
-    var boardsDictionary = NSJSONSerialization.JSONObjectWithData(inputData, options: NSJSONReadingOptions.MutableContainers, error: &error) as Array<NSDictionary>
+    var boardsDictionary = NSJSONSerialization.JSONObjectWithData(inputData, options: NSJSONReadingOptions.MutableContainers, error: &error) as! Array<NSDictionary>
     return boardsDictionary
 }
 
@@ -160,7 +160,7 @@ func shortenFullName(name:String, mode:NameDisplayMode) -> String {
         
     case .MiddleInitial:
         if words.count > 2 {
-            if words.count > 3 || words[1].utf16Count > 2 {
+            if words.count > 3 || words[1].lengthOfBytesUsingEncoding(NSUTF8StringEncoding) > 2 {
                 let char:Character = words[1][words[1].startIndex]
                 words[1] = String(char).uppercaseString + "."
             }
@@ -173,7 +173,7 @@ func shortenFullName(name:String, mode:NameDisplayMode) -> String {
     case .LastInitialNoMiddle:
         if words.count > 1 {
             var lastNameString:String = words.last!
-            if lastNameString.utf16Count > 2 {
+            if lastNameString.lengthOfBytesUsingEncoding(NSUTF8StringEncoding) > 2 {
                 let char:Character = lastNameString[lastNameString.startIndex]
                 lastNameString = String(char).uppercaseString + "."
             }
@@ -298,5 +298,5 @@ extension String {
 }
 
 func isUTF8Compatible(string:String) -> Bool {
-    return NSString(string: string).lengthOfBytesUsingEncoding(NSUTF8StringEncoding) == string.utf16Count
+    return NSString(string: string).lengthOfBytesUsingEncoding(NSUTF8StringEncoding) == string.lengthOfBytesUsingEncoding(NSUTF16StringEncoding) / 2
 }

@@ -81,7 +81,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ImageTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as! ImageTableViewCell
         let rootId:UInt64 = socialGraphController.rootId()
         if rootId == 0 {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")

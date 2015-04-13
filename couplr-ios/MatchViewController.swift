@@ -26,7 +26,7 @@ class MatchViewController: UIViewController {
     let matchTitleLabel:UIButton = UIButton()
     let resetButton:UIButton = UIButton()
     let submitButton:UIButton = UIButton()
-    let settingsButton:UIButton = UIButton.buttonWithType(UIButtonType.DetailDisclosure) as UIButton
+    let settingsButton:UIButton = UIButton.buttonWithType(UIButtonType.DetailDisclosure) as! UIButton
     let toggleNamesSwitch:UISwitch = UISwitch()
 
     let socialGraphController = SocialGraphController.sharedInstance
@@ -161,7 +161,7 @@ class MatchViewController: UIViewController {
     }
     
     func showAllNames() {
-        for cell in collectionView!.visibleCells() as [ProfilePictureCollectionViewCell] {
+        for cell in collectionView!.visibleCells() as! [ProfilePictureCollectionViewCell] {
             let randomSample:[UInt64] = socialGraphController.currentSample()
             let indexPath = collectionView!.indexPathForCell(cell)!
             cell.userName = socialGraphController.nameFromId(randomSample[indexPath.row])
@@ -171,7 +171,7 @@ class MatchViewController: UIViewController {
     }
     
     func hideAllNames() {
-        for cell in collectionView!.visibleCells() as [ProfilePictureCollectionViewCell] {
+        for cell in collectionView!.visibleCells() as! [ProfilePictureCollectionViewCell] {
             let randomSample:[UInt64] = socialGraphController.currentSample()
             let indexPath = collectionView!.indexPathForCell(cell)!
             cell.overrideLayerSelection = false
@@ -297,7 +297,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     }
 
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as ProfilePictureCollectionViewCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as! ProfilePictureCollectionViewCell
         cell.backgroundColor = UIColor.grayColor()
 
         let randomSample:[UInt64] = socialGraphController.currentSample()
@@ -312,7 +312,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
 
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         if selectedUsers.count < 2 {
-            let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
+            let cell = collectionView.cellForItemAtIndexPath(indexPath) as! ProfilePictureCollectionViewCell
             let randomSample:[UInt64] = socialGraphController.currentSample()
             cell.userName = socialGraphController.nameFromId(randomSample[indexPath.row])
             cell.backgroundColor = UIColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 0.8)
@@ -325,7 +325,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     }
 
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
-        let cell = collectionView.cellForItemAtIndexPath(indexPath) as ProfilePictureCollectionViewCell
+        let cell = collectionView.cellForItemAtIndexPath(indexPath) as! ProfilePictureCollectionViewCell
         cell.backgroundColor = UIColor.grayColor()
         let randomSample:[UInt64] = socialGraphController.currentSample()
         if let index = find(selectedUsers, randomSample[indexPath.row]) {

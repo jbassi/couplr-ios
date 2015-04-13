@@ -46,7 +46,7 @@ class NewsfeedViewController: UIViewController {
     
     func showAllNamesInVisibleCells() {
         for cell in newsfeedTableView!.visibleCells() {
-            let newsCell = cell as NewsfeedTableViewCell
+            let newsCell = cell as! NewsfeedTableViewCell
             if let matches:[(MatchTuple, NSDate)]? = newsFeedMatches() {
                 let match:MatchTuple = matches![newsfeedTableView!.indexPathForCell(newsCell)!.row].0
                 let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
@@ -58,7 +58,7 @@ class NewsfeedViewController: UIViewController {
     
     func hideAllNamesInVisibleCells() {
         for cell in newsfeedTableView!.visibleCells() {
-            let newsCell = cell as NewsfeedTableViewCell
+            let newsCell = cell as! NewsfeedTableViewCell
             newsCell.removeTransparentLayer()
         }
     }
@@ -111,7 +111,7 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as NewsfeedTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as! NewsfeedTableViewCell
         if let matchesAndUpdateTimes:[(MatchTuple, NSDate)]? = newsFeedMatches() {
             let (match:MatchTuple, updateTime:NSDate) = matchesAndUpdateTimes![indexPath.row]
             cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text

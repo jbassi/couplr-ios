@@ -101,7 +101,7 @@ class ProfileDetailLayoverView: UIView {
             superview!.insertSubview(transparentLayer, belowSubview: blurView)
             
             headerLabel.text = useRecentMatches ? "Recent Matches" : title?.text
-            if let newImageName = imageName? {
+            if let newImageName = imageName {
                 titleImage.image = UIImage(named: newImageName)
             }
             
@@ -217,7 +217,7 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if useRecentMatches {
             let rootId:UInt64 = socialGraphController.rootId()
-            let cell = tableView.dequeueReusableCellWithIdentifier("RecentViewCell", forIndexPath: indexPath) as ImageTitleTableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier("RecentViewCell", forIndexPath: indexPath) as! ImageTitleTableViewCell
             if let recentMatchesResult:[MatchTuple]? = recentMatches() {
                 let matchTuple:MatchTuple = recentMatchesResult![indexPath.row]
                 let matchedWithId:UInt64 = matchTuple.firstId == rootId ? matchTuple.secondId : matchTuple.firstId
@@ -231,7 +231,7 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
             return cell
             
         } else {
-            let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as ImageTableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as! ImageTableViewCell
             if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
                 let (matchedWithId:UInt64, voteCount:Int) = matchResult[indexPath.row]
                 cell.selectionStyle = .None
