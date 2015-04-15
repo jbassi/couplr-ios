@@ -58,7 +58,10 @@ func profilePictureURLFromId(id:UInt64, withWidth:Int = 200, withHeight:Int = 20
 }
 
 func firstNameFromFullName(fullName:String) -> String {
-    return fullName.substringToIndex(fullName.rangeOfString(" ")!.startIndex)
+    if let range = fullName.rangeOfString(" ") {
+        return fullName.substringToIndex(range.startIndex)
+    }
+    return fullName
 }
 
 func sampleWithoutReplacement(var list:[UInt64], count:Int) -> [UInt64] {

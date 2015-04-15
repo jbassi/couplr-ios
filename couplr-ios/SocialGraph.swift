@@ -342,7 +342,7 @@ public class SocialGraph {
      */
     private func updateFirstNames() {
         for (id:UInt64, fullName:String) in self.nodes {
-            let firstName:String = fullName.substringToIndex(fullName.rangeOfString(" ")!.startIndex)
+            let firstName:String = firstNameFromFullName(fullName)
             if genders[firstName] == nil {
                 genders[firstName] = Gender.Undetermined
             }
