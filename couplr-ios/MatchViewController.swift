@@ -243,7 +243,9 @@ class MatchViewController: UIViewController {
     }
 
     func showLoadingScreen() {
-        loadingView = LoadingView.createLoadingScreenInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
+        if loadingView == nil {
+            loadingView = LoadingView.createLoadingScreenInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
+        }
     }
 
     func dismissLoadingScreen() {

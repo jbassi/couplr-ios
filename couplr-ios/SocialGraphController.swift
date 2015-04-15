@@ -63,6 +63,9 @@ public class SocialGraphController {
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
                     let root:UInt64 = uint64FromAnyObject(result["id"])
+                    if MatchGraphController.sharedInstance.matches == nil {
+                        return
+                    }
                     MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root], callback: {
                         (didError:Bool) -> Void in
                         if !didError {
@@ -208,24 +211,24 @@ public class SocialGraphController {
      * loading and matches are ready to be presented.
      */
     public func didInitializeGraph() {
+        if self.graph == nil {
+            return
+        }
         if self.graph!.nodes.count <= 10 {
             showLoginWithAlertViewErrorMessage("Unfortunately, we could not find enough friends for you to match!", "Social network too small.")
             return
         }
-        let timeElapsed:Double = currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime
-        afterDelay(max(kMinLoadingDelay - timeElapsed, 0), {
-            self.delegate?.socialGraphControllerDidLoadSocialGraph(self.graph!)
-            MatchGraphController.sharedInstance.socialGraphDidLoad()
-            log("Initialized graph (\(self.graph!.nodes.count) nodes \(self.graph!.edgeCount) edges \(self.graph!.totalEdgeWeight) weight).", withIndent: 1)
-            let timeString:String = String(format: "%.3f",
-                currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
-            log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
-            if self.doBuildGraphFromCoreData {
-                self.didLoadVoteHistoryOrInitializeGraph()
-            } else {
-                self.graph!.updateGraphDataUsingPhotos()
-            }
-        })
+        self.delegate?.socialGraphControllerDidLoadSocialGraph(self.graph!)
+        MatchGraphController.sharedInstance.socialGraphDidLoad()
+        log("Initialized graph (\(self.graph!.nodes.count) nodes \(self.graph!.edgeCount) edges \(self.graph!.totalEdgeWeight) weight).", withIndent: 1)
+        let timeString:String = String(format: "%.3f",
+            currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
+        log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
+        if self.doBuildGraphFromCoreData {
+            self.didLoadVoteHistoryOrInitializeGraph()
+        } else {
+            self.graph!.updateGraphDataUsingPhotos()
+        }
     }
 
     /**
