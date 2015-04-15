@@ -251,9 +251,12 @@ extension SocialGraph {
             for index in 0..<commentData.count {
                 let comment:AnyObject! = commentData[index]!
                 // Add scores for the author of the comment.
-                let from:AnyObject! = comment["from"]!
-                let fromId:UInt64 = uint64FromAnyObject(from["id"]!)
-                let fromNameObject:AnyObject! = from["name"]!
+                let from:AnyObject? = comment["from"]
+                if from == nil {
+                    continue
+                }
+                let fromId:UInt64 = uint64FromAnyObject(from!["id"]!)
+                let fromNameObject:AnyObject! = from!["name"]!
                 updateNodeWithId(fromId, andName: fromNameObject.description!)
                 connectNode(root, toNode: fromId, withWeight: kCommentRootScore)
                 connectNode(previousCommentAuthorId, toNode: fromId, withWeight: kCommentPrevScore)
