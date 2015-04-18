@@ -168,9 +168,9 @@ class CouplrNavigationController: UINavigationController {
         let offset = button.tag - lastPageIndex
         
         if button.tag != currentPageIndex && !animating {
+            animating = true
             if offset > 0 {
                 // Positive direction
-                animating = true
                 for i in (currentPageIndex+1)...(button.tag) {
                     pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Forward, animated: true, completion: {(completed:Bool) in
                         if completed {
@@ -185,7 +185,7 @@ class CouplrNavigationController: UINavigationController {
                         }
                     })
                 }
-            } else if !animating {
+            } else {
                 // Negative direction
                 for i in reverse(button.tag...(currentPageIndex-1)) {
                     pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Reverse, animated: true, completion: {(completed:Bool) in
