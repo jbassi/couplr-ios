@@ -100,11 +100,10 @@ public class SocialGraphController {
         voteHistoryOrPhotoDataLoadProgress++
         if voteHistoryOrPhotoDataLoadProgress == 2 {
             // Both vote history and photo data are finished loading.
-            let voteHistory:[(UInt64, UInt64, Int)] = MatchGraphController.sharedInstance.matches!.userVoteHistory
-            for (firstId:UInt64, secondId:UInt64, titleId:Int) in voteHistory {
+            for tuple:MatchTuple in MatchGraphController.sharedInstance.matches!.userVotes.keys {
                 // For each match the user makes, connect the matched nodes.
-                if graph!.nodes[firstId] != nil && graph!.nodes[secondId] != nil {
-                    graph!.connectNode(firstId, toNode: secondId, withWeight: kUserMatchVoteScore)
+                if graph!.nodes[tuple.firstId] != nil && graph!.nodes[tuple.secondId] != nil {
+                    graph!.connectNode(tuple.firstId, toNode: tuple.secondId, withWeight: kUserMatchVoteScore)
                 }
             }
             if doBuildGraphFromCoreData {
@@ -181,7 +180,10 @@ public class SocialGraphController {
      * Returns true iff the graph contains the given user id.
      */
     public func containsUser(userId:UInt64) -> Bool {
-        return graph?.nodes[userId] != nil
+        if graph == nil {
+            return false
+        }
+        return graph!.nodes[userId] != nil
     }
     
     /**
@@ -189,7 +191,10 @@ public class SocialGraphController {
      * name.
      */
     public func hasNameForUser(userId:UInt64) -> Bool {
-        return graph?.names[userId] != nil
+        if graph == nil {
+            return false
+        }
+        return graph!.names[userId] != nil
     }
 
     /**

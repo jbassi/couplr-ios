@@ -65,7 +65,7 @@ public func ==(lhs:MatchTuple, rhs:MatchTuple) -> Bool {
 public class MatchList {
     public init() {
         self.matchesByTitle = [Int:[UInt64]]()
-        self.latestUpdateTimes = [Int:NSDate]()
+        self.latestNonRootUpdateTimes = [Int:NSDate]()
     }
 
     /**
@@ -81,7 +81,7 @@ public class MatchList {
         if find(voterList, voterId) == nil {
             matchesByTitle[titleId]!.append(voterId)
             if updateTime != nil && shouldUpdateLatestTime(titleId, voterId:voterId, updateTime:updateTime!) {
-                latestUpdateTimes[titleId] = updateTime
+                latestNonRootUpdateTimes[titleId] = updateTime
             }
             return true
         }
@@ -94,18 +94,18 @@ public class MatchList {
      * on this match pair.
      */
     public func lastUpdateTimeForTitle(titleId:Int) -> NSDate? {
-        return latestUpdateTimes[titleId]
+        return latestNonRootUpdateTimes[titleId]
     }
     
     private func shouldUpdateLatestTime(titleId:Int, voterId:UInt64, updateTime:NSDate) -> Bool {
         return voterId != SocialGraphController.sharedInstance.rootId() &&
-            (latestUpdateTimes[titleId] == nil || updateTime.compare(latestUpdateTimes[titleId]!) == .OrderedDescending)
+            (latestNonRootUpdateTimes[titleId] == nil || updateTime.compare(latestNonRootUpdateTimes[titleId]!) == .OrderedDescending)
     }
 
     // Maps a title ID to a list of users who voted for that match.
     var matchesByTitle:[Int:[UInt64]]
     // Maps a title to the last time that it was updated.
-    var latestUpdateTimes:[Int:NSDate]
+    var latestNonRootUpdateTimes:[Int:NSDate]
 }
 
 /**
@@ -121,9 +121,9 @@ public class MatchGraph {
         self.currentlyFlushingMatches = false
         self.unregisteredMatches = [(UInt64, UInt64, Int)]()
         self.matchesBeforeUserHistoryLoaded = [(UInt64, UInt64, Int)]()
-        self.userVoteHistory = [(UInt64, UInt64, Int)]()
         self.cachedMatchesByTitle = [UInt64:[(Int,[(UInt64,Int)])]]()
         self.matchUpdateTimes = [MatchTuple:NSDate]()
+        self.userVotes = [MatchTuple:NSDate]()
     }
 
     /**
@@ -325,7 +325,7 @@ public class MatchGraph {
                     let updateTime:NSDate = matchData.updatedAt
                     self.tryToUpdateDirectedEdge(first, to:second, voter:rootUser, titleId:titleId, updateTime:updateTime)
                     self.tryToUpdateDirectedEdge(second, to:first, voter:rootUser, titleId:titleId, updateTime:updateTime)
-                    self.userVoteHistory.append((first, second, titleId))
+                    self.userVotes[MatchTuple(firstId: first, secondId: second, titleId: titleId, voterId: rootUser)] = updateTime
                 }
                 self.didFetchUserMatchHistory = true
                 self.checkMatchesBeforeUserHistoryLoaded()
@@ -340,6 +340,24 @@ public class MatchGraph {
                 }
             }
         }
+    }
+    
+    /**
+     * Returns the vote history of the root user, sorted by time. The newest votes
+     * appear first, and the oldest votes appear last. Returns the data as a list
+     * of (MatchTuple, NSDate) pairs.
+     */
+    public func rootUserVoteHistory() -> [(MatchTuple, NSDate)] {
+        let voteHistory:[(MatchTuple,NSDate)] = Array(userVotes.keys.filter({ (tuple:MatchTuple) -> Bool in
+            return self.userVotes[tuple] != nil &&
+                SocialGraphController.sharedInstance.hasNameForUser(tuple.firstId) &&
+                SocialGraphController.sharedInstance.hasNameForUser(tuple.secondId)
+        }).map {(tuple:MatchTuple) -> (tuple:MatchTuple, time:NSDate) in
+            return (tuple, self.userVotes[tuple]!)
+        })
+        return sorted(voteHistory, { (firstTupleAndTime:(MatchTuple,NSDate), secondTimeAndTime:(MatchTuple,NSDate)) -> Bool in
+            return firstTupleAndTime.1.compare(secondTimeAndTime.1) == .OrderedDescending
+        })
     }
 
     /**
@@ -476,8 +494,8 @@ public class MatchGraph {
     var didFetchUserMatchHistory:Bool
     var currentlyFlushingMatches:Bool
     var unregisteredMatches:[(UInt64, UInt64, Int)]
+    var userVotes:[MatchTuple:NSDate]
     var matchesBeforeUserHistoryLoaded:[(UInt64, UInt64, Int)]
-    var userVoteHistory:[(UInt64, UInt64, Int)]
     var matchUpdateTimes:[MatchTuple:NSDate]
     
     var cachedMatchesByTitle:[UInt64:[(Int,[(UInt64,Int)])]]
