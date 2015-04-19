@@ -22,6 +22,11 @@ extension SocialGraph {
         request.startWithCompletionHandler{(connection:FBRequestConnection!, result:AnyObject!, error:NSError!) -> Void in
             if error == nil {
                 var couplrFriends:[UInt64] = [UInt64]()
+                if result["data"] == nil {
+                    UserSessionTracker.sharedInstance.notify("Failed to fetch friends list!")
+                    self.didFinishUpdatingFromFriendGraphs()
+                    return
+                }
                 let friendsData:AnyObject! = result["data"]!
                 for index in 0..<friendsData.count {
                     let friendObject:AnyObject! = friendsData[index]!
@@ -93,46 +98,48 @@ extension SocialGraph {
                     let oldEdgeWeight = self.totalEdgeWeight
                     let oldVertexCount = self.nodes.count
                     var previousPhotoGroup:[UInt64:String] = [UInt64:String]()
-                    let allPhotos:AnyObject! = result["data"]!
-                    for i:Int in 0..<allPhotos.count {
-                        var photoGroup:[UInt64:String] = [UInt64:String]()
-                        let photoData:AnyObject! = allPhotos[i]!
-                        let (authorId:UInt64, authorName:String) = idAndNameFromObject(photoData["from"]!!)
-                        // Build a dictionary of all the people in this photo.
-                        photoGroup[authorId] = authorName
-                        let photoTags:AnyObject? = photoData["tags"]
-                        if photoTags == nil {
-                            continue
-                        }
-                        let photoTagsData:AnyObject! = photoTags!["data"]!
-                        for j:Int in 0..<photoTagsData.count {
-                            let photoTag:AnyObject! = photoTagsData[j]
-                            let (taggedId:UInt64, taggedName:String) = idAndNameFromObject(photoTag)
-                            if taggedId != 0 {
-                                photoGroup[taggedId] = taggedName
+                    
+                    if let allPhotos:AnyObject? = result["data"] {
+                        for index:Int in 0..<allPhotos!.count {
+                            var photoGroup:[UInt64:String] = [UInt64:String]()
+                            let photoData:AnyObject! = allPhotos![index]!
+                            let (authorId:UInt64, authorName:String) = idAndNameFromObject(photoData["from"]!!)
+                            // Build a dictionary of all the people in this photo.
+                            photoGroup[authorId] = authorName
+                            let photoTags:AnyObject? = photoData["tags"]
+                            if photoTags == nil {
+                                continue
                             }
-                        }
-                        if photoGroup.count <= 1 || photoGroup.count > kMaxPhotoGroupSize {
-                            continue
-                        }
-                        let dissimilarity:Float = 1.0 - self.similarityOfGroups(photoGroup, second: previousPhotoGroup)
-                        let pairwiseWeight:Float = dissimilarity * kMaxPairwisePhotoScore / Float(photoGroup.count - 1)
-                        if pairwiseWeight >= kMinPhotoPairwiseWeight {
-                            for (node:UInt64, name:String) in photoGroup {
-                                self.updateNodeWithId(node, andName: name, andUpdateGender: false)
+                            let photoTagsData:AnyObject! = photoTags!["data"]!
+                            for j:Int in 0..<photoTagsData.count {
+                                let photoTag:AnyObject! = photoTagsData[j]
+                                let (taggedId:UInt64, taggedName:String) = idAndNameFromObject(photoTag)
+                                if taggedId != 0 {
+                                    photoGroup[taggedId] = taggedName
+                                }
                             }
-                            // Create a fully connected clique using the tagged users.
-                            for src:UInt64 in photoGroup.keys {
-                                for dst:UInt64 in photoGroup.keys {
-                                    if src < dst {
-                                        self.connectNode(src, toNode: dst, withWeight: pairwiseWeight)
+                            if photoGroup.count <= 1 || photoGroup.count > kMaxPhotoGroupSize {
+                                continue
+                            }
+                            let dissimilarity:Float = 1.0 - self.similarityOfGroups(photoGroup, second: previousPhotoGroup)
+                            let pairwiseWeight:Float = dissimilarity * kMaxPairwisePhotoScore / Float(photoGroup.count - 1)
+                            if pairwiseWeight >= kMinPhotoPairwiseWeight {
+                                for (node:UInt64, name:String) in photoGroup {
+                                    self.updateNodeWithId(node, andName: name, andUpdateGender: false)
+                                }
+                                // Create a fully connected clique using the tagged users.
+                                for src:UInt64 in photoGroup.keys {
+                                    for dst:UInt64 in photoGroup.keys {
+                                        if src < dst {
+                                            self.connectNode(src, toNode: dst, withWeight: pairwiseWeight)
+                                        }
                                     }
                                 }
                             }
+                            previousPhotoGroup = photoGroup
                         }
-                        previousPhotoGroup = photoGroup
+                        log("Received \(allPhotos!.count) photos (+\(self.nodes.count - oldVertexCount) nodes, +\(self.edgeCount - oldEdgeCount) edges, +\(self.totalEdgeWeight - oldEdgeWeight) weight).", withIndent:1, withNewline:true)
                     }
-                    log("Received \(allPhotos.count) photos (+\(self.nodes.count - oldVertexCount) nodes, +\(self.edgeCount - oldEdgeCount) edges, +\(self.totalEdgeWeight - oldEdgeWeight) weight).", withIndent:1, withNewline:true)
                     if self.nodes.count > 50 {
                         self.pruneGraphByMinWeightThreshold()
                         self.pruneGraphByIsolationFromRoot()
@@ -154,18 +161,7 @@ extension SocialGraph {
     private func fetchAndUpdateGraphDataForFriends(inout idList:[UInt64], numFriendsQueried:Int = 0) {
         let id:UInt64 = popNextHighestConnectedFriend(&idList)
         if numFriendsQueried > kMaxGraphDataQueries || id == 0 {
-            log("Done. No more friends to query.", withIndent: 1)
-            let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
-            log("Time since startup: \(timeString) sec", withIndent: 2, withNewline: true)
-            updateGenders()
-            if kUseMedianAsWeightBaseline {
-                updateMedianEdgeWeight()
-            }
-            log("Vertex count: \(nodes.count)", withIndent: 2)
-            log("Edge count: \(edgeCount)", withIndent: 2)
-            log("Total weight: \(totalEdgeWeight)", withIndent: 2)
-            log("Weight baseline: \(baselineEdgeWeight())", withIndent: 2)
-            MatchGraphController.sharedInstance.didFinishLoadingExtendedSocialGraph()
+            didFinishUpdatingFromFriendGraphs()
             return
         }
         log("Pulling the social graph of \(SocialGraphController.sharedInstance.nameFromId(id))...", withFlag: "!")
@@ -279,15 +275,36 @@ extension SocialGraph {
         }
         var allLikes:AnyObject? = post["likes"]
         if allLikes != nil {
-            let likeData:AnyObject! = allLikes!["data"]!
-            for index in 0..<likeData.count {
-                let like:AnyObject! = likeData[index]!
-                let fromId:UInt64 = uint64FromAnyObject(like["id"]!)
-                let fromNameObject:AnyObject! = like["name"]
-                updateNodeWithId(fromId, andName: fromNameObject.description!)
-                connectNode(root, toNode: fromId, withWeight: kLikeRootScore)
+            if let likeData:AnyObject? = allLikes!["data"] {
+                for index in 0..<likeData!.count {
+                    let like:AnyObject! = likeData![index]!
+                    let fromId:UInt64 = uint64FromAnyObject(like["id"]!)
+                    let fromNameObject:AnyObject! = like["name"]
+                    updateNodeWithId(fromId, andName: fromNameObject.description!)
+                    connectNode(root, toNode: fromId, withWeight: kLikeRootScore)
+                }
             }
         }
+    }
+    
+    /**
+     * Invoked when data from friends' social networks has been added
+     * to the graph. didPerformUpdate indicates whether fetching friend
+     * graph information caused an error.
+     */
+    private func didFinishUpdatingFromFriendGraphs() {
+        log("Done. No more friends to query.", withIndent: 1)
+        let timeString:String = String(format: "%.3f", currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
+        log("Time since startup: \(timeString) sec", withIndent: 2, withNewline: true)
+        updateGenders()
+        if kUseMedianAsWeightBaseline {
+            updateMedianEdgeWeight()
+        }
+        log("Vertex count: \(nodes.count)", withIndent: 2)
+        log("Edge count: \(edgeCount)", withIndent: 2)
+        log("Total weight: \(totalEdgeWeight)", withIndent: 2)
+        log("Weight baseline: \(baselineEdgeWeight())", withIndent: 2)
+        MatchGraphController.sharedInstance.didFinishLoadingExtendedSocialGraph()
     }
 
     /**

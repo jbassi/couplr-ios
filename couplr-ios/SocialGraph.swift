@@ -283,7 +283,7 @@ public class SocialGraph {
         updateFirstNames()
         let addGenders:(NSData?, NSURLResponse?, NSError?) -> Void = {
             (data:NSData?, response:NSURLResponse?, error:NSError?) in
-            if error == nil {
+            if error == nil && data != nil {
                 var parsingError:NSError? = NSError()
                 let rawGenderData:AnyObject? = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions(0), error: &parsingError)
                 if rawGenderData == nil {
@@ -293,11 +293,13 @@ public class SocialGraph {
                     for (firstName:String, genderIndicator:AnyObject) in genderData {
                         let gender = Gender.fromString(genderIndicator.description!)
                         self.genders[firstName] = gender
-                        if gender != Gender.Undetermined {
+                        if gender != Gender.Undetermined && SocialGraphController.sharedInstance.managedObjectContext != nil {
                             GenderData.insert(SocialGraphController.sharedInstance.managedObjectContext!, name: firstName, gender: gender)
                         }
                     }
-                    SocialGraphController.sharedInstance.managedObjectContext!.save(nil)
+                    if SocialGraphController.sharedInstance.managedObjectContext != nil {
+                        SocialGraphController.sharedInstance.managedObjectContext!.save(nil)
+                    }
                     let (males:Int, females:Int, undetermined:Int) = self.overallGenderCount()
                     log("Gender response received (\(genderData.count) predictions).", withIndent: 1)
                     log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent: 1, withNewline: true)
@@ -327,11 +329,13 @@ public class SocialGraph {
     public func loadGendersFromCoreData() {
         if !didLoadGendersFromCache {
             updateFirstNames()
-            let cachedGenders:[GenderData] = GenderData.allObjects(SocialGraphController.sharedInstance.managedObjectContext!)
-            for genderData in cachedGenders {
-                genders[genderData.firstName] = genderData.gender()
+            if SocialGraphController.sharedInstance.managedObjectContext != nil {
+                let cachedGenders:[GenderData] = GenderData.allObjects(SocialGraphController.sharedInstance.managedObjectContext!)
+                for genderData in cachedGenders {
+                    genders[genderData.firstName] = genderData.gender()
+                }
+                didLoadGendersFromCache = true
             }
-            didLoadGendersFromCache = true
         }
     }
 

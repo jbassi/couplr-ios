@@ -254,10 +254,12 @@ public class SocialGraphController {
                 }
             }
         }
-        var error:NSError? = nil
-        managedObjectContext!.save(&error)
-        if error != nil {
-            log("Error when saving to Core Data: \(error!.description)")
+        if managedObjectContext != nil {
+            var error:NSError? = nil
+            managedObjectContext!.save(&error)
+            if error != nil {
+                log("Error when saving to Core Data: \(error!.description)")
+            }
         }
     }
 

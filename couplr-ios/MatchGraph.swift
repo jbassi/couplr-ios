@@ -98,7 +98,6 @@ public class MatchList {
     }
     
     private func shouldUpdateLatestTime(titleId:Int, voterId:UInt64, updateTime:NSDate) -> Bool {
-        
         return voterId != SocialGraphController.sharedInstance.rootId() &&
             (latestUpdateTimes[titleId] == nil || updateTime.compare(latestUpdateTimes[titleId]!) == .OrderedDescending)
     }
