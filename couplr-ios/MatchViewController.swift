@@ -73,7 +73,7 @@ class MatchViewController: UIViewController {
         resetButton.setTitle("Shuffle", forState: .Normal)
         resetButton.layer.cornerRadius = 10
         resetButton.layer.masksToBounds = true
-        resetButton.addTarget(self, action: "shufflePeople", forControlEvents: .TouchUpInside)
+        resetButton.addTarget(self, action: "shuffleUnselectedMatches", forControlEvents: .TouchUpInside)
         
         submitButton.frame = CGRectMake(collectionViewX+buttonWidth+5, buttonY, buttonWidth, buttonHeight)
         submitButton.backgroundColor = UIColor.lightGrayColor()
@@ -139,7 +139,7 @@ class MatchViewController: UIViewController {
 
     override func motionEnded(motion: UIEventSubtype, withEvent event: UIEvent) {
         if motion == UIEventSubtype.MotionShake {
-            shufflePeople()
+            shuffleUnselectedMatches()
             UserSessionTracker.sharedInstance.notify("shuffled people")
         }
     }
@@ -197,11 +197,15 @@ class MatchViewController: UIViewController {
         UserSessionTracker.sharedInstance.notify("opened title select")
     }
 
-    func shufflePeople() {
+    func shuffleUnselectedMatches() {
         if socialGraphLoaded {
-            socialGraphController.updateRandomSample()
+            var keepUsersAtIndices:[(UInt64, Int)] = []
+            for (index:Int, userId:UInt64) in enumerate(selectedUsers) {
+                keepUsersAtIndices.append(userId, selectedIndices[index].row)
+            }
             selectedUsers.removeAll(keepCapacity: true)
             selectedIndices.removeAll(keepCapacity: true)
+            socialGraphController.updateRandomSample(keepUsersAtIndices: keepUsersAtIndices)
             let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
             dispatch_async(dispatch_get_main_queue()) {
                 self.collectionView?.reloadData()
@@ -225,7 +229,7 @@ class MatchViewController: UIViewController {
                 collectionView?.deselectItemAtIndexPath(index, animated: false)
             }
             selectedIndices.removeAll(keepCapacity: true)
-            shufflePeople()
+            shuffleUnselectedMatches()
             shuffleTitle()
             UserSessionTracker.sharedInstance.notify("submitted match")
         } else {
@@ -313,7 +317,6 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as! ProfilePictureCollectionViewCell
         cell.backgroundColor = UIColor.grayColor()
-
         let randomSample:[UInt64] = socialGraphController.currentSample()
         if randomSample.count > 0 {
             let userId = randomSample[indexPath.row]

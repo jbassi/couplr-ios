@@ -125,8 +125,8 @@ public class SocialGraphController {
      * TODO Implement sample history and prevent the user from
      * encountering repetitive samples here.
      */
-    public func updateRandomSample() {
-        graph?.updateRandomSample()
+    public func updateRandomSample(keepUsersAtIndices:[(UInt64,Int)] = []) {
+        graph?.updateRandomSample(keepUsersAtIndices: keepUsersAtIndices)
     }
 
     /**

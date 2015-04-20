@@ -13,8 +13,19 @@ extension SocialGraph {
      * Samples some number of users by performing a weighted random walk on the
      * graph starting at the root user.
      */
-    public func updateRandomSample(size:Int = kRandomSampleCount) {
-        currentSample = randomWalkSample(size)
+    public func updateRandomSample(size:Int = kRandomSampleCount, keepUsersAtIndices:[(UInt64,Int)] = []) {
+        if size - keepUsersAtIndices.count <= 0 {
+            return
+        }
+        currentSample = randomWalkSample(size, keepUsers: Array(keepUsersAtIndices.map{ $0.0 }))
+        for (keepUserId:UInt64, atIndex:Int) in keepUsersAtIndices {
+            for (index:Int, userId:UInt64) in enumerate(currentSample) {
+                if userId == keepUserId {
+                    currentSample[index] = currentSample[atIndex]
+                    currentSample[atIndex] = keepUserId
+                }
+            }
+        }
         if kShowRandomWalkDebugOutput {
             println("    Done. Final random walk result...")
             for id:UInt64 in currentSample {
@@ -25,9 +36,12 @@ extension SocialGraph {
         updateWalkWeightMultipliers()
     }
     
-    private func randomWalkSample(size:Int, expectedNumRandomHops:Float = kExpectedNumRandomHops) -> [UInt64] {
+    private func randomWalkSample(size:Int, expectedNumRandomHops:Float = kExpectedNumRandomHops, keepUsers:[UInt64] = []) -> [UInt64] {
         let randomHopProbability:Float = expectedNumRandomHops / Float(size - 1)
         var samples:[UInt64:Bool] = [UInt64:Bool]()
+        for userId in keepUsers {
+            samples[userId] = true
+        }
         var nextStep:UInt64 = root
         while samples.count < size {
             if nextStep != root && randomFloat() < randomHopProbability {
