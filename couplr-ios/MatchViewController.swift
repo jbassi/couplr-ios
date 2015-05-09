@@ -203,12 +203,17 @@ class MatchViewController: UIViewController {
             for (index:Int, userId:UInt64) in enumerate(selectedUsers) {
                 keepUsersAtIndices.append(userId, selectedIndices[index].row)
             }
-            selectedUsers.removeAll(keepCapacity: true)
-            selectedIndices.removeAll(keepCapacity: true)
             socialGraphController.updateRandomSample(keepUsersAtIndices: keepUsersAtIndices)
             let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
             dispatch_async(dispatch_get_main_queue()) {
-                self.collectionView?.reloadData()
+                let indexPaths = self.collectionView?.indexPathsForVisibleItems()
+                self.collectionView?.reloadItemsAtIndexPaths(indexPaths!.filter({ (index:AnyObject) -> Bool in
+                    return find(self.selectedIndices, index as! NSIndexPath) == nil
+                }))
+                for index in self.selectedIndices {
+                    self.collectionView?.selectItemAtIndexPath(index, animated: false, scrollPosition: .None)
+                }
+                
                 dispatch_async(dispatch_get_main_queue()) {
                     if self.toggleNamesSwitch.on {
                         self.showAllNames()
