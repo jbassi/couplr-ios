@@ -35,7 +35,7 @@ class CouplrControllers {
     func showMatchViewLoadingScreen() {
         if let matchView = matchViewController {
             if matchView.isViewLoaded() {
-                matchViewController?.showLoadingScreen()
+                matchViewController?.showLoadingScreen(overrideExistingLoadingView: true)
             }
         }
     }

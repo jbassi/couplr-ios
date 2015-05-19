@@ -251,8 +251,8 @@ class MatchViewController: UIViewController {
         matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
     }
 
-    func showLoadingScreen() {
-        if loadingView == nil {
+    func showLoadingScreen(overrideExistingLoadingView:Bool = false) {
+        if overrideExistingLoadingView || loadingView == nil {
             loadingView = LoadingView.createLoadingScreenInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
         }
     }
