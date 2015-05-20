@@ -97,7 +97,7 @@ let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
 let kParseClientKey:String = "3qw7fEgFDKJgCT1hPSii3JhF0NZHo1fCym3of2Wh"
 
 /* URL request prefixes */
-let kGenderizeURLPrefix:String = "http://gender-ml.herokuapp.com/classify?auth_token=FFE8382A3E3B4A1282CE59CAE7910BF7&names="
+let kGenderizeURLPrefix:String = "http://couplr.herokuapp.com/gender?secret=FFE8382A3E3B4A1282CE59CAE7910BF7&names="
 let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
 
 /* For managing local storage (core data) */

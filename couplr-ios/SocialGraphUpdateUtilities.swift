@@ -300,10 +300,10 @@ extension SocialGraph {
         if kUseMedianAsWeightBaseline {
             updateMedianEdgeWeight()
         }
-        log("Vertex count: \(nodes.count)", withIndent: 2)
-        log("Edge count: \(edgeCount)", withIndent: 2)
-        log("Total weight: \(totalEdgeWeight)", withIndent: 2)
-        log("Weight baseline: \(baselineEdgeWeight())", withIndent: 2)
+        log("Vertex count: \(nodes.count)", withIndent: 1)
+        log("Edge count: \(edgeCount)", withIndent: 1)
+        log("Total weight: \(totalEdgeWeight)", withIndent: 1)
+        log("Weight baseline: \(baselineEdgeWeight())", withIndent: 1)
         MatchGraphController.sharedInstance.didFinishLoadingExtendedSocialGraph()
     }
 
