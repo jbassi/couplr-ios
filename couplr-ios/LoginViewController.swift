@@ -88,7 +88,6 @@ class LoginViewController: UIViewController {
         } else {
             FBSession.openActiveSessionWithAllowLoginUI(false)
             var activeSession: FBSession = FBSession.activeSession()
-
             if(settings.shouldSkipLogin || activeSession.isOpen) {
                 loadAppViewsAndPresentNavigationController()
             } else {

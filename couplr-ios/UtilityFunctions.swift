@@ -303,3 +303,54 @@ extension String {
 func isUTF8Compatible(string:String) -> Bool {
     return NSString(string: string).lengthOfBytesUsingEncoding(NSUTF8StringEncoding) == string.lengthOfBytesUsingEncoding(NSUTF16StringEncoding) / 2
 }
+
+func unapprovedUserPermissions(permissions:[String]) -> [String] {
+    let approvedPermissions:[String] = FBSession.activeSession().permissions.map{$0 as! String}
+    return permissions.filter({ find(approvedPermissions, $0) == nil })
+}
+
+/**
+ * TODO It's super awkward to put a class in a file called UtilityFunctions. Maybe refactor
+ * the file to be something more general like Utilities?
+ */
+class AlertViewHandler: NSObject, UIAlertViewDelegate {
+    init(callback:((buttonIndex:Int) -> Void)? = nil) {
+        self.callback = callback
+    }
+    
+    func alertView(alertView:UIAlertView, clickedButtonAtIndex buttonIndex:Int) {
+        if callback != nil {
+            callback!(buttonIndex: buttonIndex)
+        }
+    }
+    
+    func alertViewCancel(alertView: UIAlertView) {
+        if callback != nil {
+            callback!(buttonIndex: CANCELED_INDEX)
+        }
+    }
+    
+    let CANCELED_INDEX = -1;
+    var callback:((buttonIndex:Int) -> Void)?
+}
+
+// See accompanying function below.
+let alertViewHandlers:[String:AlertViewHandler] = [
+    "default": AlertViewHandler(),
+    "request_missing_permissions": AlertViewHandler{ (buttonIndex:Int) -> Void in
+        FBSession.activeSession().requestNewReadPermissions(["user_friends", "user_photos", "user_posts", "user_status"], completionHandler: nil)
+    }
+]
+
+/**
+ * HACK This is a hack of epic proportions. For some reason, if I just pass an AlertViewHandler directly
+ * to the UIAlertView, Swift won't recognize that the UIAlertView contains a reference to an AlertViewHandler,
+ * and will garbage collect the handler before it gets a chance to fire upon user input. To work around this,
+ * I keep a global reference to the appropriate AlertViewHandler via the alertViewHandlers dictionary.
+ */
+func alertViewHandlerByName(name:String) -> AlertViewHandler {
+    if alertViewHandlers[name] != nil {
+        return alertViewHandlers[name]!
+    }
+    return alertViewHandlers["default"]!
+}

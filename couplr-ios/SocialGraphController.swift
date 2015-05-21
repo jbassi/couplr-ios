@@ -220,7 +220,12 @@ public class SocialGraphController {
             return
         }
         if self.graph!.nodes.count <= 10 {
-            showLoginWithAlertViewErrorMessage("Unfortunately, we could not find enough friends for you to match!", "Social network too small.")
+            let missingPermissions:[String] = unapprovedUserPermissions(["user_friends", "user_photos", "user_posts", "user_status"])
+            if missingPermissions.count > 0 {
+                showLoginWithAlertViewErrorMessage("Help us find your friends by enabling photo, post and status permissions. Remember: Couplr never saves your data, and we will never post on your behalf!", "Social network too small.", completionHandler: alertViewHandlerByName("request_missing_permissions"))
+            } else {
+                showLoginWithAlertViewErrorMessage("Unfortunately, we could not find enough friends for you to match! Check back later.", "Social network too small.")
+            }
             return
         }
         self.delegate?.socialGraphControllerDidLoadSocialGraph(self.graph!)
