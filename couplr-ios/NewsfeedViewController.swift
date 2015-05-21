@@ -12,14 +12,14 @@ class NewsfeedViewController: UIViewController {
 
     let socialGraphController = SocialGraphController.sharedInstance
     let matchGraphController = MatchGraphController.sharedInstance
-    var headerView:NewsfeedHeaderView?
+    var headerView:MatchPairHeaderView?
     var newsfeedTableView:UITableView?
     var cachedNewsFeedMatches:[(MatchTuple, NSDate)]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        headerView = NewsfeedHeaderView(frame: CGRectMake(view.frame.origin.x, kStatusBarHeight, view.bounds.size.width, 80))
+        headerView = MatchPairHeaderView(frame: CGRectMake(view.frame.origin.x, kStatusBarHeight, view.bounds.size.width, 80))
         headerView!.headerLabel.text = "Newsfeed"
         headerView!.headerLabel.font = UIFont(name: "HelveticaNeue-Light", size: 32)
 
@@ -31,7 +31,7 @@ class NewsfeedViewController: UIViewController {
         newsfeedTableView = UITableView(frame: CGRectMake(0, headerViewHeight, view.bounds.size.width, newsfeedTableViewHeight))
         newsfeedTableView!.delegate = self
         newsfeedTableView!.dataSource = self
-        newsfeedTableView!.registerClass(NewsfeedTableViewCell.self, forCellReuseIdentifier: "NewsfeedViewCell")
+        newsfeedTableView!.registerClass(MatchPairTableViewCell.self, forCellReuseIdentifier: "NewsfeedViewCell")
 
         view.addSubview(headerView!)
         view.addSubview(newsfeedTableView!)
@@ -46,7 +46,7 @@ class NewsfeedViewController: UIViewController {
     
     func showAllNamesInVisibleCells() {
         for cell in newsfeedTableView!.visibleCells() {
-            let newsCell = cell as! NewsfeedTableViewCell
+            let newsCell = cell as! MatchPairTableViewCell
             if let matches:[(MatchTuple, NSDate)]? = newsFeedMatches() {
                 let match:MatchTuple = matches![newsfeedTableView!.indexPathForCell(newsCell)!.row].0
                 let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
@@ -58,7 +58,7 @@ class NewsfeedViewController: UIViewController {
     
     func hideAllNamesInVisibleCells() {
         for cell in newsfeedTableView!.visibleCells() {
-            let newsCell = cell as! NewsfeedTableViewCell
+            let newsCell = cell as! MatchPairTableViewCell
             newsCell.removeTransparentLayer()
         }
     }
@@ -113,7 +113,7 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as! NewsfeedTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as! MatchPairTableViewCell
         if let matchesAndUpdateTimes:[(MatchTuple, NSDate)]? = newsFeedMatches() {
             let (match:MatchTuple, updateTime:NSDate) = matchesAndUpdateTimes![indexPath.row]
             cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text

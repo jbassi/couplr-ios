@@ -1,5 +1,5 @@
 //
-//  NewsfeedTableViewCell.swift
+//  MatchPairTableViewCell.swift
 //  couplr-ios
 //
 //  Created by Jeremy Bassi on 3/26/15.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class NewsfeedTableViewCell: UITableViewCell {
+class MatchPairTableViewCell: UITableViewCell {
     
     var leftName: String = ""
     var rightName: String = ""

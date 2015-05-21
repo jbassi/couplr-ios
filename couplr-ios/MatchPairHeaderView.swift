@@ -1,5 +1,5 @@
 //
-//  NewsfeedHeaderView.swift
+//  MatchPairHeaderView.swift
 //  couplr-ios
 //
 //  Created by Jeremy Bassi on 3/26/15.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class NewsfeedHeaderView: UIView {
+class MatchPairHeaderView: UIView {
 
     let headerLabel = UILabel()
     let nameSwitch = UISwitch()
