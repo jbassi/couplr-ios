@@ -48,6 +48,11 @@ public class MatchTuple : Hashable {
         return lower32Bits(sum).hashValue + self.titleId
     }
     
+    public func toString() -> String {
+        return SocialGraphController.sharedInstance.nameFromId(firstId) + " and " +
+            SocialGraphController.sharedInstance.nameFromId(secondId) + " for \(titleId) by \(encodeBase64(voterId))"
+    }
+    
     var firstId:UInt64
     var secondId:UInt64
     var voterId:UInt64
@@ -398,6 +403,7 @@ public class MatchGraph {
         }
         unregisteredMatches.append(MatchTuple(firstId: firstId, secondId: secondId, titleId: withTitleId))
         userVotes[MatchTuple(firstId: firstId, secondId: secondId, titleId: withTitleId, voterId: rootUser)] = NSDate()
+        CouplrControllers.sharedInstance.refreshHistoryView()
         SocialGraphController.sharedInstance.userDidMatch(firstId, toSecondId: secondId)
     }
     

@@ -39,6 +39,7 @@ public class MatchGraphController {
      */
     public func newsFeedMatches(maxNumMatches:Int = kMaxNumNewsFeedMatches) -> [(MatchTuple,NSDate)] {
         if matches == nil {
+            log("MatchGraphController::newsFeedMatches called before match graph was initialized.", withFlag: "-")
             return []
         }
         let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
@@ -98,8 +99,7 @@ public class MatchGraphController {
         if matches == nil {
             matches = MatchGraph()
         }
-        matches!.fetchRootUserVoteHistory {
-            (didError) -> Void in
+        matches!.fetchRootUserVoteHistory { (didError) -> Void in
             SocialGraphController.sharedInstance.didLoadVoteHistoryOrInitializeGraph()
         }
     }

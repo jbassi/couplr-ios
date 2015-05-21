@@ -32,6 +32,11 @@ class CouplrControllers {
     func refreshNewsfeedView() {
         newsfeedViewController?.newsfeedTableView?.reloadData()
     }
+
+    func refreshHistoryView() {
+        historyViewController?.updateCachedVoteHistory()
+        historyViewController?.historyTableView?.reloadData()
+    }
     
     func showMatchViewLoadingScreen() {
         if let matchView = matchViewController {
@@ -124,7 +129,7 @@ class CouplrNavigationController: UINavigationController {
             button.backgroundColor = UIColor.grayColor()
             button.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
             button.setTitle(buttonTitles[index], forState: .Normal)
-            button.titleLabel?.font = kCouplrNavigationButtonBoldFont
+            button.titleLabel?.font = button == matchViewButton ? kCouplrNavigationButtonBoldFont : kCouplrNavigationButtonFont
             button.tag = buttonTags[index]
             customNavigationBar.addSubview(button)
         }
