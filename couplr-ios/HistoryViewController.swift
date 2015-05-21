@@ -20,7 +20,7 @@ class HistoryViewController: UIViewController {
         super.viewDidLoad()
         
         headerView = MatchPairHeaderView(frame: CGRectMake(view.frame.origin.x, kStatusBarHeight, view.bounds.size.width, 80))
-        headerView!.headerLabel.text = "Submitted matches"
+        headerView!.headerLabel.text = "My votes"
         headerView!.headerLabel.font = UIFont(name: "HelveticaNeue-Light", size: 32)
         
         headerView!.nameSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)

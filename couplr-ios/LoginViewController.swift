@@ -111,15 +111,18 @@ class LoginViewController: UIViewController {
         let profileViewController = ProfileViewController()
         let matchViewController = MatchViewController()
         let newsfeedViewController = NewsfeedViewController()
+        let historyViewController = HistoryViewController()
 
         couplrNavigationController.viewControllerArray.append(profileViewController)
         couplrNavigationController.viewControllerArray.append(matchViewController)
         couplrNavigationController.viewControllerArray.append(newsfeedViewController)
+        couplrNavigationController.viewControllerArray.append(historyViewController)
 
         CouplrControllers.sharedInstance.navigationController = couplrNavigationController
         CouplrControllers.sharedInstance.profileViewController = profileViewController
         CouplrControllers.sharedInstance.matchViewController = matchViewController
         CouplrControllers.sharedInstance.newsfeedViewController = newsfeedViewController
+        CouplrControllers.sharedInstance.historyViewController = historyViewController
         
         couplrNavigationController.modalTransitionStyle = .FlipHorizontal
         presentViewController(couplrNavigationController, animated: true, completion: nil)

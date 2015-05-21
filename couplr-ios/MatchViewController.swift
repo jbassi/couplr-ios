@@ -227,7 +227,7 @@ class MatchViewController: UIViewController {
     
     func submitMatch() {
         if selectedUsers.count == 2 {
-            matchGraphController.userDidMatch(selectedUsers[0], toSecondId: selectedUsers[1], withTitleId: selectedTitle!.id)
+            matchGraphController.userDidMatch(selectedUsers[0], to: selectedUsers[1], withTitleId: selectedTitle!.id)
             log("Matching \(socialGraphController.nameFromId(selectedUsers[0])) with \(socialGraphController.nameFromId(selectedUsers[1])) for \"\(selectedTitle!.text)\"", withFlag: "~")
             selectedUsers.removeAll(keepCapacity: true)
             for index:NSIndexPath in selectedIndices {

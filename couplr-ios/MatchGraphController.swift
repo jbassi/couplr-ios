@@ -66,6 +66,28 @@ public class MatchGraphController {
         matchTuples = Array(matchTuples[0..<min(matchTuples.count, maxNumMatches)])
         return matchTuples.map { ($0, updateTimesByMatchTuple[$0]!) }
     }
+    
+    /**
+     * Returns the vote history of the root user, sorted by time. The newest votes
+     * appear first, and the oldest votes appear last. Returns the data as a list
+     * of (MatchTuple, NSDate) pairs.
+     */
+    public func rootUserVoteHistory() -> [(MatchTuple, NSDate)] {
+        if matches == nil {
+            log("MatchGraphController::rootUserVoteHistory called before match graph was initialized.", withFlag: "-")
+            return []
+        }
+        let voteHistory:[(MatchTuple,NSDate)] = Array(matches!.userVotes.keys.filter({ (tuple:MatchTuple) -> Bool in
+            return self.matches!.userVotes[tuple] != nil &&
+                SocialGraphController.sharedInstance.hasNameForUser(tuple.firstId) &&
+                SocialGraphController.sharedInstance.hasNameForUser(tuple.secondId)
+        }).map {(tuple:MatchTuple) -> (tuple:MatchTuple, time:NSDate) in
+            return (tuple, self.matches!.userVotes[tuple]!)
+        })
+        return sorted(voteHistory, { (firstTupleAndTime:(MatchTuple,NSDate), secondTimeAndTime:(MatchTuple,NSDate)) -> Bool in
+            return firstTupleAndTime.1.compare(secondTimeAndTime.1) == .OrderedDescending
+        })
+    }
 
     /**
      * Once the social graph loads, we know the root user. Use this
@@ -186,8 +208,8 @@ public class MatchGraphController {
      * Will assume that the SocialGraph has already been initialized,
      * so the root user is graph!.root.
      */
-    public func userDidMatch(firstId:UInt64, toSecondId:UInt64, withTitleId:Int) {
-        matches?.userDidMatch(firstId, toSecondId: toSecondId, withTitleId: withTitleId)
+    public func userDidMatch(from:UInt64, to:UInt64, withTitleId:Int) {
+        matches?.userDidMatch(from, to: to, withTitleId: withTitleId)
     }
     
     /**

@@ -14,6 +14,7 @@ class CouplrControllers {
         profileViewController = nil
         matchViewController = nil
         newsfeedViewController = nil
+        historyViewController = nil
         navigationController = nil
     }
     
@@ -51,6 +52,7 @@ class CouplrControllers {
     weak var profileViewController:ProfileViewController?
     weak var matchViewController:MatchViewController?
     weak var newsfeedViewController:NewsfeedViewController?
+    weak var historyViewController:HistoryViewController?
     weak var navigationController:CouplrNavigationController?
 }
 
@@ -69,6 +71,7 @@ class CouplrNavigationController: UINavigationController {
     let matchViewButton = UIButton()
     let profileViewButton = UIButton()
     let newsfeedViewButton = UIButton()
+    let historyViewButton = UIButton()
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
@@ -83,6 +86,7 @@ class CouplrNavigationController: UINavigationController {
         buttonArray.append(profileViewButton)
         buttonArray.append(matchViewButton)
         buttonArray.append(newsfeedViewButton)
+        buttonArray.append(historyViewButton)
         
         setupNavigationBarButtons()
         setupPageViewController()
@@ -111,36 +115,20 @@ class CouplrNavigationController: UINavigationController {
     
     func setupNavigationBarButtons() {
         customNavigationBar.frame = CGRectMake(0, view.frame.size.height-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight)
-        
+        let buttonTags:[Int] = [kProfileViewButtonTag, kMatchViewButtonTag, kNewsfeedViewButtonTag, kHistoryViewButtonTag]
+        let buttonTitles:[String] = [kProfileViewButtonTitle, kMatchViewButtonTitle, kNewsfeedViewButtonTitle, kHistoryViewButtonTitle]
         let buttonWidth = view.frame.width / CGFloat(viewControllerArray.count)
-        profileViewButton.frame = CGRectMake(0, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
-        matchViewButton.frame = CGRectMake(buttonWidth, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
-        newsfeedViewButton.frame = CGRectMake(buttonWidth*2, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
-        
-        matchViewButton.backgroundColor = UIColor.grayColor()
-        profileViewButton.backgroundColor = UIColor.grayColor()
-        newsfeedViewButton.backgroundColor = UIColor.grayColor()
-        
-        matchViewButton.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
-        profileViewButton.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
-        newsfeedViewButton.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
-        
-        matchViewButton.setTitle(kMatchViewButtonTitle, forState: .Normal)
-        matchViewButton.titleLabel?.font = kCouplrNavigationButtonBoldFont
-        profileViewButton.setTitle(kProfileViewButtonTitle, forState: .Normal)
-        profileViewButton.titleLabel?.font = kCouplrNavigationButtonFont
-        newsfeedViewButton.setTitle(kNewsfeedViewButtonTitle, forState: .Normal)
-        newsfeedViewButton.titleLabel?.font = kCouplrNavigationButtonFont
-        
-        matchViewButton.tag = kMatchViewButtonTag
-        profileViewButton.tag = kProfileViewButtonTag
-        newsfeedViewButton.tag = kNewsfeedViewButtonTag
-        
-        customNavigationBar.addSubview(profileViewButton)
-        customNavigationBar.addSubview(matchViewButton)
-        customNavigationBar.addSubview(newsfeedViewButton)
+        for (index:Int, button:UIButton) in enumerate(buttonArray) {
+            let buttonOffset:CGFloat = buttonWidth * CGFloat(index)
+            button.frame = CGRectMake(buttonOffset, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
+            button.backgroundColor = UIColor.grayColor()
+            button.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
+            button.setTitle(buttonTitles[index], forState: .Normal)
+            button.titleLabel?.font = kCouplrNavigationButtonBoldFont
+            button.tag = buttonTags[index]
+            customNavigationBar.addSubview(button)
+        }
         view.addSubview(customNavigationBar)
-        
         setupNavigationSelectionBar()
     }
     
@@ -166,7 +154,6 @@ class CouplrNavigationController: UINavigationController {
     
     func tapSegmentButton(button: UIButton) {
         let offset = button.tag - lastPageIndex
-        
         if button.tag != currentPageIndex && !animating {
             animating = true
             if offset > 0 {
@@ -215,12 +202,14 @@ class CouplrNavigationController: UINavigationController {
     }
     
     func pageNameFromIndex(index:NSInteger) -> String {
-        if index == 0 {
+        if index == kProfileViewButtonTag {
             return "Profile"
-        } else if index == 1 {
+        } else if index == kMatchViewButtonTag {
             return "Matches"
+        } else if index == kNewsfeedViewButtonTag {
+            return "Newsfeed"
         }
-        return index == 2 ? "Newsfeed" : "No such page"
+        return index == kHistoryViewButtonTag ? "History" : "No such page"
     }
 
 }
@@ -262,7 +251,6 @@ extension CouplrNavigationController: UIPageViewControllerDelegate, UIPageViewCo
             UserSessionTracker.sharedInstance.notify("scrolled to \(self.pageNameFromIndex(currentPageIndex))")
         }
     }
-    
 }
 
 extension CouplrNavigationController: UIScrollViewDelegate {
