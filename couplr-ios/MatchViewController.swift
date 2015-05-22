@@ -86,8 +86,8 @@ class MatchViewController: UIViewController {
         toggleNamesSwitch.on = false
         toggleNamesSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)
         
-        let settingsButtonX:CGFloat = toggleNamesSwitch.frame.origin.x + toggleNamesSwitch.frame.width + 2
-        settingsButton.frame = CGRectMake(settingsButtonX, buttonY+3, 45, 35)
+        let settingsButtonX:CGFloat = toggleNamesSwitch.frame.origin.x + toggleNamesSwitch.frame.width + 15
+        settingsButton.frame.origin = CGPointMake(settingsButtonX, buttonY+8)
         settingsButton.addTarget(self, action: "settingsToggled:", forControlEvents: .TouchUpInside)
         
         view.addSubview(collectionView!)
