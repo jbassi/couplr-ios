@@ -22,6 +22,8 @@ class MatchViewController: UIViewController {
     var socialGraphLoaded: Bool = false
     var loadingView: LoadingView?
     
+    var isInitializingSocialNetwork = false
+    
     var collectionView:UICollectionView?
     let matchTitleLabel:UIButton = UIButton()
     let resetButton:UIButton = UIButton()
@@ -97,11 +99,14 @@ class MatchViewController: UIViewController {
         view.addSubview(toggleNamesSwitch)
         view.addSubview(settingsButton)
         
-//        showLoadingScreen()
         initializeSocialGraphAndMatchGraphControllers()
     }
     
     func initializeSocialGraphAndMatchGraphControllers() {
+        if isInitializingSocialNetwork {
+            return
+        }
+        isInitializingSocialNetwork = true
         socialGraphController.delegate = self
         // TODO Retry query upon failure.
         socialGraphController.graphInitializeBeginTime = currentTimeInSeconds()

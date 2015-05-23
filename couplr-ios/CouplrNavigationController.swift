@@ -46,6 +46,10 @@ class CouplrControllers {
         }
     }
     
+    func socialNetworkDidInitialize() {
+        matchViewController?.isInitializingSocialNetwork = false
+    }
+    
     func initializeMatchView() {
         if let matchView = matchViewController {
             if matchView.isViewLoaded() {

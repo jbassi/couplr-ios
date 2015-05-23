@@ -227,5 +227,6 @@ public class MatchGraphController {
                 CouplrControllers.sharedInstance.refreshNewsfeedView()
             }
         })
+        CouplrControllers.sharedInstance.socialNetworkDidInitialize()
     }
 }
