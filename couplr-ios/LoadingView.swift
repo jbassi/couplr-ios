@@ -15,15 +15,6 @@ class LoadingView: UIView {
     let backgroundView: UIView = UIView()
     let loadingLabel = UILabel()
     
-    class func createLoadingScreenInView(view: UIView, animated: Bool) -> LoadingView {
-        let loadingView = LoadingView(frame: view.bounds)
-        
-        view.addSubview(loadingView)
-        
-        loadingView.showAnimated(animated)
-        return loadingView
-    }
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         

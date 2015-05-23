@@ -20,7 +20,6 @@ class MatchViewController: UIViewController {
     var connection: NSURLConnection?
     var userPictures: [UInt64:String]?
     var socialGraphLoaded: Bool = false
-    var loadingView: LoadingView?
     
     var isInitializingSocialNetwork = false
     
@@ -169,7 +168,7 @@ class MatchViewController: UIViewController {
     }
     
     func settingsToggled(sender: UIButton) {
-        CouplrControllers.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+        CouplrViewCoordinator.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
         UserSessionTracker.sharedInstance.notify("settings toggled")
     }
     
@@ -247,7 +246,6 @@ class MatchViewController: UIViewController {
         }
     }
     
-
     func shuffleTitle() {
         let titleList:[MatchTitle] = matchGraphController.matchTitles()
         let randomIndex:Int = randomInt(titleList.count)
@@ -255,17 +253,6 @@ class MatchViewController: UIViewController {
         selectedRow = randomIndex
         matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
     }
-
-    func showLoadingScreen(overrideExistingLoadingView:Bool = false) {
-        if overrideExistingLoadingView || loadingView == nil {
-            loadingView = LoadingView.createLoadingScreenInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
-        }
-    }
-
-    func dismissLoadingScreen() {
-        loadingView?.hideAnimated()
-    }
-
 }
 
 // MARK: - UIPickerViewDelegate and UIPickerViewDataSource Methods
@@ -375,7 +362,7 @@ extension MatchViewController: SocialGraphControllerDelegate {
 
     func socialGraphControllerDidLoadSocialGraph(graph: SocialGraph) {
         socialGraphLoaded = true
-        dismissLoadingScreen()
+        CouplrViewCoordinator.sharedInstance.dismissLoadingScreen()
         UserSessionTracker.sharedInstance.notify("initialized social graph")
         socialGraphController.updateRandomSample()
         if isViewLoaded() {

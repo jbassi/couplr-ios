@@ -403,7 +403,7 @@ public class MatchGraph {
         }
         unregisteredMatches.append(MatchTuple(firstId: firstId, secondId: secondId, titleId: withTitleId))
         userVotes[MatchTuple(firstId: firstId, secondId: secondId, titleId: withTitleId, voterId: rootUser)] = NSDate()
-        CouplrControllers.sharedInstance.refreshHistoryView()
+        CouplrViewCoordinator.sharedInstance.refreshHistoryView()
         SocialGraphController.sharedInstance.userDidMatch(firstId, toSecondId: secondId)
     }
     

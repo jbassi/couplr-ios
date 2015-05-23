@@ -42,8 +42,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
         MatchGraphController.sharedInstance.appWillHalt()
-        CouplrControllers.sharedInstance.navigationController?.resetNavigation()
-        CouplrControllers.sharedInstance.matchViewController?.resetToggleNamesSwitchAndSelectedMatches()
+        CouplrViewCoordinator.sharedInstance.navigationController?.resetNavigation()
+        CouplrViewCoordinator.sharedInstance.matchViewController?.resetToggleNamesSwitchAndSelectedMatches()
         MatchGraphController.sharedInstance.reset()
         SocialGraphController.sharedInstance.reset()
     }
@@ -52,8 +52,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
-        CouplrControllers.sharedInstance.showMatchViewLoadingScreen()
-        CouplrControllers.sharedInstance.initializeMatchView()
+        CouplrViewCoordinator.sharedInstance.showMatchViewLoadingScreen()
+        CouplrViewCoordinator.sharedInstance.initializeMatchView()
     }
 
     func applicationWillTerminate(application: UIApplication) {

@@ -70,7 +70,7 @@ public class SocialGraphController {
                         (didError:Bool) -> Void in
                         if !didError {
                             dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                CouplrControllers.sharedInstance.refreshProfileView()
+                                CouplrViewCoordinator.sharedInstance.refreshProfileView()
                                 return
                             })
                         }

@@ -9,18 +9,19 @@
 import UIKit
 import QuartzCore
 
-class CouplrControllers {
+class CouplrViewCoordinator {
     init() {
         profileViewController = nil
         matchViewController = nil
         newsfeedViewController = nil
         historyViewController = nil
         navigationController = nil
+        loadingView = nil
     }
     
-    class var sharedInstance: CouplrControllers {
+    class var sharedInstance: CouplrViewCoordinator {
         struct CouplrControllersSingleton {
-            static let instance = CouplrControllers()
+            static let instance = CouplrViewCoordinator()
         }
         return CouplrControllersSingleton.instance
     }
@@ -41,13 +42,34 @@ class CouplrControllers {
     func showMatchViewLoadingScreen() {
         if let matchView = matchViewController {
             if matchView.isViewLoaded() {
-                matchViewController?.showLoadingScreen(overrideExistingLoadingView: true)
+                tryToCreateAndShowLoadingView()
             }
         }
     }
     
-    func socialNetworkDidInitialize() {
+    func didInitializeSocialNetwork() {
         matchViewController?.isInitializingSocialNetwork = false
+    }
+    
+    func tryToCreateAndShowLoadingView(animated:Bool = true) -> Bool {
+        let mainView = UIApplication.sharedApplication().delegate!.window!!
+        if loadingViewIsActive {
+            return false
+        }
+        loadingViewIsActive = true
+        loadingView = LoadingView(frame: mainView.bounds)
+        mainView.addSubview(loadingView!)
+        loadingView!.showAnimated(animated)
+        return true
+    }
+    
+    func allowLoadingViewCreation() -> Bool {
+        return !loadingViewIsActive
+    }
+    
+    func dismissLoadingScreen() {
+        loadingView?.hideAnimated()
+        loadingViewIsActive = false
     }
     
     func initializeMatchView() {
@@ -63,6 +85,8 @@ class CouplrControllers {
     weak var newsfeedViewController:NewsfeedViewController?
     weak var historyViewController:HistoryViewController?
     weak var navigationController:CouplrNavigationController?
+    var loadingViewIsActive:Bool = false;
+    var loadingView:LoadingView? = nil;
 }
 
 class CouplrNavigationController: UINavigationController {

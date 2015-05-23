@@ -11,8 +11,8 @@ import UIKit
 func showLoginWithAlertViewErrorMessage(message: String, alertTitle:String, completionHandler:AlertViewHandler? = nil) {
     let alertView = UIAlertView(title: alertTitle, message: message, delegate: completionHandler, cancelButtonTitle: "OK")
     alertView.show()
-    CouplrControllers.sharedInstance.matchViewController?.dismissLoadingScreen()
-    CouplrControllers.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+    CouplrViewCoordinator.sharedInstance.dismissLoadingScreen()
+    CouplrViewCoordinator.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
 }
 
 class CouplrLoginErrorHandler: NSObject {

@@ -224,9 +224,9 @@ public class MatchGraphController {
             (didError:Bool) -> Void in
             if !didError {
                 SocialGraphController.sharedInstance.didLoadMatchesForClosestFriends()
-                CouplrControllers.sharedInstance.refreshNewsfeedView()
+                CouplrViewCoordinator.sharedInstance.refreshNewsfeedView()
             }
         })
-        CouplrControllers.sharedInstance.socialNetworkDidInitialize()
+        CouplrViewCoordinator.sharedInstance.didInitializeSocialNetwork()
     }
 }

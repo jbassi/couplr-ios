@@ -122,19 +122,18 @@ class LoginViewController: UIViewController {
         couplrNavigationController.viewControllerArray.append(newsfeedViewController)
         couplrNavigationController.viewControllerArray.append(historyViewController)
 
-        CouplrControllers.sharedInstance.navigationController = couplrNavigationController
-        CouplrControllers.sharedInstance.profileViewController = profileViewController
-        CouplrControllers.sharedInstance.matchViewController = matchViewController
-        CouplrControllers.sharedInstance.newsfeedViewController = newsfeedViewController
-        CouplrControllers.sharedInstance.historyViewController = historyViewController
+        CouplrViewCoordinator.sharedInstance.navigationController = couplrNavigationController
+        CouplrViewCoordinator.sharedInstance.profileViewController = profileViewController
+        CouplrViewCoordinator.sharedInstance.matchViewController = matchViewController
+        CouplrViewCoordinator.sharedInstance.newsfeedViewController = newsfeedViewController
+        CouplrViewCoordinator.sharedInstance.historyViewController = historyViewController
         
         couplrNavigationController.modalTransitionStyle = .CrossDissolve
         presentViewController(couplrNavigationController, animated: true, completion: nil)
-        let loadingView = LoadingView.createLoadingScreenInView(UIApplication.sharedApplication().delegate!.window!!, animated: animated)
-        matchViewController.loadingView = loadingView
-        
-        socialGraphController.reset()
-        matchGraphController.reset()
+        if CouplrViewCoordinator.sharedInstance.tryToCreateAndShowLoadingView() {
+            socialGraphController.reset()
+            matchGraphController.reset()
+        }
     }
     
     func continueButtonPressed(sender: UIButton) {
