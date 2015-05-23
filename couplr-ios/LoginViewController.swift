@@ -26,6 +26,10 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        loginView.hidden = true
+        continueButton.hidden = true
+        pageControl.hidden = true
+        
         loginView.delegate = self
         loginView.readPermissions = ["user_friends", "user_status", "user_posts", "user_photos"]
         let loginViewX:CGFloat = (view.bounds.width / 2) - (loginView.bounds.width / 2)
@@ -66,6 +70,7 @@ class LoginViewController: UIViewController {
         pageViewController.delegate = self
         pageViewController.setViewControllers([viewControllerArray[0]], direction: .Forward, animated: false, completion: nil)
         pageViewController.view.frame = CGRectMake(0, kStatusBarHeight+20, view.bounds.width, view.bounds.height-kStatusBarHeight-pageControl.frame.size.height-loginView.frame.size.height-70)
+        pageViewController.view.hidden = true
         
         view.backgroundColor = UIColor.whiteColor()
         addChildViewController(pageViewController)
@@ -73,11 +78,6 @@ class LoginViewController: UIViewController {
         view.addSubview(pageControl)
         view.addSubview(loginView)
         view.addSubview(continueButton)
-        
-        loginView.hidden = true
-        continueButton.hidden = true
-        pageViewController.view!.hidden = true
-        pageControl.hidden = true
         
         view.bringSubviewToFront(pageControl)
         pageViewController.didMoveToParentViewController(self)
@@ -144,6 +144,8 @@ class LoginViewController: UIViewController {
         loginView.hidden = false
         pageViewController.view!.hidden = true
         pageControl.hidden = true
+        continueButton.hidden = false
+        
         pageViewController.removeFromParentViewController()
         pageViewController.view.removeFromSuperview()
         pageControl.removeFromSuperview()
@@ -155,6 +157,7 @@ class LoginViewController: UIViewController {
         addChildViewController(pageViewController)
         view.addSubview(pageViewController.view)
         view.addSubview(pageControl)
+        
         loginView.hidden = false
         continueButton.hidden = true
         pageViewController.view!.hidden = false
@@ -189,14 +192,12 @@ extension LoginViewController: FBLoginViewDelegate {
     }
     
     func loginViewShowingLoggedOutUser(loginView: FBLoginView!) {
-        continueButton.hidden = true
         showTutorial()
     }
     
     func loginViewFetchedUserInfo(loginView : FBLoginView!, user: FBGraphUser) {
         var buttonTitle: String = "Continue As \(user.name)..."
         continueButton.setTitle(buttonTitle, forState: UIControlState.Normal)
-        continueButton.hidden = false
         hideTutorial()
     }
     

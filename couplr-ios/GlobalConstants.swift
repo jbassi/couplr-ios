@@ -22,7 +22,7 @@ let kNewsfeedViewButtonTag = 2
 let kHistoryViewButtonTag = 3
 let kMatchViewButtonTitle = "Matches"
 let kProfileViewButtonTitle = "Profile"
-let kNewsfeedViewButtonTitle = "Newsfeed"
+let kNewsfeedViewButtonTitle = "News"
 let kHistoryViewButtonTitle = "History"
 let kCouplrNavigationButtonFont: UIFont = UIFont.systemFontOfSize(18.0)
 let kCouplrNavigationButtonBoldFont: UIFont = UIFont.boldSystemFontOfSize(18.0)
@@ -31,7 +31,10 @@ let kCouplrNavigationBarButtonHeight: CGFloat = 50.0
 let kCouplrNavigationBarSelectionIndicatorHeight: CGFloat = 4.0
 let kCouplrNavigationBarSelectionIndicatorCornerRadius: CGFloat = 2.5
 
-/* Empyt TableView Strings */
+/* Couplr Default Color */
+let kCouplrRedColor = UIColor(red: 246/255.0, green: 71/255.0, blue: 71/255.0, alpha: 1)
+
+/* Empty TableView Strings */
 let kEmptyTableViewMessage = "It looks like cupid is on hiatus. Please check back later!"
 
 /* Facebook API */

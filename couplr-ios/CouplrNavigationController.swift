@@ -167,8 +167,7 @@ class CouplrNavigationController: UINavigationController {
     func setupNavigationSelectionBar(andAddSubview:Bool = true) {
         let selectionBarWidth = view.frame.width / CGFloat(viewControllerArray.count)
         navigationSelectionBar.frame = CGRectMake(selectionBarWidth, 0, selectionBarWidth, kCouplrNavigationBarSelectionIndicatorHeight)
-        navigationSelectionBar.backgroundColor = UIColor.greenColor()
-        navigationSelectionBar.alpha = 0.8
+        navigationSelectionBar.backgroundColor = kCouplrRedColor
         navigationSelectionBar.layer.cornerRadius = kCouplrNavigationBarSelectionIndicatorCornerRadius
         if andAddSubview {
             customNavigationBar.addSubview(navigationSelectionBar)

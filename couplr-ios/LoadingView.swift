@@ -29,7 +29,7 @@ class LoadingView: UIView {
         imageLayer.backgroundColor = UIColor.whiteColor()
         
         self.mask = CALayer()
-        self.mask!.contents = UIImage(named: "twitter_logo")!.CGImage
+        self.mask!.contents = UIImage(named: "heart")!.CGImage
         self.mask!.contentsGravity = kCAGravityResizeAspect
         self.mask!.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
         self.mask!.anchorPoint = CGPoint(x: 0.5, y: 0.5)
@@ -37,7 +37,7 @@ class LoadingView: UIView {
         imageLayer.layer.mask = mask
         
         backgroundView.frame = frame
-        backgroundView.backgroundColor = UIColor(red: 246/255.0, green: 71/255.0, blue: 71/255.0, alpha: 1)
+        backgroundView.backgroundColor = kCouplrRedColor
         backgroundView.alpha = 0
         
         backgroundView.addSubview(imageLayer)
@@ -74,7 +74,7 @@ class LoadingView: UIView {
         keyFrameAnimation.beginTime = CACurrentMediaTime() + 1 // Add delay of 1 second
         let initalBounds = NSValue(CGRect: mask!.bounds)
         let secondBounds = NSValue(CGRect: CGRect(x: 0, y: 0, width: 90, height: 90))
-        let finalBounds = NSValue(CGRect: CGRect(x: 0, y: 0, width: 2500, height: 2500))
+        let finalBounds = NSValue(CGRect: CGRect(x: 0, y: 0, width: 1100, height: 1100))
         keyFrameAnimation.values = [initalBounds, secondBounds, finalBounds]
         keyFrameAnimation.keyTimes = [0, 0.3, 1]
         keyFrameAnimation.timingFunctions = [CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut), CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)]

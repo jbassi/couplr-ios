@@ -330,7 +330,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
             let cell = collectionView.cellForItemAtIndexPath(indexPath) as! ProfilePictureCollectionViewCell
             let randomSample:[UInt64] = socialGraphController.currentSample()
             cell.userName = socialGraphController.nameFromId(randomSample[indexPath.row])
-            cell.backgroundColor = UIColor(red: 0.0, green: 1.0, blue: 0.0, alpha: 0.8)
+            cell.backgroundColor = kCouplrRedColor
             selectedUsers.append(randomSample[indexPath.row])
             selectedIndices.append(indexPath)
             collectionView.selectItemAtIndexPath(indexPath, animated: false, scrollPosition: .None)
