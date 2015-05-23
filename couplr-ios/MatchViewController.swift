@@ -258,7 +258,7 @@ class MatchViewController: UIViewController {
     }
 
     func dismissLoadingScreen() {
-        loadingView?.hideAnimated(true)
+        loadingView?.hideAnimated()
     }
 
 }

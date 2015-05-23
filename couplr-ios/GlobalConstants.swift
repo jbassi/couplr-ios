@@ -54,9 +54,9 @@ let kPickerSpringVelocity: CGFloat = 0.5
 
 /* LoadingView Constants */
 let kLoadingViewBlurViewBlurRadius: CGFloat = 20.0
-let kLoadingViewShowAnimationDuration: NSTimeInterval = 0.5
-let kLoadingViewHideAnimationDuration: NSTimeInterval = 0.4
-let kLoadingLabelShowAnimationDuration: NSTimeInterval = 1.0
+let kLoadingViewShowAnimationDuration: NSTimeInterval = 0.3
+let kLoadingViewHideAnimationDuration: NSTimeInterval = 0.2
+let kLoadingLabelShowAnimationDuration: NSTimeInterval = 0.5
 let kLoadingLabelHideAnimationDuration: NSTimeInterval = 0.1
 let kMinLoadingDelay: Double = 0.75
 
