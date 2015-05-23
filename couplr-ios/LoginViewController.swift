@@ -32,7 +32,6 @@ class LoginViewController: UIViewController {
         let loginViewY:CGFloat = view.bounds.height - 40 - (loginView.bounds.height / 2)
         loginView.frame.origin = CGPointMake(loginViewX, loginViewY)
         
-        continueButton.hidden = true
         let continueButtonY:CGFloat = (view.bounds.height / 2) + (loginView.frame.height / 2)
         continueButton.frame = CGRectMake(0, continueButtonY, view.frame.size.width, 50)
         continueButton.titleLabel?.adjustsFontSizeToFitWidth = true
@@ -75,6 +74,11 @@ class LoginViewController: UIViewController {
         view.addSubview(loginView)
         view.addSubview(continueButton)
         
+        loginView.hidden = true
+        continueButton.hidden = true
+        pageViewController.view!.hidden = true
+        pageControl.hidden = true
+        
         view.bringSubviewToFront(pageControl)
         pageViewController.didMoveToParentViewController(self)
     }
@@ -89,7 +93,7 @@ class LoginViewController: UIViewController {
             FBSession.openActiveSessionWithAllowLoginUI(false)
             var activeSession: FBSession = FBSession.activeSession()
             if(settings.shouldSkipLogin || activeSession.isOpen) {
-                loadAppViewsAndPresentNavigationController()
+                loadAppViewsAndPresentNavigationController(false)
             } else {
                 viewIsVisible = true
             }
@@ -104,7 +108,7 @@ class LoginViewController: UIViewController {
         viewIsVisible = false
     }
     
-    func loadAppViewsAndPresentNavigationController() {
+    func loadAppViewsAndPresentNavigationController(animated: Bool) {
         let pageViewController = UIPageViewController(transitionStyle: .Scroll, navigationOrientation: .Horizontal, options: nil)
         let couplrNavigationController: CouplrNavigationController = CouplrNavigationController(rootViewController: pageViewController)
 
@@ -124,18 +128,23 @@ class LoginViewController: UIViewController {
         CouplrControllers.sharedInstance.newsfeedViewController = newsfeedViewController
         CouplrControllers.sharedInstance.historyViewController = historyViewController
         
-        couplrNavigationController.modalTransitionStyle = .FlipHorizontal
+        couplrNavigationController.modalTransitionStyle = .CrossDissolve
         presentViewController(couplrNavigationController, animated: true, completion: nil)
+        let loadingView = LoadingView.createLoadingScreenInView(UIApplication.sharedApplication().delegate!.window!!, animated: animated)
+        matchViewController.loadingView = loadingView
         
         socialGraphController.reset()
         matchGraphController.reset()
     }
     
     func continueButtonPressed(sender: UIButton) {
-        loadAppViewsAndPresentNavigationController()
+        loadAppViewsAndPresentNavigationController(true)
     }
     
     func hideTutorial() {
+        loginView.hidden = false
+        pageViewController.view!.hidden = true
+        pageControl.hidden = true
         pageViewController.removeFromParentViewController()
         pageViewController.view.removeFromSuperview()
         pageControl.removeFromSuperview()
@@ -147,6 +156,10 @@ class LoginViewController: UIViewController {
         addChildViewController(pageViewController)
         view.addSubview(pageViewController.view)
         view.addSubview(pageControl)
+        loginView.hidden = false
+        continueButton.hidden = true
+        pageViewController.view!.hidden = false
+        pageControl.hidden = false
         
         let loginViewY:CGFloat = view.bounds.height - 40 - (loginView.bounds.height / 2)
         loginView.frame.origin.y = loginViewY
@@ -172,7 +185,7 @@ extension LoginViewController: FBLoginViewDelegate {
     
     func loginViewShowingLoggedInUser(loginView : FBLoginView!) {
         if (viewIsVisible) {
-            loadAppViewsAndPresentNavigationController()
+            loadAppViewsAndPresentNavigationController(false)
         }
     }
     

@@ -97,7 +97,7 @@ class MatchViewController: UIViewController {
         view.addSubview(toggleNamesSwitch)
         view.addSubview(settingsButton)
         
-        showLoadingScreen()
+//        showLoadingScreen()
         initializeSocialGraphAndMatchGraphControllers()
     }
     

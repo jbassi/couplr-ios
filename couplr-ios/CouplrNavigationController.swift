@@ -81,12 +81,11 @@ class CouplrNavigationController: UINavigationController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         view.backgroundColor = UIColor.whiteColor()
+        setNavigationBarHidden(true, animated: false)
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        
-        setNavigationBarHidden(true, animated: false)
         
         buttonArray.append(profileViewButton)
         buttonArray.append(matchViewButton)

@@ -62,7 +62,6 @@ class LoadingView: UIView {
     func showAnimated(animated: Bool) {
         if animated {
             self.addSubview(backgroundView)
-            
             UIView.animateWithDuration(kLoadingViewShowAnimationDuration, animations: {
                 self.backgroundView.alpha = 1
                 }, completion: { (completed:Bool) in
@@ -70,6 +69,10 @@ class LoadingView: UIView {
                         UIView.animateWithDuration(kLoadingLabelShowAnimationDuration, animations: { self.loadingLabel.alpha = 1 })
                     }
             })
+        } else {
+            self.addSubview(backgroundView)
+            self.backgroundView.alpha = 1
+            UIView.animateWithDuration(kLoadingLabelShowAnimationDuration, animations: { self.loadingLabel.alpha = 1 })
         }
     }
     
