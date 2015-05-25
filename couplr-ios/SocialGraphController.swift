@@ -71,7 +71,6 @@ public class SocialGraphController {
                         if !didError {
                             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 CouplrViewCoordinator.sharedInstance.refreshProfileView()
-                                return
                             })
                         }
                         // TODO Handle the sad path.

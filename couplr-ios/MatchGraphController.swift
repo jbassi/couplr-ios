@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Parse
 
 public class MatchGraphController {
 
@@ -210,6 +211,38 @@ public class MatchGraphController {
      */
     public func userDidMatch(from:UInt64, to:UInt64, withTitleId:Int) {
         matches?.userDidMatch(from, to: to, withTitleId: withTitleId)
+    }
+    
+    /**
+     * Notifies the MatchGraph that the root user has undone a match.
+     * This will not only update the internal data structure, but also
+     * make a request to Parse to delete the corresponding match.
+     */
+    public func userDidUndoMatch(from:UInt64, to:UInt64, withTitleId:Int) {
+        if matches == nil {
+            return log("MatchGraphController::userDidUndoMatch called before the match graph was initialized!", withFlag: "-")
+        }
+        if matches!.userDidUndoMatch(from, to: to, withTitleId: withTitleId) {
+            let rootUser:UInt64 = SocialGraphController.sharedInstance.rootId()
+            let matchToRemove:MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId, voterId: rootUser)
+            // Try to remove the match from Parse.
+            var query:PFQuery = PFQuery(className: "MatchData")
+            let (rootUserKey, firstKey, secondKey) = (encodeBase64(rootUser), encodeBase64(matchToRemove.firstId), encodeBase64(matchToRemove.secondId))
+            query.whereKey("voterId", equalTo: rootUserKey)
+            query.whereKey("firstId", equalTo: firstKey)
+            query.whereKey("secondId", equalTo: secondKey)
+            query.whereKey("titleId", equalTo: withTitleId)
+            query.findObjectsInBackgroundWithBlock({ (objects:[AnyObject]!, error:NSError?) -> Void in
+                if error != nil || objects.count < 1 {
+                    log("Failed to delete [\(firstKey)), \(secondKey), \(withTitleId)]: \(error!.localizedDescription)", withFlag: "-", withIndent: 1)
+                    return
+                }
+                for index in 0..<objects.count {
+                    objects[index].deleteEventually()
+                }
+                log("Removed \(objects.count) object(s) corresponding to [\(firstKey)), \(secondKey), \(withTitleId)]")
+            })
+        }
     }
     
     /**
