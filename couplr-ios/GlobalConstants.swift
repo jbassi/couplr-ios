@@ -17,12 +17,13 @@ let kShouldSkipLoginKey: String = "kShouldSkipLoginKey"
 
 /* CouplrNavigationController Constants */
 let kProfileViewButtonTag = 0
-let kMatchViewButtonTag = 1
-let kNewsfeedViewButtonTag = 2
+let kNewsfeedViewButtonTag = 1
+let kMatchViewButtonTag = 2
 let kHistoryViewButtonTag = 3
+let kInitialPageIndex = 2
 let kMatchViewButtonTitle = "Matches"
-let kProfileViewButtonTitle = "Profile"
 let kNewsfeedViewButtonTitle = "News"
+let kProfileViewButtonTitle = "Profile"
 let kHistoryViewButtonTitle = "History"
 let kCouplrNavigationButtonFont: UIFont = UIFont.systemFontOfSize(18.0)
 let kCouplrNavigationButtonBoldFont: UIFont = UIFont.boldSystemFontOfSize(18.0)

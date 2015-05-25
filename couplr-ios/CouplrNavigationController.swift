@@ -99,8 +99,8 @@ class CouplrNavigationController: UINavigationController {
     var buttonArray = Array<UIButton>()
     var pageViewController: UIPageViewController?
     var pageScrollView: UIScrollView?
-    var lastPageIndex: NSInteger = 1
-    var currentPageIndex: NSInteger = 1
+    var lastPageIndex: NSInteger = kInitialPageIndex
+    var currentPageIndex: NSInteger = kInitialPageIndex
     let matchViewButton = UIButton()
     let profileViewButton = UIButton()
     let newsfeedViewButton = UIButton()
@@ -116,8 +116,8 @@ class CouplrNavigationController: UINavigationController {
         super.viewDidAppear(animated)
         
         buttonArray.append(profileViewButton)
-        buttonArray.append(matchViewButton)
         buttonArray.append(newsfeedViewButton)
+        buttonArray.append(matchViewButton)
         buttonArray.append(historyViewButton)
         
         setupNavigationBarButtons()
@@ -125,10 +125,10 @@ class CouplrNavigationController: UINavigationController {
     }
     
     func resetNavigation() {
-        pageViewController!.setViewControllers([viewControllerArray[1]], direction: .Forward, animated: false, completion: {(completed:Bool) in
+        pageViewController!.setViewControllers([viewControllerArray[kInitialPageIndex]], direction: .Forward, animated: false, completion: {(completed:Bool) in
             if completed {
-                self.currentPageIndex = 1
-                self.lastPageIndex = 1
+                self.currentPageIndex = kInitialPageIndex
+                self.lastPageIndex = kInitialPageIndex
                 for (index:Int, button:UIButton) in enumerate(self.buttonArray) {
                     button.titleLabel?.font = index == self.lastPageIndex ? kCouplrNavigationButtonBoldFont : kCouplrNavigationButtonFont
                 }
@@ -141,14 +141,14 @@ class CouplrNavigationController: UINavigationController {
         pageViewController = self.topViewController as? UIPageViewController
         pageViewController?.delegate = self
         pageViewController?.dataSource = self
-        pageViewController?.setViewControllers([viewControllerArray[1]], direction: .Forward, animated: true, completion: nil)
+        pageViewController?.setViewControllers([viewControllerArray[kInitialPageIndex]], direction: .Forward, animated: true, completion: nil)
         syncScrollView()
     }
     
     func setupNavigationBarButtons() {
         customNavigationBar.frame = CGRectMake(0, view.frame.size.height-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight)
-        let buttonTags:[Int] = [kProfileViewButtonTag, kMatchViewButtonTag, kNewsfeedViewButtonTag, kHistoryViewButtonTag]
-        let buttonTitles:[String] = [kProfileViewButtonTitle, kMatchViewButtonTitle, kNewsfeedViewButtonTitle, kHistoryViewButtonTitle]
+        let buttonTags:[Int] = [kProfileViewButtonTag, kNewsfeedViewButtonTag, kMatchViewButtonTag, kHistoryViewButtonTag]
+        let buttonTitles:[String] = [kProfileViewButtonTitle, kNewsfeedViewButtonTitle, kMatchViewButtonTitle, kHistoryViewButtonTitle]
         let buttonWidth = view.frame.width / CGFloat(viewControllerArray.count)
         for (index:Int, button:UIButton) in enumerate(buttonArray) {
             let buttonOffset:CGFloat = buttonWidth * CGFloat(index)
@@ -166,7 +166,7 @@ class CouplrNavigationController: UINavigationController {
     
     func setupNavigationSelectionBar(andAddSubview:Bool = true) {
         let selectionBarWidth = view.frame.width / CGFloat(viewControllerArray.count)
-        navigationSelectionBar.frame = CGRectMake(selectionBarWidth, 0, selectionBarWidth, kCouplrNavigationBarSelectionIndicatorHeight)
+        navigationSelectionBar.frame = CGRectMake(selectionBarWidth*2, 0, selectionBarWidth, kCouplrNavigationBarSelectionIndicatorHeight)
         navigationSelectionBar.backgroundColor = kCouplrRedColor
         navigationSelectionBar.layer.cornerRadius = kCouplrNavigationBarSelectionIndicatorCornerRadius
         if andAddSubview {

@@ -113,19 +113,19 @@ class LoginViewController: UIViewController {
         let couplrNavigationController: CouplrNavigationController = CouplrNavigationController(rootViewController: pageViewController)
 
         let profileViewController = ProfileViewController()
-        let matchViewController = MatchViewController()
         let newsfeedViewController = NewsfeedViewController()
+        let matchViewController = MatchViewController()
         let historyViewController = HistoryViewController()
 
         couplrNavigationController.viewControllerArray.append(profileViewController)
-        couplrNavigationController.viewControllerArray.append(matchViewController)
         couplrNavigationController.viewControllerArray.append(newsfeedViewController)
+        couplrNavigationController.viewControllerArray.append(matchViewController)
         couplrNavigationController.viewControllerArray.append(historyViewController)
 
         CouplrViewCoordinator.sharedInstance.navigationController = couplrNavigationController
         CouplrViewCoordinator.sharedInstance.profileViewController = profileViewController
-        CouplrViewCoordinator.sharedInstance.matchViewController = matchViewController
         CouplrViewCoordinator.sharedInstance.newsfeedViewController = newsfeedViewController
+        CouplrViewCoordinator.sharedInstance.matchViewController = matchViewController
         CouplrViewCoordinator.sharedInstance.historyViewController = historyViewController
         
         couplrNavigationController.modalTransitionStyle = .CrossDissolve
