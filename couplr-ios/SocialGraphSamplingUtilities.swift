@@ -218,6 +218,10 @@ extension SocialGraph {
         if medianEdgeWeight != nil {
             return medianEdgeWeight!
         }
-        return (totalEdgeWeight - totalEdgeWeightFromRoot) / Float(edgeCount - edges[root]!.count)
+        if edgeCount == 0 {
+            return 0
+        }
+        let numEdgesFromRoot = edges[root] == nil ? 0 : edges[root]!.count
+        return (totalEdgeWeight - totalEdgeWeightFromRoot) / Float(edgeCount - numEdgesFromRoot)
     }
 }

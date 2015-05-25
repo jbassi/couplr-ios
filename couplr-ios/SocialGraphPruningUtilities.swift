@@ -19,7 +19,7 @@ extension SocialGraph {
         var edgesToRemove:[(UInt64, UInt64)] = []
         for (node:UInt64, neighbors:[UInt64:Float]) in edges {
             for (neighbor:UInt64, weight:Float) in edges[node]! {
-                if node < neighbor && weight < kMinGraphEdgeWeight {
+                if node < neighbor && weight < minWeight {
                     edgesToRemove.append((node, neighbor))
                 }
             }

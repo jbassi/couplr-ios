@@ -52,6 +52,9 @@
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
 		F4875BA81B0D9FBF006FCB94 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4875BA71B0D9FBF006FCB94 /* HistoryViewController.swift */; };
 		F4973F0B1A50E31700FEA3B0 /* SocialGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */; };
+		F4BFF9B51B13C19600D4CA58 /* MatchGraphTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BFF9B41B13C19600D4CA58 /* MatchGraphTest.swift */; };
+		F4BFF9B71B13C36000D4CA58 /* SocialGraphTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BFF9B61B13C36000D4CA58 /* SocialGraphTest.swift */; };
+		F4BFF9BA1B13E6F300D4CA58 /* TestExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BFF9B81B13E68700D4CA58 /* TestExtensions.swift */; };
 		F4C911BB1A5A764300D2CB11 /* MatchGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */; };
 		F4EA6F201AC87398004D6133 /* SocialGraphPruningUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EA6F1F1AC87398004D6133 /* SocialGraphPruningUtilities.swift */; };
 		F4EA6F221AC87426004D6133 /* SocialGraphUpdateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EA6F211AC87426004D6133 /* SocialGraphUpdateUtilities.swift */; };
@@ -76,7 +79,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		0F1B9EF519C4DD7A00CD64FD /* PBXContainerItemProxy */ = {
+		F44EED3B1B139B61003AA77E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0F1B9ED519C4DD7A00CD64FD /* Project object */;
 			proxyType = 1;
@@ -92,7 +95,6 @@
 		0F1B9EE219C4DD7A00CD64FD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0F1B9EEB19C4DD7A00CD64FD /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		0F1B9EEE19C4DD7A00CD64FD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		0F1B9EF419C4DD7A00CD64FD /* couplr-iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "couplr-iosTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F24FB3F1A53BD5C00201C31 /* SocialGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphController.swift; sourceTree = "<group>"; };
 		0F37CA1819C5151E007A6951 /* CouplrSettingsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CouplrSettingsManager.swift; sourceTree = "<group>"; };
 		0F37CA1C19C52455007A6951 /* CouplrLoginErrorHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CouplrLoginErrorHandler.swift; sourceTree = "<group>"; };
@@ -149,10 +151,15 @@
 		11FDBBAA1AC5F206006DFD9B /* UIImageView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+WebCache.m"; sourceTree = "<group>"; };
 		11FDBBAB1AC5F206006DFD9B /* UIView+WebCacheOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+WebCacheOperation.h"; sourceTree = "<group>"; };
 		11FDBBAC1AC5F206006DFD9B /* UIView+WebCacheOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+WebCacheOperation.m"; sourceTree = "<group>"; };
+		F44EECDF1B139526003AA77E /* couplr-ios-test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "couplr-ios-test.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F44EECE21B139526003AA77E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserAnalytics.swift; sourceTree = "<group>"; };
 		F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphController.swift; sourceTree = "<group>"; };
 		F4875BA71B0D9FBF006FCB94 /* HistoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
 		F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraph.swift; sourceTree = "<group>"; };
+		F4BFF9B41B13C19600D4CA58 /* MatchGraphTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphTest.swift; sourceTree = "<group>"; };
+		F4BFF9B61B13C36000D4CA58 /* SocialGraphTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphTest.swift; sourceTree = "<group>"; };
+		F4BFF9B81B13E68700D4CA58 /* TestExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TestExtensions.swift; path = "couplr-ios-test/TestExtensions.swift"; sourceTree = SOURCE_ROOT; };
 		F4C911BA1A5A764300D2CB11 /* MatchGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraph.swift; sourceTree = "<group>"; };
 		F4EA6F1F1AC87398004D6133 /* SocialGraphPruningUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphPruningUtilities.swift; sourceTree = "<group>"; };
 		F4EA6F211AC87426004D6133 /* SocialGraphUpdateUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphUpdateUtilities.swift; sourceTree = "<group>"; };
@@ -200,7 +207,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		0F1B9EF119C4DD7A00CD64FD /* Frameworks */ = {
+		F44EECDC1B139526003AA77E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -214,6 +221,7 @@
 			isa = PBXGroup;
 			children = (
 				0F1B9EDF19C4DD7A00CD64FD /* couplr-ios */,
+				F44EECE01B139526003AA77E /* couplr-ios-test */,
 				0F1B9EDE19C4DD7A00CD64FD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -222,7 +230,7 @@
 			isa = PBXGroup;
 			children = (
 				0F1B9EDD19C4DD7A00CD64FD /* couplr-ios.app */,
-				0F1B9EF419C4DD7A00CD64FD /* couplr-iosTests.xctest */,
+				F44EECDF1B139526003AA77E /* couplr-ios-test.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -393,6 +401,24 @@
 			path = SDWebImage;
 			sourceTree = "<group>";
 		};
+		F44EECE01B139526003AA77E /* couplr-ios-test */ = {
+			isa = PBXGroup;
+			children = (
+				F4BFF9B41B13C19600D4CA58 /* MatchGraphTest.swift */,
+				F4BFF9B61B13C36000D4CA58 /* SocialGraphTest.swift */,
+				F44EECE11B139526003AA77E /* Supporting Files */,
+			);
+			path = "couplr-ios-test";
+			sourceTree = "<group>";
+		};
+		F44EECE11B139526003AA77E /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				F44EECE21B139526003AA77E /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		F4875BA61B0D9F9F006FCB94 /* History */ = {
 			isa = PBXGroup;
 			children = (
@@ -417,6 +443,7 @@
 		F4EA6F1E1AC87380004D6133 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				F4BFF9B81B13E68700D4CA58 /* TestExtensions.swift */,
 				F4EA6F1F1AC87398004D6133 /* SocialGraphPruningUtilities.swift */,
 				F4EA6F211AC87426004D6133 /* SocialGraphUpdateUtilities.swift */,
 				F4EA6F231AC8754E004D6133 /* SocialGraphSamplingUtilities.swift */,
@@ -444,22 +471,22 @@
 			productReference = 0F1B9EDD19C4DD7A00CD64FD /* couplr-ios.app */;
 			productType = "com.apple.product-type.application";
 		};
-		0F1B9EF319C4DD7A00CD64FD /* couplr-iosTests */ = {
+		F44EECDE1B139526003AA77E /* couplr-ios-test */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0F1B9F0119C4DD7A00CD64FD /* Build configuration list for PBXNativeTarget "couplr-iosTests" */;
+			buildConfigurationList = F44EECE91B139526003AA77E /* Build configuration list for PBXNativeTarget "couplr-ios-test" */;
 			buildPhases = (
-				0F1B9EF019C4DD7A00CD64FD /* Sources */,
-				0F1B9EF119C4DD7A00CD64FD /* Frameworks */,
-				0F1B9EF219C4DD7A00CD64FD /* Resources */,
+				F44EECDB1B139526003AA77E /* Sources */,
+				F44EECDC1B139526003AA77E /* Frameworks */,
+				F44EECDD1B139526003AA77E /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				0F1B9EF619C4DD7A00CD64FD /* PBXTargetDependency */,
+				F44EED3C1B139B61003AA77E /* PBXTargetDependency */,
 			);
-			name = "couplr-iosTests";
-			productName = "couplr-iosTests";
-			productReference = 0F1B9EF419C4DD7A00CD64FD /* couplr-iosTests.xctest */;
+			name = "couplr-ios-test";
+			productName = "couplr-ios-test";
+			productReference = F44EECDF1B139526003AA77E /* couplr-ios-test.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -475,8 +502,8 @@
 						CreatedOnToolsVersion = 6.0;
 						DevelopmentTeam = 88YZ7R233S;
 					};
-					0F1B9EF319C4DD7A00CD64FD = {
-						CreatedOnToolsVersion = 6.0;
+					F44EECDE1B139526003AA77E = {
+						CreatedOnToolsVersion = 6.3.1;
 						TestTargetID = 0F1B9EDC19C4DD7A00CD64FD;
 					};
 				};
@@ -495,7 +522,7 @@
 			projectRoot = "";
 			targets = (
 				0F1B9EDC19C4DD7A00CD64FD /* couplr-ios */,
-				0F1B9EF319C4DD7A00CD64FD /* couplr-iosTests */,
+				F44EECDE1B139526003AA77E /* couplr-ios-test */,
 			);
 		};
 /* End PBXProject section */
@@ -510,7 +537,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		0F1B9EF219C4DD7A00CD64FD /* Resources */ = {
+		F44EECDD1B139526003AA77E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -534,6 +561,7 @@
 				0FF11BDC1A50C42D00C14FDC /* UtilityFunctions.swift in Sources */,
 				0F9F1CBF1A5CFB7300E683A1 /* FXBlurView.m in Sources */,
 				0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */,
+				F4BFF9BA1B13E6F300D4CA58 /* TestExtensions.swift in Sources */,
 				11FDBBB31AC5F206006DFD9B /* SDWebImageDownloaderOperation.m in Sources */,
 				11FDBBB51AC5F206006DFD9B /* SDWebImagePrefetcher.m in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,
@@ -575,20 +603,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		0F1B9EF019C4DD7A00CD64FD /* Sources */ = {
+		F44EECDB1B139526003AA77E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F4BFF9B51B13C19600D4CA58 /* MatchGraphTest.swift in Sources */,
+				F4BFF9B71B13C36000D4CA58 /* SocialGraphTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		0F1B9EF619C4DD7A00CD64FD /* PBXTargetDependency */ = {
+		F44EED3C1B139B61003AA77E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 0F1B9EDC19C4DD7A00CD64FD /* couplr-ios */;
-			targetProxy = 0F1B9EF519C4DD7A00CD64FD /* PBXContainerItemProxy */;
+			targetProxy = F44EED3B1B139B61003AA77E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -719,34 +749,48 @@
 			};
 			name = Release;
 		};
-		0F1B9F0219C4DD7A00CD64FD /* Debug */ = {
+		F44EECE71B139526003AA77E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)/FacebookSDK",
+					"$(PROJECT_DIR)/Parse",
 				);
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = "couplr-iosTests/Info.plist";
+				INFOPLIST_FILE = "couplr-ios-test/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/couplr-ios.app/couplr-ios";
 			};
 			name = Debug;
 		};
-		0F1B9F0319C4DD7A00CD64FD /* Release */ = {
+		F44EECE81B139526003AA77E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)/FacebookSDK",
+					"$(PROJECT_DIR)/Parse",
 				);
-				INFOPLIST_FILE = "couplr-iosTests/Info.plist";
+				GCC_NO_COMMON_BLOCKS = YES;
+				INFOPLIST_FILE = "couplr-ios-test/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/couplr-ios.app/couplr-ios";
@@ -774,11 +818,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0F1B9F0119C4DD7A00CD64FD /* Build configuration list for PBXNativeTarget "couplr-iosTests" */ = {
+		F44EECE91B139526003AA77E /* Build configuration list for PBXNativeTarget "couplr-ios-test" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0F1B9F0219C4DD7A00CD64FD /* Debug */,
-				0F1B9F0319C4DD7A00CD64FD /* Release */,
+				F44EECE71B139526003AA77E /* Debug */,
+				F44EECE81B139526003AA77E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

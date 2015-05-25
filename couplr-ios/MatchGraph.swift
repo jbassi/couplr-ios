@@ -95,7 +95,9 @@ public class MatchList {
     
     /**
      * Removes a match that the root user voted on. Returns true if and
-     * only if the match actually existed.
+     * only if the match actually existed. Observe that we do NOT have to
+     * update the last non-root update time for the title, since this
+     * operation will only remove matches made by the root user.
      */
     public func removeMatchVotedByRootUser(titleId:Int) -> Bool {
         if matchesByTitle[titleId] == nil {
@@ -103,6 +105,9 @@ public class MatchList {
         }
         if let index = find(matchesByTitle[titleId]!, SocialGraphController.sharedInstance.rootId()) {
             matchesByTitle[titleId]!.removeAtIndex(index)
+            if matchesByTitle[titleId]!.count == 0 {
+                matchesByTitle[titleId] = nil
+            }
             return true
         }
         return false
@@ -243,9 +248,7 @@ public class MatchGraph {
                 (first:(UInt64,Int), second:(UInt64,Int)) -> Bool in
                 return first.1 > second.1
             }
-            let element:(Int,[(UInt64,Int)]) = (titleId, list)
-            // TODO Why doesn't this work without using temp variable?
-            sortedMatches.append(element)
+            sortedMatches += [(titleId, list)]
         }
         sortedMatches.sort {
             (first:(Int,[(UInt64,Int)]), second:(Int,[(UInt64,Int)])) -> Bool in
@@ -403,17 +406,20 @@ public class MatchGraph {
             log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag: "-")
             return false
         }
-        let matchToRemove:MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId, voterId: rootUser)
+        let matchToRemoveWithoutRoot:MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId)
+        let matchToRemoveWithRoot:MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId, voterId: rootUser)
         var didRemoveMatchFromGraph:Bool = false
         // Attempt to remove any existing edges from the graph.
         if undirectedMatchListExists(from, to: to) {
             didRemoveMatchFromGraph = matches[from]![to]!.removeMatchVotedByRootUser(withTitleId)
                 && matches[to]![from]!.removeMatchVotedByRootUser(withTitleId)
+            pruneDirectedMatchListIfEmpty(from, to: to)
+            pruneDirectedMatchListIfEmpty(to, to: from)
         }
         // Attempt to remove any matches that were going to be flushed to Parse.
         var indicesToRemove:[Int] = []
         for (index:Int, match:MatchTuple) in enumerate(matchesBeforeUserHistoryLoaded) {
-            if match == matchToRemove {
+            if match == matchToRemoveWithoutRoot {
                 indicesToRemove.append(index)
             }
         }
@@ -422,16 +428,16 @@ public class MatchGraph {
         }
         indicesToRemove.removeAll()
         for (index:Int, match:MatchTuple) in enumerate(unregisteredMatches) {
-            if match == matchToRemove {
+            if match == matchToRemoveWithoutRoot {
                 indicesToRemove.append(index)
             }
         }
         for index in indicesToRemove {
             unregisteredMatches.removeAtIndex(index)
         }
-        // Update other auxilary datastructures as necessary.
-        userVotes[matchToRemove] = nil
-        matchUpdateTimes[matchToRemove] = nil
+        // Update other auxiliary datastructures as necessary.
+        userVotes[matchToRemoveWithRoot] = nil
+        matchUpdateTimes[matchToRemoveWithRoot] = nil
         // Update the history view.
         CouplrViewCoordinator.sharedInstance.refreshHistoryView()
         return didRemoveMatchFromGraph
@@ -442,28 +448,31 @@ public class MatchGraph {
      * added and the social graph exists, notifies the social graph about the
      * new match.
      */
-    public func userDidMatch(from:UInt64, to:UInt64, withTitleId:Int) {
+    public func userDidMatch(from:UInt64, to:UInt64, withTitleId:Int) -> Bool {
         if from == to {
-            return log("User voted \(from) with him/herself!", withFlag: "-")
+            log("User voted \(from) with him/herself!", withFlag: "-")
+            return false
+        }
+        let match:MatchTuple = MatchTuple(firstId: from, secondId: to)
+        if !didFetchUserMatchHistory {
+            matchesBeforeUserHistoryLoaded.append(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId))
+            return true
         }
         let rootUser:UInt64 = rootUserFromGraph()
         if rootUser == 0 {
-            return log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag: "-")
+            log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag: "-")
+            return false
         }
-        let (firstId:UInt64, secondId:UInt64) = from < to ? (to, from) : (from, to)
-        if !didFetchUserMatchHistory {
-            matchesBeforeUserHistoryLoaded.append(MatchTuple(firstId: firstId, secondId: secondId, titleId: withTitleId, voterId: rootUser))
-            return
+        if !tryToUpdateDirectedEdge(match.firstId, to: match.secondId, voter: rootUser, titleId: withTitleId) ||
+            !tryToUpdateDirectedEdge(match.secondId, to: match.firstId, voter: rootUser , titleId: withTitleId) {
+            log("User already voted on [\(match.firstId), \(match.secondId)] with title \"\(titlesById[withTitleId]!.text)\"")
+            return true
         }
-        var didUpdate:Bool = tryToUpdateDirectedEdge(firstId, to: secondId, voter: rootUser, titleId: withTitleId)
-        didUpdate = didUpdate && tryToUpdateDirectedEdge(secondId, to: firstId, voter: rootUser , titleId: withTitleId)
-        if !didUpdate {
-            return log("User already voted on [\(firstId), \(secondId)] with title \"\(titlesById[withTitleId]!.text)\"")
-        }
-        unregisteredMatches.append(MatchTuple(firstId: firstId, secondId: secondId, titleId: withTitleId, voterId: rootUser))
-        userVotes[MatchTuple(firstId: firstId, secondId: secondId, titleId: withTitleId, voterId: rootUser)] = NSDate()
+        unregisteredMatches.append(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId))
+        userVotes[MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId, voterId: rootUser)] = NSDate()
         CouplrViewCoordinator.sharedInstance.refreshHistoryView()
-        SocialGraphController.sharedInstance.userDidMatch(firstId, toSecondId: secondId)
+        SocialGraphController.sharedInstance.userDidMatch(match.firstId, toSecondId: match.secondId)
+        return true
     }
     
     /**
@@ -472,6 +481,21 @@ public class MatchGraph {
     public func matchListsForUserId(userId:UInt64) -> [UInt64:MatchList] {
         return matches[userId] == nil ? [UInt64:MatchList]() : matches[userId]!
     }
+    
+    /**
+     * Removes a *directed* match list iff the match list is completely empty.
+     */
+    private func pruneDirectedMatchListIfEmpty(from:UInt64, to:UInt64) {
+        if matches[from] == nil || matches[from]![to] == nil {
+            return
+        }
+        if matches[from]![to]!.matchesByTitle.count == 0 {
+            matches[from]![to] = nil
+        }
+        if matches[from]!.count == 0 {
+            matches[from] = nil
+        }
+    }    
 
     /**
      * Updates the graph going in one direction. Returns if the edge was successfully
@@ -520,13 +544,14 @@ public class MatchGraph {
             return log("Warning: MatchGraph::checkMatchesBeforeUserHistoryLoaded called before social graph was initialized.", withFlag:"-")
         }
         for match:MatchTuple in matchesBeforeUserHistoryLoaded {
-            var didUpdate:Bool = tryToUpdateDirectedEdge(match.firstId, to: match.secondId, voter: rootUser, titleId: match.titleId)
-            didUpdate = didUpdate && tryToUpdateDirectedEdge(match.secondId, to: match.firstId, voter: rootUser , titleId: match.titleId)
-            if !didUpdate {
-                return log("User already voted on [\(match.firstId), \(match.secondId)] with title \"\(titlesById[match.titleId]!.text)\"")
+            if tryToUpdateDirectedEdge(match.firstId, to: match.secondId, voter: rootUser, titleId: match.titleId) &&
+                tryToUpdateDirectedEdge(match.secondId, to: match.firstId, voter: rootUser , titleId: match.titleId) {
+                    
+                log("Appending buffered match [\(match.firstId), \(match.secondId)] with title \"\(titlesById[match.titleId])\" to unregistered matches.")
+                unregisteredMatches.append(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: match.titleId))
+            } else {
+                log("User already voted on [\(match.firstId), \(match.secondId)] with title \"\(titlesById[match.titleId]!.text)\"")
             }
-            log("Appending buffered match [\(match.firstId), \(match.secondId)] with title \"\(titlesById[match.titleId])\" to unregistered matches.")
-            unregisteredMatches.append(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: match.titleId, voterId: rootUser))
         }
         matchesBeforeUserHistoryLoaded.removeAll()
     }
