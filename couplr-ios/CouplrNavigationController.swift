@@ -129,9 +129,6 @@ class CouplrNavigationController: UINavigationController {
             if completed {
                 self.currentPageIndex = kInitialPageIndex
                 self.lastPageIndex = kInitialPageIndex
-                for (index:Int, button:UIButton) in enumerate(self.buttonArray) {
-                    button.titleLabel?.font = index == self.lastPageIndex ? kCouplrNavigationButtonBoldFont : kCouplrNavigationButtonFont
-                }
             }
         })
         setupNavigationSelectionBar(andAddSubview: false)
@@ -148,15 +145,16 @@ class CouplrNavigationController: UINavigationController {
     func setupNavigationBarButtons() {
         customNavigationBar.frame = CGRectMake(0, view.frame.size.height-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight)
         let buttonTags:[Int] = [kProfileViewButtonTag, kNewsfeedViewButtonTag, kMatchViewButtonTag, kHistoryViewButtonTag]
-        let buttonTitles:[String] = [kProfileViewButtonTitle, kNewsfeedViewButtonTitle, kMatchViewButtonTitle, kHistoryViewButtonTitle]
+        let buttonIconNames:[String] = ["nav-profile", "nav-newsfeed", "nav-match", "nav-history"]
         let buttonWidth = view.frame.width / CGFloat(viewControllerArray.count)
         for (index:Int, button:UIButton) in enumerate(buttonArray) {
             let buttonOffset:CGFloat = buttonWidth * CGFloat(index)
             button.frame = CGRectMake(buttonOffset, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
             button.backgroundColor = UIColor.grayColor()
             button.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
-            button.setTitle(buttonTitles[index], forState: .Normal)
-            button.titleLabel?.font = button == matchViewButton ? kCouplrNavigationButtonBoldFont : kCouplrNavigationButtonFont
+            let horizontalInset: CGFloat = (button.bounds.width - (button.bounds.height - kCouplrNavigationBarBottomInset - kCouplrNavigationBarTopInset)) / 2
+            button.imageEdgeInsets = UIEdgeInsetsMake(kCouplrNavigationBarTopInset, horizontalInset, kCouplrNavigationBarBottomInset, horizontalInset)
+            button.setImage(UIImage(named: buttonIconNames[index]), forState: .Normal)
             button.tag = buttonTags[index]
             customNavigationBar.addSubview(button)
         }
@@ -193,9 +191,7 @@ class CouplrNavigationController: UINavigationController {
                     pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Forward, animated: true, completion: {(completed:Bool) in
                         if completed {
                             self.currentPageIndex = i
-                            self.buttonArray[self.lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
                             self.lastPageIndex = button.tag
-                            self.buttonArray[button.tag].titleLabel?.font = kCouplrNavigationButtonBoldFont
                             if i == button.tag {
                                 self.animating = false
                             }
@@ -209,9 +205,7 @@ class CouplrNavigationController: UINavigationController {
                     pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Reverse, animated: true, completion: {(completed:Bool) in
                         if completed {
                             self.currentPageIndex = i
-                            self.buttonArray[self.lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
                             self.lastPageIndex = button.tag
-                            self.buttonArray[button.tag].titleLabel?.font = kCouplrNavigationButtonBoldFont
                             if i == button.tag {
                                 self.animating = false
                             }
@@ -242,7 +236,6 @@ class CouplrNavigationController: UINavigationController {
         }
         return index == kHistoryViewButtonTag ? "History" : "No such page"
     }
-
 }
 
 extension CouplrNavigationController: UIPageViewControllerDelegate, UIPageViewControllerDataSource {
@@ -276,8 +269,6 @@ extension CouplrNavigationController: UIPageViewControllerDelegate, UIPageViewCo
     func pageViewController(pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [AnyObject], transitionCompleted completed: Bool) {
         if completed {
             currentPageIndex = indexOfViewController(pageViewController.viewControllers.last as! UIViewController)
-            self.buttonArray[lastPageIndex].titleLabel?.font = kCouplrNavigationButtonFont
-            self.buttonArray[currentPageIndex].titleLabel?.font = kCouplrNavigationButtonBoldFont
             lastPageIndex = currentPageIndex
             UserSessionTracker.sharedInstance.notify("scrolled to \(self.pageNameFromIndex(currentPageIndex))")
         }

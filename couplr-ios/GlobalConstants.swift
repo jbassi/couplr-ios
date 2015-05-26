@@ -21,16 +21,12 @@ let kNewsfeedViewButtonTag = 1
 let kMatchViewButtonTag = 2
 let kHistoryViewButtonTag = 3
 let kInitialPageIndex = 2
-let kMatchViewButtonTitle = "Matches"
-let kNewsfeedViewButtonTitle = "News"
-let kProfileViewButtonTitle = "Profile"
-let kHistoryViewButtonTitle = "History"
-let kCouplrNavigationButtonFont: UIFont = UIFont.systemFontOfSize(18.0)
-let kCouplrNavigationButtonBoldFont: UIFont = UIFont.boldSystemFontOfSize(18.0)
 let kCouplrNavigationBarHeight: CGFloat = 50.0
 let kCouplrNavigationBarButtonHeight: CGFloat = 50.0
 let kCouplrNavigationBarSelectionIndicatorHeight: CGFloat = 4.0
 let kCouplrNavigationBarSelectionIndicatorCornerRadius: CGFloat = 2.5
+let kCouplrNavigationBarTopInset: CGFloat = 10.0
+let kCouplrNavigationBarBottomInset: CGFloat = 6.0
 
 /* Couplr Default Color */
 let kCouplrRedColor = UIColor(red: 246/255.0, green: 71/255.0, blue: 71/255.0, alpha: 1)
