@@ -28,6 +28,7 @@
 		11276E361AC4F5FE00ADD063 /* MatchPairTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11276E351AC4F5FE00ADD063 /* MatchPairTableViewCell.swift */; };
 		114E42991AE2143D00CC9EB7 /* TutorialPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114E42981AE2143D00CC9EB7 /* TutorialPageViewController.swift */; };
 		11996CB81AC4D1B400C45DB0 /* MatchPairHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11996CB71AC4D1B400C45DB0 /* MatchPairHeaderView.swift */; };
+		11C9301B1B142FDF0091BFA4 /* FXBlurView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F9F1CBE1A5CFB7300E683A1 /* FXBlurView.m */; };
 		11CF0BDA1AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11CF0BD91AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift */; };
 		11E5870F1AC39BFB00D61CDB /* ImageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E5870E1AC39BFB00D61CDB /* ImageTableViewCell.swift */; };
 		11E587111AC3A92F00D61CDB /* ImageTitleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E587101AC3A92F00D61CDB /* ImageTitleTableViewCell.swift */; };
@@ -607,6 +608,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				11C9301B1B142FDF0091BFA4 /* FXBlurView.m in Sources */,
 				F4BFF9B51B13C19600D4CA58 /* MatchGraphTest.swift in Sources */,
 				F4BFF9B71B13C36000D4CA58 /* SocialGraphTest.swift in Sources */,
 			);
