@@ -9,7 +9,7 @@
 import Parse
 import UIKit
 
-public class MatchTitle {
+public class MatchTitle : Equatable {
     public init(id:Int, text:String, picture:String) {
         self.id = id
         self.text = text
@@ -19,6 +19,14 @@ public class MatchTitle {
     var id:Int
     var text:String
     var picture:String
+    
+    public func toString() -> String {
+        return "[id=\(id), text=\"\(text)\", picture=\"\(picture)\"]"
+    }
+}
+
+public func ==(lhs:MatchTitle, rhs:MatchTitle) -> Bool {
+    return lhs.id == rhs.id && lhs.text == rhs.text && lhs.picture == rhs.picture
 }
 
 /**
@@ -299,10 +307,7 @@ public class MatchGraph {
                     let second:UInt64 = uint64FromAnyObject(matchData["secondId"], base64:true)
                     let voter:UInt64 = uint64FromAnyObject(matchData["voterId"], base64:true)
                     let titleId:Int = matchData["titleId"] as! Int
-                    self.tryToUpdateDirectedEdge(first, to:second, voter:voter, titleId:titleId, updateTime:matchData.updatedAt)
-                    self.tryToUpdateDirectedEdge(second, to:first, voter:voter, titleId:titleId, updateTime:matchData.updatedAt)
-                    let matchTuple:MatchTuple = MatchTuple(firstId:first, secondId:second, titleId:titleId, voterId:voter)
-                    self.matchUpdateTimes[matchTuple] = matchData.updatedAt
+                    self.tryToUpdateMatch(first, secondId: second, voterId: voter, titleId: titleId, time: matchData.updatedAt)
                 }
                 // Consider a match fetched only after the response arrives.
                 for userId:UInt64 in userIdsToQuery {
@@ -318,6 +323,21 @@ public class MatchGraph {
                     callback!(didError:true)
                 }
             }
+        }
+    }
+    
+    /**
+     * Attempts to update the appropriate match lists with a new match. If the
+     * time of the match is given, also updates the time of the match.
+     * HACK This method should really be private, but it's public because the
+     *   tests need to know how to add matches to the graph.
+     */
+    public func tryToUpdateMatch(firstId:UInt64, secondId:UInt64, voterId:UInt64, titleId:Int, time:NSDate? = nil) {
+        self.tryToUpdateDirectedEdge(firstId, to: secondId, voter: voterId, titleId: titleId, updateTime: time)
+        self.tryToUpdateDirectedEdge(secondId, to: firstId, voter: voterId, titleId: titleId, updateTime: time)
+        if time != nil {
+            let matchTuple:MatchTuple = MatchTuple(firstId: firstId, secondId: secondId, titleId: titleId, voterId: voterId)
+            self.matchUpdateTimes[matchTuple] = time!
         }
     }
 
@@ -348,7 +368,7 @@ public class MatchGraph {
                     let updateTime:NSDate = matchData.updatedAt
                     self.tryToUpdateDirectedEdge(first, to:second, voter:rootUser, titleId:titleId, updateTime:updateTime)
                     self.tryToUpdateDirectedEdge(second, to:first, voter:rootUser, titleId:titleId, updateTime:updateTime)
-                    self.userVotes[MatchTuple(firstId: first, secondId: second, titleId: titleId, voterId: rootUser)] = updateTime
+                    self.userVotes[MatchTuple(firstId: first, secondId: second, titleId: titleId)] = updateTime
                 }
                 self.didFetchUserMatchHistory = true
                 self.checkMatchesBeforeUserHistoryLoaded()
@@ -406,8 +426,7 @@ public class MatchGraph {
             log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag: "-")
             return false
         }
-        let matchToRemoveWithoutRoot:MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId)
-        let matchToRemoveWithRoot:MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId, voterId: rootUser)
+        let matchToRemove:MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId)
         var didRemoveMatchFromGraph:Bool = false
         // Attempt to remove any existing edges from the graph.
         if undirectedMatchListExists(from, to: to) {
@@ -419,7 +438,7 @@ public class MatchGraph {
         // Attempt to remove any matches that were going to be flushed to Parse.
         var indicesToRemove:[Int] = []
         for (index:Int, match:MatchTuple) in enumerate(matchesBeforeUserHistoryLoaded) {
-            if match == matchToRemoveWithoutRoot {
+            if match == matchToRemove {
                 indicesToRemove.append(index)
             }
         }
@@ -428,7 +447,7 @@ public class MatchGraph {
         }
         indicesToRemove.removeAll()
         for (index:Int, match:MatchTuple) in enumerate(unregisteredMatches) {
-            if match == matchToRemoveWithoutRoot {
+            if match == matchToRemove {
                 indicesToRemove.append(index)
             }
         }
@@ -436,8 +455,8 @@ public class MatchGraph {
             unregisteredMatches.removeAtIndex(index)
         }
         // Update other auxiliary datastructures as necessary.
-        userVotes[matchToRemoveWithRoot] = nil
-        matchUpdateTimes[matchToRemoveWithRoot] = nil
+        userVotes[matchToRemove] = nil
+        matchUpdateTimes[MatchTuple(firstId: to, secondId: from, titleId: withTitleId, voterId: rootUser)] = nil
         // Update the history view.
         CouplrViewCoordinator.sharedInstance.refreshHistoryView()
         return didRemoveMatchFromGraph
@@ -469,7 +488,7 @@ public class MatchGraph {
             return true
         }
         unregisteredMatches.append(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId))
-        userVotes[MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId, voterId: rootUser)] = NSDate()
+        userVotes[MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId)] = NSDate()
         CouplrViewCoordinator.sharedInstance.refreshHistoryView()
         SocialGraphController.sharedInstance.userDidMatch(match.firstId, toSecondId: match.secondId)
         return true

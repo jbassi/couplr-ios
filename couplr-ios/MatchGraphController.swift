@@ -38,9 +38,9 @@ public class MatchGraphController {
      * The matches involve the user's closest friends, and are sorted
      * by chronological order, newest first.
      */
-    public func newsFeedMatches(maxNumMatches:Int = kMaxNumNewsFeedMatches) -> [(MatchTuple,NSDate)] {
+    public func newsfeedMatches(maxNumMatches:Int = kMaxNumNewsfeedMatches) -> [(MatchTuple,NSDate)] {
         if matches == nil {
-            log("MatchGraphController::newsFeedMatches called before match graph was initialized.", withFlag: "-")
+            log("MatchGraphController::newsfeedMatches called before match graph was initialized.", withFlag: "-")
             return []
         }
         let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
@@ -86,8 +86,8 @@ public class MatchGraphController {
         }).map {(tuple:MatchTuple) -> (tuple:MatchTuple, time:NSDate) in
             return (tuple, self.matches!.userVotes[tuple]!)
         })
-        return sorted(voteHistory, { (firstTupleAndTime:(MatchTuple,NSDate), secondTimeAndTime:(MatchTuple,NSDate)) -> Bool in
-            return firstTupleAndTime.1.compare(secondTimeAndTime.1) == .OrderedDescending
+        return sorted(voteHistory, { (firstTupleAndTime:(MatchTuple,NSDate), secondTupleAndTime:(MatchTuple,NSDate)) -> Bool in
+            return firstTupleAndTime.1.compare(secondTupleAndTime.1) == .OrderedDescending
         })
     }
 
@@ -116,7 +116,7 @@ public class MatchGraphController {
      * minNumMatches: indicates the minimum number of matches to count as
      *   most recent, given that there are at least that many total matches.
      */
-    public func recentMatches(minNumMatches:Int = kMinNumRecentMatches) -> [(MatchTuple,NSDate)] {
+    public func rootUserRecentMatches(maxNumMatches:Int = kMaxNumRecentMatches) -> [(MatchTuple,NSDate)] {
         if matches == nil {
             return []
         }
@@ -131,13 +131,8 @@ public class MatchGraphController {
             (first:(MatchTuple, NSDate), second:(MatchTuple, NSDate)) -> Bool in
             return first.1.compare(second.1) == .OrderedDescending
         })
-        if recentMatchesAndUpdateTimes.count > minNumMatches {
-            let timeThreshold:NSDate = recentMatchesAndUpdateTimes[minNumMatches].1
-            recentMatchesAndUpdateTimes.filter({
-                (tupleAndDate:(MatchTuple, NSDate)) -> Bool in
-                let timeComparison:NSComparisonResult = tupleAndDate.1.compare(timeThreshold)
-                return timeComparison == .OrderedDescending || timeComparison == .OrderedSame
-            })
+        if recentMatchesAndUpdateTimes.count > maxNumMatches {
+            return Array(recentMatchesAndUpdateTimes[0..<maxNumMatches])
         }
         return recentMatchesAndUpdateTimes
     }

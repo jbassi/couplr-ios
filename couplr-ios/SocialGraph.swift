@@ -157,10 +157,8 @@ public class SocialGraph {
         if nodes[id] == nil {
             nodes[id] = andName
             let firstName:String = firstNameFromFullName(andName)
-            if andUpdateGender {
-                if genders[firstName] == nil {
-                    genders[firstName] = Gender.Undetermined
-                }
+            if andUpdateGender && genders[firstName] == nil {
+                genders[firstName] = Gender.Undetermined
             }
         }
     }
@@ -271,7 +269,7 @@ public class SocialGraph {
      * response is received, only the second call will "go through" -- all
      * subsequent invocations will be dropped.
      */
-    public func updateGenders() {
+    public func updateGenders(onComplete: ((success: Bool) -> Void)? = nil) {
         dispatch_semaphore_wait(genderUpdateSemaphore, DISPATCH_TIME_FOREVER)
         if isCurrentlyUpdatingGender {
             shouldReupdateGender = true
@@ -287,6 +285,7 @@ public class SocialGraph {
                 var parsingError:NSError? = NSError()
                 let rawGenderData:AnyObject? = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions(0), error: &parsingError)
                 if rawGenderData == nil {
+                    onComplete?(success: false)
                     return
                 }
                 if let genderData = rawGenderData as? [String : AnyObject] {
@@ -303,12 +302,15 @@ public class SocialGraph {
                     let (males:Int, females:Int, undetermined:Int) = self.overallGenderCount()
                     log("Gender response received (\(genderData.count) predictions).", withIndent: 1)
                     log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent: 1, withNewline: true)
+                    onComplete?(success: true)
                 }
+            } else {
+                onComplete?(success: false)
             }
             self.isCurrentlyUpdatingGender = false
             if self.shouldReupdateGender {
                 self.shouldReupdateGender = false
-                self.updateGenders()
+                self.updateGenders(onComplete: onComplete)
             }
         }
         var requestURL:String = kGenderizeURLPrefix

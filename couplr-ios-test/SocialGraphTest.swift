@@ -68,6 +68,28 @@ class SocialGraphTest: XCTestCase {
         graph!.connectNode(3, toNode: 4, withWeight: 1)
         graph!.connectNode(2, toNode: 5, withWeight: 0.25)
         XCTAssertEqualWithAccuracy(graph!.baselineEdgeWeight(), 0.583, 0.001, "Incorrect baseline edge weight.")
+        graph!.connectNode(2, toNode: 5, withWeight: 1)
+        XCTAssertEqualWithAccuracy(graph!.baselineEdgeWeight(), 0.917, 0.001, "Incorrect baseline edge weight.")
+    }
+    
+    func testUpdateGenders() {
+        let expectation = expectationWithDescription("Expected genders to update.")
+        graph!.updateNodeWithId(6, andName: "Grace Hopper")
+        graph!.updateNodeWithId(7, andName: "Dennis Ritchie")
+        graph!.updateNodeWithId(8, andName: "Margaret Hamilton")
+        graph!.updateNodeWithId(9, andName: "Radia Perlman")
+        graph!.updateGenders { success in
+            expectation.fulfill()
+        }
+        waitForExpectationsWithTimeout(5, handler: { error in
+            XCTAssertNil(error, "An error occurred when testing gender updates.")
+            for node: UInt64 in [1, 3, 4, 5, 7] {
+                XCTAssertEqual(self.graph!.genderFromId(node), .Male, "Expected node \(node) to map to male.")
+            }
+            for node: UInt64 in [2, 6, 8, 9] {
+                XCTAssertEqual(self.graph!.genderFromId(node), .Female, "Expected node \(node) to map to female.")
+            }
+        })
     }
     
     private func expectNoEdgeFrom(from: UInt64, to: UInt64) {

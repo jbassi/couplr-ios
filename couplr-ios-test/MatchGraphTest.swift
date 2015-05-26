@@ -36,7 +36,7 @@ class MatchGraphTest: XCTestCase {
         matchlist.updateMatch(1, voterId: 10, updateTime: NSDate(timeIntervalSinceNow: 3600))
         matchlist.updateMatch(2, voterId: 20, updateTime: NSDate(timeIntervalSinceNow: 7200))
         matchlist.updateMatch(2, voterId: 30, updateTime: NSDate())
-        expectDatesToMatch(matchlist.lastUpdateTimeForTitle(2)!, other: NSDate(timeIntervalSinceNow: 7200), message: "Latest update time incorrect.")
+        expectDatesToMatch(matchlist.lastUpdateTimeForTitle(2)!, NSDate(timeIntervalSinceNow: 7200), "Latest update time incorrect.")
         XCTAssertNil(matchlist.lastUpdateTimeForTitle(1), "Expected latest update time to be nil.")
         XCTAssertFalse(matchlist.removeMatchVotedByRootUser(2))
         XCTAssert(matchlist.removeMatchVotedByRootUser(1))
@@ -104,10 +104,6 @@ class MatchGraphTest: XCTestCase {
     
     private func expectUserToHave(userId: UInt64, numMatches: Int) {
         XCTAssertEqual(matches!.matchListsForUserId(userId).count, numMatches, "Expected \(userId) to have \(numMatches) matches.")
-    }
-    
-    private func expectDatesToMatch(date: NSDate, other: NSDate, message: String) {
-        XCTAssertEqualWithAccuracy(date.timeIntervalSince1970, other.timeIntervalSince1970, 1, message)
     }
     
     var matches:MatchGraph? = nil

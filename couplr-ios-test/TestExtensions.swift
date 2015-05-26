@@ -32,4 +32,12 @@ extension MatchGraph {
     public func setDidFetchUserMatchHistory(didFetchUserMatchHistory: Bool) {
         self.didFetchUserMatchHistory = didFetchUserMatchHistory
     }
+    
+    public func setMatchTitles(titles: [MatchTitle]) {
+        titleList = titles
+        titlesById.removeAll()
+        for title: MatchTitle in titles {
+            titlesById[title.id] = title
+        }
+    }
 }

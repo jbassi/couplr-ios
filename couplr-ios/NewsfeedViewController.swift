@@ -14,7 +14,7 @@ class NewsfeedViewController: UIViewController {
     let matchGraphController = MatchGraphController.sharedInstance
     var headerView:MatchPairHeaderView?
     var newsfeedTableView:UITableView?
-    var cachedNewsFeedMatches:[(MatchTuple, NSDate)]?
+    var cachedNewsfeedMatches:[(MatchTuple, NSDate)]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,17 +37,17 @@ class NewsfeedViewController: UIViewController {
         view.addSubview(newsfeedTableView!)
     }
     
-    func newsFeedMatches() -> [(MatchTuple, NSDate)]? {
-        if cachedNewsFeedMatches == nil {
-            cachedNewsFeedMatches = matchGraphController.newsFeedMatches()
+    func newsfeedMatches() -> [(MatchTuple, NSDate)]? {
+        if cachedNewsfeedMatches == nil {
+            cachedNewsfeedMatches = matchGraphController.newsfeedMatches()
         }
-        return self.cachedNewsFeedMatches
+        return self.cachedNewsfeedMatches
     }
     
     func showAllNamesInVisibleCells() {
         for cell in newsfeedTableView!.visibleCells() {
             let newsCell = cell as! MatchPairTableViewCell
-            if let matches:[(MatchTuple, NSDate)]? = newsFeedMatches() {
+            if let matches:[(MatchTuple, NSDate)]? = newsfeedMatches() {
                 let match:MatchTuple = matches![newsfeedTableView!.indexPathForCell(newsCell)!.row].0
                 let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
                 let nameForSecondId:String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
@@ -78,8 +78,8 @@ class NewsfeedViewController: UIViewController {
 extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        self.cachedNewsFeedMatches = nil
-        let matches:[(MatchTuple, NSDate)]? = newsFeedMatches()
+        self.cachedNewsfeedMatches = nil
+        let matches:[(MatchTuple, NSDate)]? = newsfeedMatches()
         
         if let numberOfMatches = matches?.count {
             if numberOfMatches > 0 {
@@ -107,14 +107,14 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        self.cachedNewsFeedMatches = nil
-        let matches:[(MatchTuple, NSDate)]? = newsFeedMatches()
+        self.cachedNewsfeedMatches = nil
+        let matches:[(MatchTuple, NSDate)]? = newsfeedMatches()
         return matches == nil ? 0 : matches!.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as! MatchPairTableViewCell
-        if let matchesAndUpdateTimes:[(MatchTuple, NSDate)]? = newsFeedMatches() {
+        if let matchesAndUpdateTimes:[(MatchTuple, NSDate)]? = newsfeedMatches() {
             let (match:MatchTuple, updateTime:NSDate) = matchesAndUpdateTimes![indexPath.row]
             cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text
             cell.selectionStyle = .None

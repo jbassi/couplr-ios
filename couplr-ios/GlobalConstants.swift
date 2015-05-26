@@ -111,14 +111,14 @@ let kSecondsBeforeNextGraphUpdate:Double = 345600 // In seconds. This is about 4
 let kEnableGraphCaching:Bool = true
 
 /* Recent match view */
-let kMinNumRecentMatches:Int = 10
+let kMaxNumRecentMatches:Int = 10
 
 /* Graph paths for posts and photos. */
 let kPostGraphPathFields:String = "fields=from,likes,comments.fields(from,likes)"
 let kPhotosGraphPathFields:String = "fields=from,tags.fields(id,name)"
 
 /* News feed */
-let kMaxNumNewsFeedMatches:Int = 25
+let kMaxNumNewsfeedMatches:Int = 25
 let kMaxNumClosestFriends:Int = 25
 
 /* Debugging output */

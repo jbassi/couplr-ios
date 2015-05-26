@@ -52,6 +52,9 @@
 		F45AF54F1ADB916A0051FA90 /* UserAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */; };
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
 		F4875BA81B0D9FBF006FCB94 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4875BA71B0D9FBF006FCB94 /* HistoryViewController.swift */; };
+		F48D52321B1456A900D84CAC /* SocialGraphControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48D52311B1456A900D84CAC /* SocialGraphControllerTest.swift */; };
+		F48D52341B14640700D84CAC /* MatchGraphControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48D52331B14640700D84CAC /* MatchGraphControllerTest.swift */; };
+		F48D52361B15182100D84CAC /* TestUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48D52351B15182100D84CAC /* TestUtil.swift */; };
 		F4973F0B1A50E31700FEA3B0 /* SocialGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */; };
 		F4BFF9B51B13C19600D4CA58 /* MatchGraphTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BFF9B41B13C19600D4CA58 /* MatchGraphTest.swift */; };
 		F4BFF9B71B13C36000D4CA58 /* SocialGraphTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BFF9B61B13C36000D4CA58 /* SocialGraphTest.swift */; };
@@ -157,6 +160,9 @@
 		F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserAnalytics.swift; sourceTree = "<group>"; };
 		F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphController.swift; sourceTree = "<group>"; };
 		F4875BA71B0D9FBF006FCB94 /* HistoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
+		F48D52311B1456A900D84CAC /* SocialGraphControllerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphControllerTest.swift; sourceTree = "<group>"; };
+		F48D52331B14640700D84CAC /* MatchGraphControllerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphControllerTest.swift; sourceTree = "<group>"; };
+		F48D52351B15182100D84CAC /* TestUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestUtil.swift; sourceTree = "<group>"; };
 		F4973F0A1A50E31700FEA3B0 /* SocialGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraph.swift; sourceTree = "<group>"; };
 		F4BFF9B41B13C19600D4CA58 /* MatchGraphTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphTest.swift; sourceTree = "<group>"; };
 		F4BFF9B61B13C36000D4CA58 /* SocialGraphTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphTest.swift; sourceTree = "<group>"; };
@@ -407,7 +413,10 @@
 			children = (
 				F4BFF9B41B13C19600D4CA58 /* MatchGraphTest.swift */,
 				F4BFF9B61B13C36000D4CA58 /* SocialGraphTest.swift */,
+				F48D52311B1456A900D84CAC /* SocialGraphControllerTest.swift */,
+				F48D52331B14640700D84CAC /* MatchGraphControllerTest.swift */,
 				F44EECE11B139526003AA77E /* Supporting Files */,
+				F48D52351B15182100D84CAC /* TestUtil.swift */,
 			);
 			path = "couplr-ios-test";
 			sourceTree = "<group>";
@@ -609,8 +618,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				11C9301B1B142FDF0091BFA4 /* FXBlurView.m in Sources */,
+				F48D52361B15182100D84CAC /* TestUtil.swift in Sources */,
 				F4BFF9B51B13C19600D4CA58 /* MatchGraphTest.swift in Sources */,
 				F4BFF9B71B13C36000D4CA58 /* SocialGraphTest.swift in Sources */,
+				F48D52341B14640700D84CAC /* MatchGraphControllerTest.swift in Sources */,
+				F48D52321B1456A900D84CAC /* SocialGraphControllerTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

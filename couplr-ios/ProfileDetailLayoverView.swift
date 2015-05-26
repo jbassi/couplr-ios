@@ -134,7 +134,7 @@ class ProfileDetailLayoverView: UIView {
         }
         let rootId:UInt64 = socialGraphController.rootId()
         recentMatchesResult = []
-        let tuples:[MatchTuple] = matchGraphController.recentMatches().filter({
+        let tuples:[MatchTuple] = matchGraphController.rootUserRecentMatches().filter({
             (tupleAndTime:(MatchTuple,NSDate)) -> Bool in
             let tuple:MatchTuple = tupleAndTime.0
             let matchedWithId:UInt64 = tuple.firstId == rootId ? tuple.secondId : tuple.firstId

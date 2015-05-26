@@ -202,10 +202,14 @@ extension SocialGraph {
      * Randomly samples a node out of the root user's neighbors.
      */
     private func sampleRandomNode(withNodesTraversed:[UInt64:Bool]) -> UInt64 {
-        let possibleNextNodes:[UInt64] = Array(edges[root]!.keys.filter {
-            (neighbor:UInt64) -> Bool in
+        var possibleNextNodes:[UInt64] = Array(edges[root]!.keys.filter { (neighbor:UInt64) -> Bool in
             return withNodesTraversed[neighbor] == nil
         })
+        if possibleNextNodes.count == 0 {
+            possibleNextNodes = Array(nodes.keys.filter { (neighbor:UInt64) -> Bool in
+                return withNodesTraversed[neighbor] == nil && neighbor != self.root
+            })
+        }
         return possibleNextNodes[randomInt(possibleNextNodes.count)]
     }
     
