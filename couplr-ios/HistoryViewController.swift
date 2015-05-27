@@ -34,6 +34,7 @@ class HistoryViewController: UIViewController {
         historyTableView!.delegate = self
         historyTableView!.dataSource = self
         historyTableView!.registerClass(MatchPairTableViewCell.self, forCellReuseIdentifier: "HistoryViewCell")
+        historyTableView!.setEditing(true, animated: false)
         
         view.addSubview(headerView!)
         view.addSubview(historyTableView!)
@@ -58,28 +59,28 @@ class HistoryViewController: UIViewController {
     
     func showAllNamesInVisibleCells() {
         for cell in historyTableView!.visibleCells() {
-            let newsCell = cell as! MatchPairTableViewCell
-            let match: MatchTuple = voteHistory()[historyTableView!.indexPathForCell(newsCell)!.row].0
+            let matchCell = cell as! MatchPairTableViewCell
+            let match: MatchTuple = voteHistory()[historyTableView!.indexPathForCell(matchCell)!.row].0
             let nameForFirstId: String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
             let nameForSecondId: String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
-            newsCell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
+            matchCell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
         }
     }
     
     func hideAllNamesInVisibleCells() {
         for cell in historyTableView!.visibleCells() {
-            let newsCell = cell as! MatchPairTableViewCell
-            newsCell.removeTransparentLayer()
+            let matchCell = cell as! MatchPairTableViewCell
+            matchCell.removeTransparentLayer()
         }
     }
     
     func switchToggled(sender: UISwitch) {
         if sender.on {
             showAllNamesInVisibleCells()
-            UserSessionTracker.sharedInstance.notify("toggled newsfeed names on")
+            UserSessionTracker.sharedInstance.notify("toggled history names on")
         } else {
             hideAllNamesInVisibleCells()
-            UserSessionTracker.sharedInstance.notify("toggled newsfeed names off")
+            UserSessionTracker.sharedInstance.notify("toggled history names off")
         }
     }
 }
@@ -89,6 +90,7 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         updateCachedVoteHistory()
         if voteHistory().count > 0 {
+            tableView.backgroundView = nil
             tableView.separatorStyle = .SingleLine
             headerView!.nameSwitch.enabled = true
             return 1
@@ -100,7 +102,7 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
         messageLabel.textAlignment = .Center
         messageLabel.sizeToFit()
         tableView.backgroundView = messageLabel;
-        tableView.separatorStyle = .None;
+        tableView.separatorStyle = .None
         headerView!.nameSwitch.enabled = false
         return 0
     }
@@ -110,9 +112,31 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
         return voteHistory().count
     }
     
+    func tableView(tableView: UITableView, titleForDeleteConfirmationButtonForRowAtIndexPath indexPath: NSIndexPath) -> String! {
+        return "Undo"
+    }
+    
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        let match: MatchTuple = voteHistory()[indexPath.row].0
+        matchGraphController.userDidUndoMatch(match.firstId, to: match.secondId, withTitleId: match.titleId, onComplete: { success in
+            if success {
+                let rootUserVoteHistory = self.matchGraphController.rootUserVoteHistory()
+                if rootUserVoteHistory.count > 0 {
+                    // This is the case where there are still other table cells remaining.
+                    tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
+                    self.cachedVoteHistory = rootUserVoteHistory
+                } else {
+                    // This is the case where the table is now empty.
+                    tableView.deleteSections(NSIndexSet(index: indexPath.section), withRowAnimation: UITableViewRowAnimation.Fade)
+                }
+            }
+        })
+    }
+    
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("HistoryViewCell", forIndexPath: indexPath) as! MatchPairTableViewCell
         let (match: MatchTuple, updateTime: NSDate) = voteHistory()[indexPath.row]
+        cell.setAdditionalLeftPaddingForCell(kAdditionalLeftPaddingForDeleteButton)
         cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text
         cell.selectionStyle = .None
         cell.leftCellImage.sd_setImageWithURL(profilePictureURLFromId(match.firstId), placeholderImage: UIImage(named: "unknown"))
@@ -144,5 +168,4 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
     func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         headerView!.nameSwitch.enabled = true
     }
-    
 }

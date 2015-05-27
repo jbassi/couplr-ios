@@ -457,8 +457,6 @@ public class MatchGraph {
         // Update other auxiliary datastructures as necessary.
         userVotes[matchToRemove] = nil
         matchUpdateTimes[MatchTuple(firstId: to, secondId: from, titleId: withTitleId, voterId: rootUser)] = nil
-        // Update the history view.
-        CouplrViewCoordinator.sharedInstance.refreshHistoryView()
         return didRemoveMatchFromGraph
     }
 

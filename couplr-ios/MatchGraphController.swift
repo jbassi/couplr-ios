@@ -213,8 +213,9 @@ public class MatchGraphController {
      * This will not only update the internal data structure, but also
      * make a request to Parse to delete the corresponding match.
      */
-    public func userDidUndoMatch(from: UInt64, to: UInt64, withTitleId: Int) {
+    public func userDidUndoMatch(from: UInt64, to: UInt64, withTitleId: Int, onComplete: ((success: Bool) -> Void)? = nil) {
         if matches == nil {
+            onComplete?(success: false)
             return log("MatchGraphController::userDidUndoMatch called before the match graph was initialized!", withFlag: "-")
         }
         if matches!.userDidUndoMatch(from, to: to, withTitleId: withTitleId) {
@@ -228,15 +229,19 @@ public class MatchGraphController {
             query.whereKey("secondId", equalTo: secondKey)
             query.whereKey("titleId", equalTo: withTitleId)
             query.findObjectsInBackgroundWithBlock({ (objects: [AnyObject]!, error: NSError?) -> Void in
-                if error != nil || objects.count < 1 {
+                if error != nil {
                     log("Failed to delete [\(firstKey)), \(secondKey), \(withTitleId)]: \(error!.localizedDescription)", withFlag: "-", withIndent: 1)
+                    onComplete?(success: false)
                     return
                 }
                 for index in 0..<objects.count {
                     objects[index].deleteEventually()
                 }
                 log("Removed \(objects.count) object(s) corresponding to [\(firstKey)), \(secondKey), \(withTitleId)]")
+                onComplete?(success: true)
             })
+        } else {
+            onComplete?(success: false)
         }
     }
     

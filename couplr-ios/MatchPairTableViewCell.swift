@@ -12,6 +12,7 @@ class MatchPairTableViewCell: UITableViewCell {
     
     var leftName: String = ""
     var rightName: String = ""
+    var additionalLeftPadding: CGFloat = 0
     let rightTransparentLayer = UIView()
     let leftTransparentLayer = UIView()
     let leftNameLabel = UILabel()
@@ -40,14 +41,14 @@ class MatchPairTableViewCell: UITableViewCell {
         leftCellImage.layer.masksToBounds = true
         
         let cellTextHeight: CGFloat = 30.0
-        let cellTextWidth: CGFloat = frame.size.width - (imageSize * 2) - (cellImageInsets * 4)
+        let cellTextWidth: CGFloat = frame.size.width - (imageSize * 2) - (cellImageInsets * 4) - additionalLeftPadding
         let cellTextY: CGFloat = (frame.size.height / 2) - cellTextHeight
-        cellText.frame = CGRectMake(cellImageInsets, cellTextY, cellTextWidth, cellTextHeight)
+        cellText.frame = CGRectMake(cellImageInsets + additionalLeftPadding, cellTextY, cellTextWidth, cellTextHeight)
         cellText.adjustsFontSizeToFitWidth = true
         cellText.font = UIFont.systemFontOfSize(20)
         
         let dateLabelY: CGFloat = cellText.frame.origin.y + cellTextHeight
-        dateLabel.frame = CGRectMake(cellImageInsets, dateLabelY, cellTextWidth, cellTextHeight)
+        dateLabel.frame = CGRectMake(cellImageInsets + additionalLeftPadding, dateLabelY, cellTextWidth, cellTextHeight)
         dateLabel.textColor = UIColor.lightGrayColor()
     }
 
@@ -62,6 +63,19 @@ class MatchPairTableViewCell: UITableViewCell {
 
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    /**
+     * Sets the additional amount of padding on the left side of this cell.
+     * This is useful when an edit button appears in this cell. The total
+     * amount of left-side padding is this amount + cellImageInsets. Notice
+     * that this will also automatically adjust cell width to fit.
+     *
+     * HACK Can I seriously not name this setAdditionalLeftPadding? Why is
+     * it that this name is reserved, but I can't use it anyways? </shrug>
+     */
+    func setAdditionalLeftPaddingForCell(padding: CGFloat) {
+        additionalLeftPadding = padding
     }
     
     func addTransparentLayerWithName(leftName: String, rightName: String) {

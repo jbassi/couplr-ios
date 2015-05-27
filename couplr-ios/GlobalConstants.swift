@@ -118,6 +118,9 @@ let kProfileDetailViewProfileNameLabelFont = UIFont(name: "HelveticaNeue-Light",
 /* MatchViewControllerCollectionView Constants */
 let kMatchViewControllerCollectionViewNumberOfRows: Int = 9
 
+/* History view Constants */
+let kAdditionalLeftPaddingForDeleteButton: CGFloat = 35.0
+
 /* PickerView Colors */
 let kPickerTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, alpha: 0.6)
 
