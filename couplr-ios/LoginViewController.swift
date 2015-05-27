@@ -32,11 +32,11 @@ class LoginViewController: UIViewController {
         
         loginView.delegate = self
         loginView.readPermissions = ["user_friends", "user_status", "user_posts", "user_photos"]
-        let loginViewX:CGFloat = (view.bounds.width / 2) - (loginView.bounds.width / 2)
-        let loginViewY:CGFloat = view.bounds.height - 40 - (loginView.bounds.height / 2)
+        let loginViewX: CGFloat = (view.bounds.width / 2) - (loginView.bounds.width / 2)
+        let loginViewY: CGFloat = view.bounds.height - 40 - (loginView.bounds.height / 2)
         loginView.frame.origin = CGPointMake(loginViewX, loginViewY)
         
-        let continueButtonY:CGFloat = (view.bounds.height / 2) + (loginView.frame.height / 2)
+        let continueButtonY: CGFloat = (view.bounds.height / 2) + (loginView.frame.height / 2)
         continueButton.frame = CGRectMake(0, continueButtonY, view.frame.size.width, 50)
         continueButton.titleLabel?.adjustsFontSizeToFitWidth = true
         continueButton.titleLabel?.textAlignment = .Center
@@ -57,8 +57,8 @@ class LoginViewController: UIViewController {
         viewControllerArray.append(pageTwo)
         viewControllerArray.append(pageThree)
         
-        let pageControlX:CGFloat = (view.bounds.width / 2) - (pageControl.bounds.width / 2)
-        let pageControlY:CGFloat = loginViewY - 20
+        let pageControlX: CGFloat = (view.bounds.width / 2) - (pageControl.bounds.width / 2)
+        let pageControlY: CGFloat = loginViewY - 20
         pageControl.frame.origin = CGPointMake(pageControlX, pageControlY)
         pageControl.numberOfPages = viewControllerArray.count
         pageControl.currentPage = 0
@@ -149,7 +149,7 @@ class LoginViewController: UIViewController {
         pageViewController.removeFromParentViewController()
         pageViewController.view.removeFromSuperview()
         pageControl.removeFromSuperview()
-        let loginViewY:CGFloat = (view.bounds.height / 2) - (loginView.bounds.height / 2)
+        let loginViewY: CGFloat = (view.bounds.height / 2) - (loginView.bounds.height / 2)
         loginView.frame.origin.y = loginViewY
     }
     
@@ -163,7 +163,7 @@ class LoginViewController: UIViewController {
         pageViewController.view!.hidden = false
         pageControl.hidden = false
         
-        let loginViewY:CGFloat = view.bounds.height - 40 - (loginView.bounds.height / 2)
+        let loginViewY: CGFloat = view.bounds.height - 40 - (loginView.bounds.height / 2)
         loginView.frame.origin.y = loginViewY
         
         view.bringSubviewToFront(pageControl)
@@ -201,7 +201,7 @@ extension LoginViewController: FBLoginViewDelegate {
         hideTutorial()
     }
     
-    func loginView(loginView : FBLoginView!, handleError:NSError) {
+    func loginView(loginView : FBLoginView!, handleError: NSError) {
         CouplrLoginErrorHandler.handleError(handleError)
     }
     

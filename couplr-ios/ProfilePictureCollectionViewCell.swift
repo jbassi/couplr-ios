@@ -32,7 +32,7 @@ class ProfilePictureCollectionViewCell: UICollectionViewCell {
         super.init(coder: aDecoder)
     }
     
-    func addTransparentLayerWithName(name:String) {
+    func addTransparentLayerWithName(name: String) {
         transparentLayer.frame = CGRectMake(4, 4, 92, 92)
         transparentLayer.backgroundColor = UIColor(white: 0.1, alpha: 0.8)
         transparentLayer.layer.masksToBounds = true
@@ -53,7 +53,7 @@ class ProfilePictureCollectionViewCell: UICollectionViewCell {
         UIView.animateWithDuration(kProfilePictureCollectionViewCellHideAnimationDuration, animations: {
             self.transparentLayer.backgroundColor = UIColor.clearColor()
             self.nameLabel.textColor = UIColor.clearColor()
-            }, completion: { (value:Bool) in
+            }, completion: { (value: Bool) in
                 self.transparentLayer.removeFromSuperview()
                 self.nameLabel.removeFromSuperview()
         })

@@ -38,31 +38,31 @@ public class MatchGraphController {
      * The matches involve the user's closest friends, and are sorted
      * by chronological order, newest first.
      */
-    public func newsfeedMatches(maxNumMatches:Int = kMaxNumNewsfeedMatches) -> [(MatchTuple,NSDate)] {
+    public func newsfeedMatches(maxNumMatches: Int = kMaxNumNewsfeedMatches) -> [(MatchTuple, NSDate)] {
         if matches == nil {
             log("MatchGraphController::newsfeedMatches called before match graph was initialized.", withFlag: "-")
             return []
         }
-        let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
-        var updateTimesByMatchTuple:[MatchTuple:NSDate] = [MatchTuple:NSDate]()
-        for friendId:UInt64 in SocialGraphController.sharedInstance.closestFriendsOfUser(rootId) {
-            for (neighborId:UInt64, matchList:MatchList) in matches!.matchListsForUserId(friendId) {
+        let rootId: UInt64 = SocialGraphController.sharedInstance.rootId()
+        var updateTimesByMatchTuple: [MatchTuple: NSDate] = [MatchTuple: NSDate]()
+        for friendId: UInt64 in SocialGraphController.sharedInstance.closestFriendsOfUser(rootId) {
+            for (neighborId: UInt64, matchList: MatchList) in matches!.matchListsForUserId(friendId) {
                 if neighborId == rootId || !SocialGraphController.sharedInstance.hasNameForUser(neighborId) {
                     continue
                 }
-                for (titleId:Int, _:[UInt64]) in matchList.matchesByTitle {
-                    let updateTime:NSDate? = matchList.lastUpdateTimeForTitle(titleId)
+                for (titleId: Int, _: [UInt64]) in matchList.matchesByTitle {
+                    let updateTime: NSDate? = matchList.lastUpdateTimeForTitle(titleId)
                     if updateTime != nil {
                         updateTimesByMatchTuple[MatchTuple(firstId: friendId, secondId: neighborId, titleId: titleId)] = updateTime!
                     }
                 }
             }
         }
-        var matchTuples:[MatchTuple] = updateTimesByMatchTuple.keys.array
+        var matchTuples: [MatchTuple] = updateTimesByMatchTuple.keys.array
         matchTuples.sort {
-            (first:MatchTuple, second:MatchTuple) -> Bool in
-            let firstUpdateTime:NSDate = updateTimesByMatchTuple[first]!
-            let secondUpdateTime:NSDate = updateTimesByMatchTuple[second]!
+            (first: MatchTuple, second: MatchTuple) -> Bool in
+            let firstUpdateTime: NSDate = updateTimesByMatchTuple[first]!
+            let secondUpdateTime: NSDate = updateTimesByMatchTuple[second]!
             return firstUpdateTime.compare(secondUpdateTime) == .OrderedDescending
         }
         matchTuples = Array(matchTuples[0..<min(matchTuples.count, maxNumMatches)])
@@ -79,14 +79,14 @@ public class MatchGraphController {
             log("MatchGraphController::rootUserVoteHistory called before match graph was initialized.", withFlag: "-")
             return []
         }
-        let voteHistory:[(MatchTuple,NSDate)] = Array(matches!.userVotes.keys.filter({ (tuple:MatchTuple) -> Bool in
+        let voteHistory: [(MatchTuple, NSDate)] = Array(matches!.userVotes.keys.filter({ (tuple: MatchTuple) -> Bool in
             return self.matches!.userVotes[tuple] != nil &&
                 SocialGraphController.sharedInstance.hasNameForUser(tuple.firstId) &&
                 SocialGraphController.sharedInstance.hasNameForUser(tuple.secondId)
-        }).map {(tuple:MatchTuple) -> (tuple:MatchTuple, time:NSDate) in
+        }).map {(tuple: MatchTuple) -> (tuple: MatchTuple, time: NSDate) in
             return (tuple, self.matches!.userVotes[tuple]!)
         })
-        return sorted(voteHistory, { (firstTupleAndTime:(MatchTuple,NSDate), secondTupleAndTime:(MatchTuple,NSDate)) -> Bool in
+        return sorted(voteHistory, { (firstTupleAndTime:(MatchTuple, NSDate), secondTupleAndTime:(MatchTuple, NSDate)) -> Bool in
             return firstTupleAndTime.1.compare(secondTupleAndTime.1) == .OrderedDescending
         })
     }
@@ -116,13 +116,13 @@ public class MatchGraphController {
      * minNumMatches: indicates the minimum number of matches to count as
      *   most recent, given that there are at least that many total matches.
      */
-    public func rootUserRecentMatches(maxNumMatches:Int = kMaxNumRecentMatches) -> [(MatchTuple,NSDate)] {
+    public func rootUserRecentMatches(maxNumMatches: Int = kMaxNumRecentMatches) -> [(MatchTuple, NSDate)] {
         if matches == nil {
             return []
         }
-        let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
-        var recentMatchesAndUpdateTimes:[(MatchTuple,NSDate)] = []
-        for (match:MatchTuple, updateTime:NSDate) in matches!.matchUpdateTimes {
+        let rootId: UInt64 = SocialGraphController.sharedInstance.rootId()
+        var recentMatchesAndUpdateTimes: [(MatchTuple, NSDate)] = []
+        for (match: MatchTuple, updateTime: NSDate) in matches!.matchUpdateTimes {
             if match.firstId == rootId || match.secondId == rootId {
                 recentMatchesAndUpdateTimes.append((match, updateTime))
             }
@@ -145,9 +145,9 @@ public class MatchGraphController {
      *
      * If the request failed, the resulting argument will be nil.
      */
-    public func doAfterLoadingMatchesForId(id:UInt64, callback:([(Int,[(UInt64,Int)])]?) -> Void) {
+    public func doAfterLoadingMatchesForId(id: UInt64, callback:([(Int,[(UInt64, Int)])]?) -> Void) {
         matches?.fetchMatchesForIds([id], callback: {
-            (didError:Bool) -> Void in
+            (didError: Bool) -> Void in
             if didError {
                 callback(nil)
             } else {
@@ -163,7 +163,7 @@ public class MatchGraphController {
      * TODO Implement "reliability" features here, i.e. resending queries
      * to Parse up to a maximum number of attempts.
      */
-    public func fetchMatchTitles(callback:((didError:Bool)->Void)) {
+    public func fetchMatchTitles(callback:((didError: Bool)->Void)) {
         if matches == nil {
             callback(didError: true)
         } else {
@@ -184,17 +184,17 @@ public class MatchGraphController {
     /**
      * Returns a MatchTitle object for the given title id.
      */
-    public func matchTitleFromId(titleId:Int) -> MatchTitle? {
+    public func matchTitleFromId(titleId: Int) -> MatchTitle? {
         return matches!.titlesById[titleId]
     }
 
     /**
      * Wraps a call to the same method of MatchGraph.
      */
-    public func sortedMatchesForUser(userId:UInt64) -> [(Int,[(UInt64,Int)])] {
+    public func sortedMatchesForUser(userId: UInt64) -> [(Int,[(UInt64, Int)])] {
         if matches == nil {
             log("Warning: match graph not yet loaded!", withFlag:"?")
-            return [(Int,[(UInt64,Int)])]()
+            return [(Int,[(UInt64, Int)])]()
         }
         return matches!.sortedMatchesForUser(userId)
     }
@@ -204,7 +204,7 @@ public class MatchGraphController {
      * Will assume that the SocialGraph has already been initialized,
      * so the root user is graph!.root.
      */
-    public func userDidMatch(from:UInt64, to:UInt64, withTitleId:Int) {
+    public func userDidMatch(from: UInt64, to: UInt64, withTitleId: Int) {
         matches?.userDidMatch(from, to: to, withTitleId: withTitleId)
     }
     
@@ -213,21 +213,21 @@ public class MatchGraphController {
      * This will not only update the internal data structure, but also
      * make a request to Parse to delete the corresponding match.
      */
-    public func userDidUndoMatch(from:UInt64, to:UInt64, withTitleId:Int) {
+    public func userDidUndoMatch(from: UInt64, to: UInt64, withTitleId: Int) {
         if matches == nil {
             return log("MatchGraphController::userDidUndoMatch called before the match graph was initialized!", withFlag: "-")
         }
         if matches!.userDidUndoMatch(from, to: to, withTitleId: withTitleId) {
-            let rootUser:UInt64 = SocialGraphController.sharedInstance.rootId()
-            let matchToRemove:MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId, voterId: rootUser)
+            let rootUser: UInt64 = SocialGraphController.sharedInstance.rootId()
+            let matchToRemove: MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId, voterId: rootUser)
             // Try to remove the match from Parse.
-            var query:PFQuery = PFQuery(className: "MatchData")
+            var query: PFQuery = PFQuery(className: "MatchData")
             let (rootUserKey, firstKey, secondKey) = (encodeBase64(rootUser), encodeBase64(matchToRemove.firstId), encodeBase64(matchToRemove.secondId))
             query.whereKey("voterId", equalTo: rootUserKey)
             query.whereKey("firstId", equalTo: firstKey)
             query.whereKey("secondId", equalTo: secondKey)
             query.whereKey("titleId", equalTo: withTitleId)
-            query.findObjectsInBackgroundWithBlock({ (objects:[AnyObject]!, error:NSError?) -> Void in
+            query.findObjectsInBackgroundWithBlock({ (objects: [AnyObject]!, error: NSError?) -> Void in
                 if error != nil || objects.count < 1 {
                     log("Failed to delete [\(firstKey)), \(secondKey), \(withTitleId)]: \(error!.localizedDescription)", withFlag: "-", withIndent: 1)
                     return
@@ -246,10 +246,10 @@ public class MatchGraphController {
      * match information for the user's closest friends from Parse.
      */
     public func didFinishLoadingExtendedSocialGraph() {
-        let rootId:UInt64 = SocialGraphController.sharedInstance.rootId()
-        let friends:[UInt64] = SocialGraphController.sharedInstance.closestFriendsOfUser(rootId)
+        let rootId: UInt64 = SocialGraphController.sharedInstance.rootId()
+        let friends: [UInt64] = SocialGraphController.sharedInstance.closestFriendsOfUser(rootId)
         matches?.fetchMatchesForIds(friends, callback: {
-            (didError:Bool) -> Void in
+            (didError: Bool) -> Void in
             if !didError {
                 SocialGraphController.sharedInstance.didLoadMatchesForClosestFriends()
                 CouplrViewCoordinator.sharedInstance.refreshNewsfeedView()

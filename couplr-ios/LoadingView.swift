@@ -70,7 +70,7 @@ class LoadingView: UIView {
             self.addSubview(backgroundView)
             UIView.animateWithDuration(kLoadingViewShowAnimationDuration, animations: {
                 self.backgroundView.alpha = 1
-                }, completion: { (completed:Bool) in
+                }, completion: { (completed: Bool) in
                     if completed {
                         UIView.animateWithDuration(kLoadingLabelShowAnimationDuration, animations: { self.loadingLabel.alpha = 1 })
                     }
@@ -108,7 +108,7 @@ class LoadingView: UIView {
     override func animationDidStop(anim: CAAnimation!, finished flag: Bool) {
         UIView.animateWithDuration(kLoadingViewHideAnimationDuration, animations: {
             self.backgroundView.alpha = 0
-            }, completion: { (completed:Bool) in
+            }, completion: { (completed: Bool) in
                 self.backgroundView.removeFromSuperview()
                 self.removeFromSuperview()
         })

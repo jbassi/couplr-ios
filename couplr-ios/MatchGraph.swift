@@ -10,22 +10,22 @@ import Parse
 import UIKit
 
 public class MatchTitle : Equatable {
-    public init(id:Int, text:String, picture:String) {
+    public init(id: Int, text: String, picture: String) {
         self.id = id
         self.text = text
         self.picture = picture
     }
 
-    var id:Int
-    var text:String
-    var picture:String
+    var id: Int
+    var text: String
+    var picture: String
     
     public func toString() -> String {
         return "[id=\(id), text=\"\(text)\", picture=\"\(picture)\"]"
     }
 }
 
-public func ==(lhs:MatchTitle, rhs:MatchTitle) -> Bool {
+public func ==(lhs: MatchTitle, rhs: MatchTitle) -> Bool {
     return lhs.id == rhs.id && lhs.text == rhs.text && lhs.picture == rhs.picture
 }
 
@@ -39,7 +39,7 @@ public func ==(lhs:MatchTitle, rhs:MatchTitle) -> Bool {
  * the titleId.
  */
 public class MatchTuple : Hashable {
-    public init(firstId:UInt64, secondId:UInt64, titleId:Int = 0, voterId:UInt64 = 0) {
+    public init(firstId: UInt64, secondId: UInt64, titleId: Int = 0, voterId: UInt64 = 0) {
         if firstId > secondId {
             self.firstId = secondId
             self.secondId = firstId
@@ -51,8 +51,8 @@ public class MatchTuple : Hashable {
         self.titleId = titleId
     }
     
-    public var hashValue:Int {
-        let sum:UInt64 = UInt64.addWithOverflow(UInt64.addWithOverflow(self.firstId, self.secondId).0, self.voterId).0
+    public var hashValue: Int {
+        let sum: UInt64 = UInt64.addWithOverflow(UInt64.addWithOverflow(self.firstId, self.secondId).0, self.voterId).0
         return lower32Bits(sum).hashValue + self.titleId
     }
     
@@ -61,13 +61,13 @@ public class MatchTuple : Hashable {
             SocialGraphController.sharedInstance.nameFromId(secondId) + " for \(titleId) by \(encodeBase64(voterId))"
     }
     
-    var firstId:UInt64
-    var secondId:UInt64
-    var voterId:UInt64
-    var titleId:Int
+    var firstId: UInt64
+    var secondId: UInt64
+    var voterId: UInt64
+    var titleId: Int
 }
 
-public func ==(lhs:MatchTuple, rhs:MatchTuple) -> Bool {
+public func ==(lhs: MatchTuple, rhs: MatchTuple) -> Bool {
     return lhs.firstId == rhs.firstId && lhs.secondId == rhs.secondId && lhs.voterId == rhs.voterId && lhs.titleId == rhs.titleId
 }
 
@@ -77,8 +77,8 @@ public func ==(lhs:MatchTuple, rhs:MatchTuple) -> Bool {
  */
 public class MatchList {
     public init() {
-        self.matchesByTitle = [Int:[UInt64]]()
-        self.latestNonRootUpdateTimes = [Int:NSDate]()
+        self.matchesByTitle = [Int: [UInt64]]()
+        self.latestNonRootUpdateTimes = [Int: NSDate]()
     }
 
     /**
@@ -86,14 +86,14 @@ public class MatchList {
      * has been correctly added, otherwise returns false (e.g. if
      * the result already exists).
      */
-    public func updateMatch(titleId:Int, voterId:UInt64, updateTime:NSDate? = nil) -> Bool {
+    public func updateMatch(titleId: Int, voterId: UInt64, updateTime: NSDate? = nil) -> Bool {
         if matchesByTitle[titleId] == nil {
             matchesByTitle[titleId] = []
         }
-        let voterList:[UInt64] = matchesByTitle[titleId]!
+        let voterList: [UInt64] = matchesByTitle[titleId]!
         if find(voterList, voterId) == nil {
             matchesByTitle[titleId]!.append(voterId)
-            if updateTime != nil && shouldUpdateLatestTime(titleId, voterId:voterId, updateTime:updateTime!) {
+            if updateTime != nil && shouldUpdateLatestTime(titleId, voterId: voterId, updateTime: updateTime!) {
                 latestNonRootUpdateTimes[titleId] = updateTime
             }
             return true
@@ -107,7 +107,7 @@ public class MatchList {
      * update the last non-root update time for the title, since this
      * operation will only remove matches made by the root user.
      */
-    public func removeMatchVotedByRootUser(titleId:Int) -> Bool {
+    public func removeMatchVotedByRootUser(titleId: Int) -> Bool {
         if matchesByTitle[titleId] == nil {
             return false
         }
@@ -126,19 +126,19 @@ public class MatchList {
      * on by the root user. A nil result indicates that only the user voted
      * on this match pair.
      */
-    public func lastUpdateTimeForTitle(titleId:Int) -> NSDate? {
+    public func lastUpdateTimeForTitle(titleId: Int) -> NSDate? {
         return latestNonRootUpdateTimes[titleId]
     }
     
-    private func shouldUpdateLatestTime(titleId:Int, voterId:UInt64, updateTime:NSDate) -> Bool {
+    private func shouldUpdateLatestTime(titleId: Int, voterId: UInt64, updateTime: NSDate) -> Bool {
         return voterId != SocialGraphController.sharedInstance.rootId() &&
             (latestNonRootUpdateTimes[titleId] == nil || updateTime.compare(latestNonRootUpdateTimes[titleId]!) == .OrderedDescending)
     }
 
     // Maps a title ID to a list of users who voted for that match.
-    var matchesByTitle:[Int:[UInt64]]
+    var matchesByTitle: [Int: [UInt64]]
     // Maps a title to the last time that it was updated.
-    var latestNonRootUpdateTimes:[Int:NSDate]
+    var latestNonRootUpdateTimes: [Int: NSDate]
 }
 
 /**
@@ -146,36 +146,36 @@ public class MatchList {
  */
 public class MatchGraph {
     public init() {
-        self.matches = [UInt64:[UInt64:MatchList]]()
-        self.titlesById = [Int:MatchTitle]()
+        self.matches = [UInt64: [UInt64: MatchList]]()
+        self.titlesById = [Int: MatchTitle]()
         self.titleList = [MatchTitle]()
-        self.fetchedIdHistory = [UInt64:Bool]()
+        self.fetchedIdHistory = [UInt64: Bool]()
         self.didFetchUserMatchHistory = false
         self.currentlyFlushingMatches = false
         self.unregisteredMatches = [MatchTuple]()
         self.matchesBeforeUserHistoryLoaded = [MatchTuple]()
-        self.cachedMatchesByTitle = [UInt64:[(Int,[(UInt64,Int)])]]()
-        self.matchUpdateTimes = [MatchTuple:NSDate]()
-        self.userVotes = [MatchTuple:NSDate]()
+        self.cachedMatchesByTitle = [UInt64: [(Int,[(UInt64, Int)])]]()
+        self.matchUpdateTimes = [MatchTuple: NSDate]()
+        self.userVotes = [MatchTuple: NSDate]()
     }
 
     /**
      * Loads match titles from Parse and passes them to a given callback
      * function.
      */
-    public func fetchMatchTitles(callback:((didError:Bool)->Void)? = nil) {
+    public func fetchMatchTitles(callback:((didError: Bool)->Void)? = nil) {
         log("Requesting match titles...", withFlag: "!")
         var query = PFQuery(className: "MatchTitle")
         query.findObjectsInBackgroundWithBlock {
-            (objects:[AnyObject]!, error:NSError?) -> Void in
+            (objects: [AnyObject]!, error: NSError?) -> Void in
             if error == nil {
-                for title:AnyObject in objects {
-                    let titleId:Int = title["titleId"]! as! Int
-                    let text:String = title["text"]! as! String
-                    let picture:String = title["picture"]! as! String
+                for title: AnyObject in objects {
+                    let titleId: Int = title["titleId"]! as! Int
+                    let text: String = title["text"]! as! String
+                    let picture: String = title["picture"]! as! String
                     self.titlesById[titleId] = MatchTitle(id: titleId, text: text, picture: picture)
                 }
-                for title:MatchTitle in self.titlesById.values {
+                for title: MatchTitle in self.titlesById.values {
                     self.titleList.append(title)
                 }
                 self.titleList = sorted(self.titleList, {(first: MatchTitle, second: MatchTitle) -> Bool in
@@ -183,12 +183,12 @@ public class MatchGraph {
                 })
                 log("Received \(objects.count) titles.", withIndent: 1, withNewline: true)
                 if callback != nil {
-                    callback!(didError:false)
+                    callback!(didError: false)
                 }
             } else {
                 log("Error \"\(error!.description)\" while retrieving titles.", withIndent: 1, withFlag: "-", withNewline: true)
                 if callback != nil {
-                    callback!(didError:true)
+                    callback!(didError: true)
                 }
             }
         }
@@ -199,11 +199,11 @@ public class MatchGraph {
      * purposes.
      */
     public func toString() -> String {
-        var result:String = "MatchGraph({\n"
-        for (node:UInt64, neighbors:[UInt64:MatchList]) in matches {
+        var result: String = "MatchGraph({\n"
+        for (node: UInt64, neighbors: [UInt64: MatchList]) in matches {
             result += "    \(node)'s matches:\n"
-            for (neighbor:UInt64, matchList:MatchList) in neighbors {
-                for (titleId:Int, voters:[UInt64]) in matchList.matchesByTitle {
+            for (neighbor: UInt64, matchList: MatchList) in neighbors {
+                for (titleId: Int, voters: [UInt64]) in matchList.matchesByTitle {
                     result += "        with \(neighbor) (\(voters.count) votes): \(titlesById[titleId]!.text)\n"
                 }
             }
@@ -221,23 +221,23 @@ public class MatchGraph {
      * This list of sorted matches will not include neighbors that the root user does
      * not know about (i.e. users who do not appear in the root user's social graph).
      */
-    public func sortedMatchesForUser(userId:UInt64) -> [(Int,[(UInt64,Int)])] {
+    public func sortedMatchesForUser(userId: UInt64) -> [(Int,[(UInt64, Int)])] {
         if cachedMatchesByTitle[userId] != nil {
             return cachedMatchesByTitle[userId]!
         }
         if matches[userId] == nil {
-            return [(Int,[(UInt64,Int)])]()
+            return [(Int,[(UInt64, Int)])]()
         }
-        var matchResultSet:[Int:[UInt64:Int]] = [Int:[UInt64:Int]]()
-        var matchCountsByTitle:[Int:Int] = [Int:Int]()
-        for (neighbor:UInt64, list:MatchList) in matches[userId]! {
+        var matchResultSet: [Int: [UInt64: Int]] = [Int: [UInt64: Int]]()
+        var matchCountsByTitle: [Int: Int] = [Int: Int]()
+        for (neighbor: UInt64, list: MatchList) in matches[userId]! {
             // HACK Find a better way of preventing unknown users from showing up in matches.
             if !SocialGraphController.sharedInstance.hasNameForUser(neighbor) {
                 continue
             }
-            for (titleId:Int, voters:[UInt64]) in list.matchesByTitle {
+            for (titleId: Int, voters: [UInt64]) in list.matchesByTitle {
                 if matchResultSet[titleId] == nil {
-                    matchResultSet[titleId] = [UInt64:Int]()
+                    matchResultSet[titleId] = [UInt64: Int]()
                 }
                 matchResultSet[titleId]![neighbor] = voters.count
                 if matchCountsByTitle[titleId] == nil {
@@ -246,20 +246,20 @@ public class MatchGraph {
                 matchCountsByTitle[titleId] = matchCountsByTitle[titleId]! + voters.count
             }
         }
-        var sortedMatches:[(Int,[(UInt64,Int)])] = [(Int,[(UInt64,Int)])]()
-        for (titleId:Int, results:[UInt64:Int]) in matchResultSet {
-            var list:[(UInt64,Int)] = [(UInt64,Int)]()
-            for (neighbor:UInt64, count:Int) in results {
+        var sortedMatches: [(Int,[(UInt64, Int)])] = [(Int,[(UInt64, Int)])]()
+        for (titleId: Int, results: [UInt64: Int]) in matchResultSet {
+            var list: [(UInt64, Int)] = [(UInt64, Int)]()
+            for (neighbor: UInt64, count: Int) in results {
                 list.append((neighbor, count))
             }
             list.sort {
-                (first:(UInt64,Int), second:(UInt64,Int)) -> Bool in
+                (first:(UInt64, Int), second:(UInt64, Int)) -> Bool in
                 return first.1 > second.1
             }
             sortedMatches += [(titleId, list)]
         }
         sortedMatches.sort {
-            (first:(Int,[(UInt64,Int)]), second:(Int,[(UInt64,Int)])) -> Bool in
+            (first:(Int,[(UInt64, Int)]), second:(Int,[(UInt64, Int)])) -> Bool in
             return matchCountsByTitle[first.0]! > matchCountsByTitle[second.0]!
         }
         cachedMatchesByTitle[userId] = sortedMatches
@@ -274,15 +274,15 @@ public class MatchGraph {
      * finishes. The callback takes a Bool parameter indicating whether or not an
      * error occurred when receiving the data.
      */
-    public func fetchMatchesForIds(userIds:[UInt64], callback:((didError:Bool)->Void)? = nil) {
+    public func fetchMatchesForIds(userIds: [UInt64], callback:((didError: Bool)->Void)? = nil) {
         // FIXME Why is this function being invoked with an empty list?
         if userIds.count == 0 {
             return log("Skipping match request for 0 users.", withFlag:"-")
         }
         log("Requesting match records for user(s) \(SocialGraphController.sharedInstance.namesFromIds(userIds))", withFlag:"!")
         // Do not re-fetch matches.
-        let userIdsToQuery:[UInt64] = userIds.filter {
-            (userId:UInt64) -> Bool in
+        let userIdsToQuery: [UInt64] = userIds.filter {
+            (userId: UInt64) -> Bool in
             if self.fetchedIdHistory[userId] != nil {
                 log("Skipping match query for user \(SocialGraphController.sharedInstance.namesFromIds(userIds))")
                 return false
@@ -291,36 +291,36 @@ public class MatchGraph {
         }
         if userIdsToQuery.count == 0 {
             if callback != nil {
-                callback!(didError:false)
+                callback!(didError: false)
             }
-            return log("Matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIds))) already loaded.", withIndent:1, withNewline:true)
+            return log("Matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIds))) already loaded.", withIndent: 1, withNewline: true)
         }
-        let encodedUserIds:[String] = userIds.map(encodeBase64)
-        let predicate:NSPredicate = NSPredicate(format:"firstId IN %@ OR secondId IN %@", encodedUserIds, encodedUserIds)
-        var query = PFQuery(className:"MatchData", predicate:predicate)
+        let encodedUserIds: [String] = userIds.map(encodeBase64)
+        let predicate: NSPredicate = NSPredicate(format:"firstId IN %@ OR secondId IN %@", encodedUserIds, encodedUserIds)
+        var query = PFQuery(className:"MatchData", predicate: predicate)
         query.findObjectsInBackgroundWithBlock {
-            (objects:[AnyObject]!, error:NSError?) -> Void in
+            (objects: [AnyObject]!, error: NSError?) -> Void in
             if error == nil {
                 for index in 0..<objects.count {
-                    let matchData:AnyObject! = objects[index]
-                    let first:UInt64 = uint64FromAnyObject(matchData["firstId"], base64:true)
-                    let second:UInt64 = uint64FromAnyObject(matchData["secondId"], base64:true)
-                    let voter:UInt64 = uint64FromAnyObject(matchData["voterId"], base64:true)
-                    let titleId:Int = matchData["titleId"] as! Int
+                    let matchData: AnyObject! = objects[index]
+                    let first: UInt64 = uint64FromAnyObject(matchData["firstId"], base64: true)
+                    let second: UInt64 = uint64FromAnyObject(matchData["secondId"], base64: true)
+                    let voter: UInt64 = uint64FromAnyObject(matchData["voterId"], base64: true)
+                    let titleId: Int = matchData["titleId"] as! Int
                     self.tryToUpdateMatch(first, secondId: second, voterId: voter, titleId: titleId, time: matchData.updatedAt)
                 }
                 // Consider a match fetched only after the response arrives.
-                for userId:UInt64 in userIdsToQuery {
+                for userId: UInt64 in userIdsToQuery {
                     self.fetchedIdHistory[userId] = true
                 }
-                log("Received and updated \(objects.count) matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent:1, withNewline:true)
+                log("Received and updated \(objects.count) matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent: 1, withNewline: true)
                 if callback != nil {
-                    callback!(didError:false)
+                    callback!(didError: false)
                 }
             } else {
-                log("Error \(error!.description) occurred when loading matches for \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent:1, withFlag:"-", withNewline:true)
+                log("Error \(error!.description) occurred when loading matches for \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent: 1, withFlag:"-", withNewline: true)
                 if callback != nil {
-                    callback!(didError:true)
+                    callback!(didError: true)
                 }
             }
         }
@@ -332,11 +332,11 @@ public class MatchGraph {
      * HACK This method should really be private, but it's public because the
      *   tests need to know how to add matches to the graph.
      */
-    public func tryToUpdateMatch(firstId:UInt64, secondId:UInt64, voterId:UInt64, titleId:Int, time:NSDate? = nil) {
+    public func tryToUpdateMatch(firstId: UInt64, secondId: UInt64, voterId: UInt64, titleId: Int, time: NSDate? = nil) {
         self.tryToUpdateDirectedEdge(firstId, to: secondId, voter: voterId, titleId: titleId, updateTime: time)
         self.tryToUpdateDirectedEdge(secondId, to: firstId, voter: voterId, titleId: titleId, updateTime: time)
         if time != nil {
-            let matchTuple:MatchTuple = MatchTuple(firstId: firstId, secondId: secondId, titleId: titleId, voterId: voterId)
+            let matchTuple: MatchTuple = MatchTuple(firstId: firstId, secondId: secondId, titleId: titleId, voterId: voterId)
             self.matchUpdateTimes[matchTuple] = time!
         }
     }
@@ -346,8 +346,8 @@ public class MatchGraph {
      * correspondingly, and running a given callback function upon receiving a
      * response.
      */
-    public func fetchRootUserVoteHistory(callback:((didError:Bool) -> Void)? = nil) {
-        let rootUser:UInt64 = rootUserFromGraph()
+    public func fetchRootUserVoteHistory(callback:((didError: Bool) -> Void)? = nil) {
+        let rootUser: UInt64 = rootUserFromGraph()
         if rootUser == 0 {
             return log("Warning: MatchGraph::fetchRootUserMatchHistory called before social graph was initialized.", withFlag:"-")
         }
@@ -355,31 +355,31 @@ public class MatchGraph {
             return log("Request for user history denied. Already fetched root user history.", withFlag:"?")
         }
         log("Requesting match history for current user.", withFlag:"!")
-        let predicate:NSPredicate = NSPredicate(format:"voterId = \"\(encodeBase64(rootUser))\"")
-        var query = PFQuery(className:"MatchData", predicate:predicate)
+        let predicate: NSPredicate = NSPredicate(format:"voterId = \"\(encodeBase64(rootUser))\"")
+        var query = PFQuery(className:"MatchData", predicate: predicate)
         query.findObjectsInBackgroundWithBlock {
-            (objects:[AnyObject]!, error:NSError?) -> Void in
+            (objects: [AnyObject]!, error: NSError?) -> Void in
             if error == nil {
-                for index:Int in 0..<objects.count {
-                    let matchData:AnyObject! = objects[index]
-                    let first:UInt64 = uint64FromAnyObject(matchData["firstId"], base64:true)
-                    let second:UInt64 = uint64FromAnyObject(matchData["secondId"], base64:true)
-                    let titleId:Int = matchData["titleId"] as! Int
-                    let updateTime:NSDate = matchData.updatedAt
-                    self.tryToUpdateDirectedEdge(first, to:second, voter:rootUser, titleId:titleId, updateTime:updateTime)
-                    self.tryToUpdateDirectedEdge(second, to:first, voter:rootUser, titleId:titleId, updateTime:updateTime)
+                for index: Int in 0..<objects.count {
+                    let matchData: AnyObject! = objects[index]
+                    let first: UInt64 = uint64FromAnyObject(matchData["firstId"], base64: true)
+                    let second: UInt64 = uint64FromAnyObject(matchData["secondId"], base64: true)
+                    let titleId: Int = matchData["titleId"] as! Int
+                    let updateTime: NSDate = matchData.updatedAt
+                    self.tryToUpdateDirectedEdge(first, to: second, voter: rootUser, titleId: titleId, updateTime: updateTime)
+                    self.tryToUpdateDirectedEdge(second, to: first, voter: rootUser, titleId: titleId, updateTime: updateTime)
                     self.userVotes[MatchTuple(firstId: first, secondId: second, titleId: titleId)] = updateTime
                 }
                 self.didFetchUserMatchHistory = true
                 self.checkMatchesBeforeUserHistoryLoaded()
-                log("User voted on \(objects.count) matches.", withIndent:1, withNewline:true)
+                log("User voted on \(objects.count) matches.", withIndent: 1, withNewline: true)
                 if callback != nil {
-                    callback!(didError:false)
+                    callback!(didError: false)
                 }
             } else {
-                log("Error \"\(error!.description)\" while fetching user match history.", withIndent:1, withFlag:"-", withNewline:true)
+                log("Error \"\(error!.description)\" while fetching user match history.", withIndent: 1, withFlag:"-", withNewline: true)
                 if callback != nil {
-                    callback!(didError:true)
+                    callback!(didError: true)
                 }
             }
         }
@@ -391,7 +391,7 @@ public class MatchGraph {
      * from disappearing in the case of a crash.
      */
     public func flushUnregisteredMatches() {
-        let rootUser:UInt64 = rootUserFromGraph()
+        let rootUser: UInt64 = rootUserFromGraph()
         if rootUser == 0 {
             return log("Warning: MatchGraph::flushUnregisteredMatches called before social graph was initialized.", withFlag: "-")
         }
@@ -403,9 +403,9 @@ public class MatchGraph {
         }
         currentlyFlushingMatches = true
         log("Saving \(unregisteredMatches.count) matches to Parse...")
-        var newMatches:[PFObject] = [PFObject]()
-        for match:MatchTuple in unregisteredMatches {
-            var newMatch:PFObject = PFObject(className: "MatchData")
+        var newMatches: [PFObject] = [PFObject]()
+        for match: MatchTuple in unregisteredMatches {
+            var newMatch: PFObject = PFObject(className: "MatchData")
             newMatch["firstId"] = encodeBase64(match.firstId)
             newMatch["secondId"] = encodeBase64(match.secondId)
             newMatch["voterId"] = encodeBase64(rootUser)
@@ -420,14 +420,14 @@ public class MatchGraph {
      * Attempts to remove the user's vote for a given couple and title. Returns true
      * if and only if a saved match was found and removed from the match graph.
      */
-    public func userDidUndoMatch(from:UInt64, to:UInt64, withTitleId:Int) -> Bool {
-        let rootUser:UInt64 = rootUserFromGraph()
+    public func userDidUndoMatch(from: UInt64, to: UInt64, withTitleId: Int) -> Bool {
+        let rootUser: UInt64 = rootUserFromGraph()
         if rootUser == 0 {
             log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag: "-")
             return false
         }
-        let matchToRemove:MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId)
-        var didRemoveMatchFromGraph:Bool = false
+        let matchToRemove: MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId)
+        var didRemoveMatchFromGraph: Bool = false
         // Attempt to remove any existing edges from the graph.
         if undirectedMatchListExists(from, to: to) {
             didRemoveMatchFromGraph = matches[from]![to]!.removeMatchVotedByRootUser(withTitleId)
@@ -436,8 +436,8 @@ public class MatchGraph {
             pruneDirectedMatchListIfEmpty(to, to: from)
         }
         // Attempt to remove any matches that were going to be flushed to Parse.
-        var indicesToRemove:[Int] = []
-        for (index:Int, match:MatchTuple) in enumerate(matchesBeforeUserHistoryLoaded) {
+        var indicesToRemove: [Int] = []
+        for (index: Int, match: MatchTuple) in enumerate(matchesBeforeUserHistoryLoaded) {
             if match == matchToRemove {
                 indicesToRemove.append(index)
             }
@@ -446,7 +446,7 @@ public class MatchGraph {
             matchesBeforeUserHistoryLoaded.removeAtIndex(index)
         }
         indicesToRemove.removeAll()
-        for (index:Int, match:MatchTuple) in enumerate(unregisteredMatches) {
+        for (index: Int, match: MatchTuple) in enumerate(unregisteredMatches) {
             if match == matchToRemove {
                 indicesToRemove.append(index)
             }
@@ -467,17 +467,17 @@ public class MatchGraph {
      * added and the social graph exists, notifies the social graph about the
      * new match.
      */
-    public func userDidMatch(from:UInt64, to:UInt64, withTitleId:Int) -> Bool {
+    public func userDidMatch(from: UInt64, to: UInt64, withTitleId: Int) -> Bool {
         if from == to {
             log("User voted \(from) with him/herself!", withFlag: "-")
             return false
         }
-        let match:MatchTuple = MatchTuple(firstId: from, secondId: to)
+        let match: MatchTuple = MatchTuple(firstId: from, secondId: to)
         if !didFetchUserMatchHistory {
             matchesBeforeUserHistoryLoaded.append(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId))
             return true
         }
-        let rootUser:UInt64 = rootUserFromGraph()
+        let rootUser: UInt64 = rootUserFromGraph()
         if rootUser == 0 {
             log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag: "-")
             return false
@@ -497,14 +497,14 @@ public class MatchGraph {
     /**
      * Returns a dictionary containing MatchLists of each neighbor of the given user.
      */
-    public func matchListsForUserId(userId:UInt64) -> [UInt64:MatchList] {
-        return matches[userId] == nil ? [UInt64:MatchList]() : matches[userId]!
+    public func matchListsForUserId(userId: UInt64) -> [UInt64: MatchList] {
+        return matches[userId] == nil ? [UInt64: MatchList]() : matches[userId]!
     }
     
     /**
      * Removes a *directed* match list iff the match list is completely empty.
      */
-    private func pruneDirectedMatchListIfEmpty(from:UInt64, to:UInt64) {
+    private func pruneDirectedMatchListIfEmpty(from: UInt64, to: UInt64) {
         if matches[from] == nil || matches[from]![to] == nil {
             return
         }
@@ -520,20 +520,20 @@ public class MatchGraph {
      * Updates the graph going in one direction. Returns if the edge was successfully
      * added (i.e. the user did not already vote on the pair for the same title).
      */
-    private func tryToUpdateDirectedEdge(from:UInt64, to:UInt64, voter:UInt64, titleId:Int, updateTime:NSDate? = nil) -> Bool {
+    private func tryToUpdateDirectedEdge(from: UInt64, to: UInt64, voter: UInt64, titleId: Int, updateTime: NSDate? = nil) -> Bool {
         // Make a new adjacency map if none exists.
         if matches[from] == nil {
-            matches[from] = [UInt64:MatchList]()
+            matches[from] = [UInt64: MatchList]()
         }
         // Make a new MatchList if none exists.
         if matches[from]![to] == nil {
             matches[from]![to] = MatchList()
         }
-        let didUpdateMatch:Bool = matches[from]![to]!.updateMatch(titleId, voterId:voter, updateTime:updateTime)
+        let didUpdateMatch: Bool = matches[from]![to]!.updateMatch(titleId, voterId: voter, updateTime: updateTime)
         if didUpdateMatch {
             cachedMatchesByTitle[from] = nil
             cachedMatchesByTitle[to] = nil
-            SocialGraphController.sharedInstance.notifyMatchExistsBetweenUsers(from, secondUser:to, withVoter:voter)
+            SocialGraphController.sharedInstance.notifyMatchExistsBetweenUsers(from, secondUser: to, withVoter: voter)
         }
         return didUpdateMatch
     }
@@ -558,11 +558,11 @@ public class MatchGraph {
      * history arrives.
      */
     private func checkMatchesBeforeUserHistoryLoaded() {
-        let rootUser:UInt64 = rootUserFromGraph()
+        let rootUser: UInt64 = rootUserFromGraph()
         if rootUser == 0 {
             return log("Warning: MatchGraph::checkMatchesBeforeUserHistoryLoaded called before social graph was initialized.", withFlag:"-")
         }
-        for match:MatchTuple in matchesBeforeUserHistoryLoaded {
+        for match: MatchTuple in matchesBeforeUserHistoryLoaded {
             if tryToUpdateDirectedEdge(match.firstId, to: match.secondId, voter: rootUser, titleId: match.titleId) &&
                 tryToUpdateDirectedEdge(match.secondId, to: match.firstId, voter: rootUser , titleId: match.titleId) {
                     
@@ -579,20 +579,20 @@ public class MatchGraph {
      * Returns true iff a MatchList exists going from the first user to the second and
      * from the second user to the first.
      */
-    private func undirectedMatchListExists(from:UInt64, to:UInt64) -> Bool {
+    private func undirectedMatchListExists(from: UInt64, to: UInt64) -> Bool {
         return matches[to] != nil && matches[to]![from] != nil && matches[from] != nil && matches[from]![to] != nil
     }
 
-    var matches:[UInt64:[UInt64:MatchList]]
-    var titlesById:[Int:MatchTitle]
-    var titleList:[MatchTitle]
-    var fetchedIdHistory:[UInt64:Bool]
-    var didFetchUserMatchHistory:Bool
-    var currentlyFlushingMatches:Bool
-    var unregisteredMatches:[MatchTuple]
-    var userVotes:[MatchTuple:NSDate]
-    var matchesBeforeUserHistoryLoaded:[MatchTuple]
-    var matchUpdateTimes:[MatchTuple:NSDate]
+    var matches: [UInt64: [UInt64: MatchList]]
+    var titlesById: [Int: MatchTitle]
+    var titleList: [MatchTitle]
+    var fetchedIdHistory: [UInt64: Bool]
+    var didFetchUserMatchHistory: Bool
+    var currentlyFlushingMatches: Bool
+    var unregisteredMatches: [MatchTuple]
+    var userVotes: [MatchTuple: NSDate]
+    var matchesBeforeUserHistoryLoaded: [MatchTuple]
+    var matchUpdateTimes: [MatchTuple: NSDate]
     
-    var cachedMatchesByTitle:[UInt64:[(Int,[(UInt64,Int)])]]
+    var cachedMatchesByTitle: [UInt64: [(Int,[(UInt64, Int)])]]
 }

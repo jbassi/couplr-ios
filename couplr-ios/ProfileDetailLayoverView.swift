@@ -17,9 +17,9 @@ class ProfileDetailLayoverView: UIView {
     let blurView = FXBlurView()
     let dismissButton: UIButton = UIButton()
     let tableView: UITableView = UITableView()
-    var title:MatchTitle? = nil
-    var matchResult:[(UInt64,Int)]? = nil
-    var recentMatchesResult:[MatchTuple]? = nil
+    var title: MatchTitle? = nil
+    var matchResult: [(UInt64, Int)]? = nil
+    var recentMatchesResult: [MatchTuple]? = nil
     var imageName: String?
     let headerLabel: UILabel = UILabel()
     let titleImage: UIImageView = UIImageView()
@@ -120,7 +120,7 @@ class ProfileDetailLayoverView: UIView {
             self.frame.origin.y = self.superview!.frame.size.height + self.frame.size.height
             self.transparentLayer.alpha = 0
             self.blurView.alpha = 0
-            }, completion: { (completed:Bool) in
+            }, completion: { (completed: Bool) in
                 self.blurView.removeFromSuperview()
                 self.transparentLayer.removeFromSuperview()
                 self.removeFromSuperview()
@@ -132,17 +132,17 @@ class ProfileDetailLayoverView: UIView {
         if recentMatchesResult != nil {
             return recentMatchesResult!
         }
-        let rootId:UInt64 = socialGraphController.rootId()
+        let rootId: UInt64 = socialGraphController.rootId()
         recentMatchesResult = []
-        let tuples:[MatchTuple] = matchGraphController.rootUserRecentMatches().filter({
-            (tupleAndTime:(MatchTuple,NSDate)) -> Bool in
-            let tuple:MatchTuple = tupleAndTime.0
-            let matchedWithId:UInt64 = tuple.firstId == rootId ? tuple.secondId : tuple.firstId
+        let tuples: [MatchTuple] = matchGraphController.rootUserRecentMatches().filter({
+            (tupleAndTime:(MatchTuple, NSDate)) -> Bool in
+            let tuple: MatchTuple = tupleAndTime.0
+            let matchedWithId: UInt64 = tuple.firstId == rootId ? tuple.secondId : tuple.firstId
             return self.socialGraphController.hasNameForUser(matchedWithId)
         }).map{ $0.0 }
-        for u:MatchTuple in tuples {
-            var shouldAddMatch:Bool = true
-            for v:MatchTuple in recentMatchesResult! {
+        for u: MatchTuple in tuples {
+            var shouldAddMatch: Bool = true
+            for v: MatchTuple in recentMatchesResult! {
                 if u == v {
                     shouldAddMatch = false
                 }
@@ -154,17 +154,17 @@ class ProfileDetailLayoverView: UIView {
         return recentMatchesResult
     }
     
-    func matchResultsForTitleId() -> [(UInt64,Int)]? {
+    func matchResultsForTitleId() -> [(UInt64, Int)]? {
         if self.title == nil {
             return nil
         }
         if self.matchResult != nil {
             return self.matchResult
         }
-        let rootId:UInt64 = socialGraphController.rootId()
-        let sortedMatches:[(Int,[(UInt64,Int)])] = matchGraphController.sortedMatchesForUser(rootId)
-        let matchResult:[(UInt64,Int)] = sortedMatches.filter ({
-            (titleAndMatches:(Int,[(UInt64,Int)])) -> Bool in
+        let rootId: UInt64 = socialGraphController.rootId()
+        let sortedMatches: [(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
+        let matchResult: [(UInt64, Int)] = sortedMatches.filter ({
+            (titleAndMatches:(Int,[(UInt64, Int)])) -> Bool in
             return titleAndMatches.0 == self.title?.id
         })[0].1
         self.matchResult = matchResult
@@ -177,7 +177,7 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         if useRecentMatches {
             self.recentMatchesResult = nil // Reset the recent matches upon rendering a new view.
-            if let recentMatchesResult:[MatchTuple]? = recentMatches() {
+            if let recentMatchesResult: [MatchTuple]? = recentMatches() {
                 if recentMatchesResult?.count > 0 {
                     tableView.separatorStyle = .SingleLine
                     return 1
@@ -202,12 +202,12 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if useRecentMatches {
             self.recentMatchesResult = nil // Reset the recent matches upon rendering a new view.
-            if let recentMatchesResult:[MatchTuple]? = recentMatches() {
+            if let recentMatchesResult: [MatchTuple]? = recentMatches() {
                 return recentMatchesResult!.count
             }
         } else {
             self.matchResult = nil // Reset the match result upon rendering a new view.
-            if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
+            if let matchResult: [(UInt64, Int)] = matchResultsForTitleId() {
                 return matchResult.count
             }
         }
@@ -216,11 +216,11 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if useRecentMatches {
-            let rootId:UInt64 = socialGraphController.rootId()
+            let rootId: UInt64 = socialGraphController.rootId()
             let cell = tableView.dequeueReusableCellWithIdentifier("RecentViewCell", forIndexPath: indexPath) as! ImageTitleTableViewCell
-            if let recentMatchesResult:[MatchTuple]? = recentMatches() {
-                let matchTuple:MatchTuple = recentMatchesResult![indexPath.row]
-                let matchedWithId:UInt64 = matchTuple.firstId == rootId ? matchTuple.secondId : matchTuple.firstId
+            if let recentMatchesResult: [MatchTuple]? = recentMatches() {
+                let matchTuple: MatchTuple = recentMatchesResult![indexPath.row]
+                let matchedWithId: UInt64 = matchTuple.firstId == rootId ? matchTuple.secondId : matchTuple.firstId
                 cell.selectionStyle = .None
                 cell.cellImage.layer.cornerRadius = 30
                 cell.cellImage.layer.masksToBounds = true
@@ -232,8 +232,8 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
             
         } else {
             let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as! ImageTableViewCell
-            if let matchResult:[(UInt64,Int)] = matchResultsForTitleId() {
-                let (matchedWithId:UInt64, voteCount:Int) = matchResult[indexPath.row]
+            if let matchResult: [(UInt64, Int)] = matchResultsForTitleId() {
+                let (matchedWithId: UInt64, voteCount: Int) = matchResult[indexPath.row]
                 cell.selectionStyle = .None
                 cell.cellText.text = socialGraphController.nameFromId(matchedWithId, maxStringLength: 20)
                 cell.cellImage.layer.cornerRadius = 30

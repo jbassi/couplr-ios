@@ -67,13 +67,13 @@ class SocialGraphControllerTest: XCTestCase {
         graph!.connectNode(1, toNode: 10, withWeight: 2)
         controller.updateRandomSample()
         XCTAssertEqual(sorted(controller.currentSample()), [2, 3, 4, 5, 6, 7, 8, 9, 10], "Expected the random sample to contain all the other users.")
-        for node:UInt64 in 2...10 {
+        for node: UInt64 in 2...10 {
             XCTAssertLessThan(graph!.walkWeightBonusForNode(node), 0, "Expected a walk weight penalty for node \(node)")
         }
         controller.updateRandomSample(keepUsersAtIndices: [(5, 0), (2, 1), (4, 2)])
         XCTAssertEqual(controller.currentSample()[0..<3], [5, 2, 4], "Expected the random sample to retain given users and indices.")
         controller.updateRandomSample()
-        for node:UInt64 in 2...10 {
+        for node: UInt64 in 2...10 {
             XCTAssertLessThan(graph!.walkWeightBonusForNode(node), 0, "Expected a walk weight penalty for node \(node)")
             XCTAssertGreaterThan(graph!.walkWeightBonusForNode(node), -1, "Expected walk weight penalty for node \(node) to not be below -1.")
         }

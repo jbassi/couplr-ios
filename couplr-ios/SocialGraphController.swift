@@ -15,15 +15,15 @@ protocol SocialGraphControllerDelegate: class {
 
 public class SocialGraphController {
 
-    weak var delegate:SocialGraphControllerDelegate?
-    var graph:SocialGraph?
-    var voteHistoryOrPhotoDataLoadProgress:Int = 0 // HACK This is really terrible. Make this an enum or something!
+    weak var delegate: SocialGraphControllerDelegate?
+    var graph: SocialGraph?
+    var voteHistoryOrPhotoDataLoadProgress: Int = 0 // HACK This is really terrible. Make this an enum or something!
     var graphSerializationSemaphore = dispatch_semaphore_create(1)
-    var graphInitializeBeginTime:Double = 0
-    var doBuildGraphFromCoreData:Bool = false
-    var matchesRecordedInSocialGraph:[MatchTuple:Bool] = [MatchTuple:Bool]() // HACK This name is so terrible I can't even.
+    var graphInitializeBeginTime: Double = 0
+    var doBuildGraphFromCoreData: Bool = false
+    var matchesRecordedInSocialGraph: [MatchTuple: Bool] = [MatchTuple: Bool]() // HACK This name is so terrible I can't even.
 
-    lazy var managedObjectContext:NSManagedObjectContext? = {
+    lazy var managedObjectContext: NSManagedObjectContext? = {
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         if let managedObjectContext = appDelegate.managedObjectContext {
             return managedObjectContext
@@ -48,7 +48,7 @@ public class SocialGraphController {
         graphSerializationSemaphore = dispatch_semaphore_create(1)
         graphInitializeBeginTime = 0
         doBuildGraphFromCoreData = false
-        matchesRecordedInSocialGraph = [MatchTuple:Bool]()
+        matchesRecordedInSocialGraph = [MatchTuple: Bool]()
         graph = nil
     }
 
@@ -62,12 +62,12 @@ public class SocialGraphController {
         FBRequestConnection.startWithGraphPath("me?fields=id",
             completionHandler: { (connection, result, error) -> Void in
                 if error == nil {
-                    let root:UInt64 = uint64FromAnyObject(result["id"])
+                    let root: UInt64 = uint64FromAnyObject(result["id"])
                     if MatchGraphController.sharedInstance.matches == nil {
                         return
                     }
                     MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root], callback: {
-                        (didError:Bool) -> Void in
+                        (didError: Bool) -> Void in
                         if !didError {
                             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 CouplrViewCoordinator.sharedInstance.refreshProfileView()
@@ -79,7 +79,7 @@ public class SocialGraphController {
                     if self.doBuildGraphFromCoreData {
                         self.initializeGraphFromCoreData(root)
                     } else {
-                        self.graph = SocialGraph(root: root, nodes: [UInt64:String]())
+                        self.graph = SocialGraph(root: root, nodes: [UInt64: String]())
                         self.graph!.updateGraphUsingPosts()
                     }
                 } else {
@@ -99,7 +99,7 @@ public class SocialGraphController {
         voteHistoryOrPhotoDataLoadProgress++
         if voteHistoryOrPhotoDataLoadProgress == 2 {
             // Both vote history and photo data are finished loading.
-            for tuple:MatchTuple in MatchGraphController.sharedInstance.matches!.userVotes.keys {
+            for tuple: MatchTuple in MatchGraphController.sharedInstance.matches!.userVotes.keys {
                 // For each match the user makes, connect the matched nodes.
                 if graph!.nodes[tuple.firstId] != nil && graph!.nodes[tuple.secondId] != nil {
                     graph!.connectNode(tuple.firstId, toNode: tuple.secondId, withWeight: kUserMatchVoteScore)
@@ -124,7 +124,7 @@ public class SocialGraphController {
      * TODO Implement sample history and prevent the user from
      * encountering repetitive samples here.
      */
-    public func updateRandomSample(keepUsersAtIndices:[(UInt64,Int)] = []) {
+    public func updateRandomSample(keepUsersAtIndices: [(UInt64, Int)] = []) {
         graph?.updateRandomSample(keepUsersAtIndices: keepUsersAtIndices)
     }
 
@@ -146,11 +146,11 @@ public class SocialGraphController {
      * (if it exists) a middle initial, and then the last name an
      * initial.
      */
-    public func nameFromId(id:UInt64, maxStringLength:Int = kMaxNameDisplayLength) -> String {
+    public func nameFromId(id: UInt64, maxStringLength: Int = kMaxNameDisplayLength) -> String {
         if graph == nil || graph!.names[id] == nil {
             return String(id)
         }
-        var name:String = graph!.names[id]!
+        var name: String = graph!.names[id]!
         if name.lengthOfBytesUsingEncoding(NSUTF8StringEncoding) > maxStringLength {
             name = shortenFullName(name, NameDisplayMode.MiddleInitial)
         }
@@ -164,21 +164,21 @@ public class SocialGraphController {
      * Returns a list of names from a list of ids. Simply
      * for convenience.
      */
-    public func namesFromIds(ids:[UInt64], maxStringLength:Int = kMaxNameDisplayLength) -> [String] {
+    public func namesFromIds(ids: [UInt64], maxStringLength: Int = kMaxNameDisplayLength) -> [String] {
         return ids.map { self.nameFromId($0, maxStringLength: 15) }
     }
 
     /**
      * Notifies the graph that the user performed a match.
      */
-    public func userDidMatch(firstId:UInt64, toSecondId:UInt64) {
+    public func userDidMatch(firstId: UInt64, toSecondId: UInt64) {
         graph?.userDidMatch(firstId, toSecondId: toSecondId)
     }
 
     /**
      * Returns true iff the graph contains the given user id.
      */
-    public func containsUser(userId:UInt64) -> Bool {
+    public func containsUser(userId: UInt64) -> Bool {
         if graph == nil {
             return false
         }
@@ -189,7 +189,7 @@ public class SocialGraphController {
      * Returns true iff the given user's id has a corresponding
      * name.
      */
-    public func hasNameForUser(userId:UInt64) -> Bool {
+    public func hasNameForUser(userId: UInt64) -> Bool {
         if graph == nil {
             return false
         }
@@ -219,7 +219,7 @@ public class SocialGraphController {
             return
         }
         if self.graph!.nodes.count <= 10 {
-            let missingPermissions:[String] = unapprovedUserPermissions(["user_friends", "user_photos", "user_posts", "user_status"])
+            let missingPermissions: [String] = unapprovedUserPermissions(["user_friends", "user_photos", "user_posts", "user_status"])
             if missingPermissions.count > 0 {
                 showLoginWithAlertViewErrorMessage("Help us find your friends by enabling photo, post and status permissions. Remember: Couplr never saves your data, and we will never post on your behalf!", "Social network too small.", completionHandler: alertViewHandlerByName("request_missing_permissions"))
             } else {
@@ -230,7 +230,7 @@ public class SocialGraphController {
         self.delegate?.socialGraphControllerDidLoadSocialGraph(self.graph!)
         MatchGraphController.sharedInstance.socialGraphDidLoad()
         log("Initialized graph (\(self.graph!.nodes.count) nodes \(self.graph!.edgeCount) edges \(self.graph!.totalEdgeWeight) weight).", withIndent: 1)
-        let timeString:String = String(format: "%.3f",
+        let timeString: String = String(format: "%.3f",
             currentTimeInSeconds() - SocialGraphController.sharedInstance.graphInitializeBeginTime)
         log("Time since startup: \(timeString) sec", withIndent: 1, withNewline: true)
         if self.doBuildGraphFromCoreData {
@@ -250,21 +250,21 @@ public class SocialGraphController {
         managedObjectContext!.save(nil)
         log("Flushing the graph to core data...", withFlag: "!")
         RootData.insert(managedObjectContext!, rootId: graph!.root, timeModified: NSDate().timeIntervalSince1970)
-        for (id:UInt64, name:String) in graph!.nodes {
+        for (id: UInt64, name: String) in graph!.nodes {
             NodeData.insert(managedObjectContext!, nodeId: id, name: name)
         }
-        for (id:UInt64, name:String) in graph!.names {
+        for (id: UInt64, name: String) in graph!.names {
             NameData.insert(managedObjectContext!, nodeId: id, name: name)
         }
-        for (node:UInt64, neighbors:[UInt64:Float]) in graph!.edges {
-            for (neighbor:UInt64, weight:Float) in neighbors {
+        for (node: UInt64, neighbors: [UInt64: Float]) in graph!.edges {
+            for (neighbor: UInt64, weight: Float) in neighbors {
                 if node < neighbor {
                     EdgeData.insert(managedObjectContext!, fromId: node, toId: neighbor, weight: weight)
                 }
             }
         }
         if managedObjectContext != nil {
-            var error:NSError? = nil
+            var error: NSError? = nil
             managedObjectContext!.save(&error)
             if error != nil {
                 log("Error when saving to Core Data: \(error!.description)")
@@ -279,19 +279,19 @@ public class SocialGraphController {
      *   consider as "close". This function will not return more
      *   than that number.
      */
-    public func closestFriendsOfUser(userId:UInt64, maxNumFriends:Int = kMaxNumClosestFriends) -> [UInt64] {
+    public func closestFriendsOfUser(userId: UInt64, maxNumFriends: Int = kMaxNumClosestFriends) -> [UInt64] {
         if graph == nil || graph!.edges[userId] == nil {
             return []
         }
-        var closestNeighbors:[(UInt64, Float)] = []
-        for (neighbor:UInt64, weight:Float) in graph!.edges[userId]! {
+        var closestNeighbors: [(UInt64, Float)] = []
+        for (neighbor: UInt64, weight: Float) in graph!.edges[userId]! {
             closestNeighbors.append((neighbor, weight))
         }
         closestNeighbors.sort({
-            (first:(UInt64,Float), second:(UInt64,Float)) -> Bool in
+            (first:(UInt64, Float), second:(UInt64, Float)) -> Bool in
             return first.1 > second.1
         })
-        let numClosestFriends:Int = min(maxNumFriends, closestNeighbors.count)
+        let numClosestFriends: Int = min(maxNumFriends, closestNeighbors.count)
         return Array(closestNeighbors[0..<numClosestFriends]).map({$0.0})
     }
 
@@ -301,13 +301,13 @@ public class SocialGraphController {
      * between the two users who were matched, but only if the voter
      * was not the root and an edge had not been previously added.
      */
-    public func notifyMatchExistsBetweenUsers(firstUser:UInt64, secondUser:UInt64, withVoter:UInt64) {
+    public func notifyMatchExistsBetweenUsers(firstUser: UInt64, secondUser: UInt64, withVoter: UInt64) {
         if graph == nil || withVoter == graph!.root || graph!.nodes[firstUser] == nil || graph!.nodes[secondUser] == nil {
             return
         }
-        let pair:MatchTuple = MatchTuple(firstId:firstUser, secondId:secondUser)
+        let pair: MatchTuple = MatchTuple(firstId: firstUser, secondId: secondUser)
         if matchesRecordedInSocialGraph[pair] == nil {
-            graph!.connectNode(firstUser, toNode:secondUser, withWeight:kMatchExistsBetweenUsersWeight)
+            graph!.connectNode(firstUser, toNode: secondUser, withWeight: kMatchExistsBetweenUsersWeight)
             matchesRecordedInSocialGraph[pair] = true
         }
     }
@@ -325,19 +325,19 @@ public class SocialGraphController {
     /**
      * Initializes the graph directly from core data.
      */
-    private func initializeGraphFromCoreData(rootId:UInt64) {
+    private func initializeGraphFromCoreData(rootId: UInt64) {
         log("Initializing graph from core data...", withFlag:"!")
-        var nodes:[UInt64:String] = [UInt64:String]()
+        var nodes: [UInt64: String] = [UInt64: String]()
         for node in NodeData.allObjects(managedObjectContext!) {
             nodes[node.id()] = node.name
         }
         self.graph = SocialGraph(root: rootId, nodes: nodes)
-        let edges:[EdgeData] = EdgeData.allObjects(managedObjectContext!)
-        for edgeData:EdgeData in edges {
+        let edges: [EdgeData] = EdgeData.allObjects(managedObjectContext!)
+        for edgeData: EdgeData in edges {
             graph!.connectNode(edgeData.from(), toNode: edgeData.to(), withWeight: edgeData.weight)
         }
-        let names:[NameData] = NameData.allObjects(managedObjectContext!)
-        for name:NameData in names {
+        let names: [NameData] = NameData.allObjects(managedObjectContext!)
+        for name: NameData in names {
             graph!.names[name.id()] = name.name
         }
         graph!.loadGendersFromCoreData()
@@ -348,16 +348,16 @@ public class SocialGraphController {
      * Removes all graph data from local storage.
      */
     private func eraseGraphFromCoreData() {
-        for root:RootData in RootData.allObjects(managedObjectContext!) {
+        for root: RootData in RootData.allObjects(managedObjectContext!) {
             managedObjectContext!.deleteObject(root)
         }
-        for node:NodeData in NodeData.allObjects(managedObjectContext!) {
+        for node: NodeData in NodeData.allObjects(managedObjectContext!) {
             managedObjectContext!.deleteObject(node)
         }
-        for edge:EdgeData in EdgeData.allObjects(managedObjectContext!) {
+        for edge: EdgeData in EdgeData.allObjects(managedObjectContext!) {
             managedObjectContext!.deleteObject(edge)
         }
-        for name:NameData in NameData.allObjects(managedObjectContext!) {
+        for name: NameData in NameData.allObjects(managedObjectContext!) {
             managedObjectContext!.deleteObject(name)
         }
     }
@@ -366,15 +366,15 @@ public class SocialGraphController {
      * Determines whether or not we should use Core Data to
      * build the graph up.
      */
-    private func shouldInitializeGraphFromCoreData(rootId:UInt64) -> Bool {
+    private func shouldInitializeGraphFromCoreData(rootId: UInt64) -> Bool {
         if !kEnableGraphCaching {
             return false
         }
-        let roots:[RootData] = RootData.allObjects(managedObjectContext!)
+        let roots: [RootData] = RootData.allObjects(managedObjectContext!)
         if roots.count != 1 {
             return false
         }
-        let secondsSinceUpdate:Double = NSDate().timeIntervalSince1970 - roots[0].timeModified
+        let secondsSinceUpdate: Double = NSDate().timeIntervalSince1970 - roots[0].timeModified
         return roots[0].id() == rootId && secondsSinceUpdate < kSecondsBeforeNextGraphUpdate
     }
 }

@@ -13,10 +13,10 @@ class HistoryViewController: UIViewController {
     
     let socialGraphController = SocialGraphController.sharedInstance
     let matchGraphController = MatchGraphController.sharedInstance
-    var headerView:MatchPairHeaderView?
-    var historyTableView:UITableView?
+    var headerView: MatchPairHeaderView?
+    var historyTableView: UITableView?
     
-    var cachedVoteHistory:[(MatchTuple, NSDate)]? = nil
+    var cachedVoteHistory: [(MatchTuple, NSDate)]? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,9 +59,9 @@ class HistoryViewController: UIViewController {
     func showAllNamesInVisibleCells() {
         for cell in historyTableView!.visibleCells() {
             let newsCell = cell as! MatchPairTableViewCell
-            let match:MatchTuple = voteHistory()[historyTableView!.indexPathForCell(newsCell)!.row].0
-            let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
-            let nameForSecondId:String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
+            let match: MatchTuple = voteHistory()[historyTableView!.indexPathForCell(newsCell)!.row].0
+            let nameForFirstId: String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
+            let nameForSecondId: String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
             newsCell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
         }
     }
@@ -73,7 +73,7 @@ class HistoryViewController: UIViewController {
         }
     }
     
-    func switchToggled(sender:UISwitch) {
+    func switchToggled(sender: UISwitch) {
         if sender.on {
             showAllNamesInVisibleCells()
             UserSessionTracker.sharedInstance.notify("toggled newsfeed names on")
@@ -112,19 +112,19 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("HistoryViewCell", forIndexPath: indexPath) as! MatchPairTableViewCell
-        let (match:MatchTuple, updateTime:NSDate) = voteHistory()[indexPath.row]
+        let (match: MatchTuple, updateTime: NSDate) = voteHistory()[indexPath.row]
         cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text
         cell.selectionStyle = .None
         cell.leftCellImage.sd_setImageWithURL(profilePictureURLFromId(match.firstId), placeholderImage: UIImage(named: "unknown"))
         cell.rightCellImage.sd_setImageWithURL(profilePictureURLFromId(match.secondId), placeholderImage: UIImage(named: "unknown"))
         if headerView!.nameSwitch.on {
-            let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
-            let nameForSecondId:String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
+            let nameForFirstId: String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
+            let nameForSecondId: String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
             cell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
         } else {
             cell.removeTransparentLayer()
         }
-        let updateTimeInterval:NSTimeInterval = NSDate().timeIntervalSinceDate(updateTime)
+        let updateTimeInterval: NSTimeInterval = NSDate().timeIntervalSinceDate(updateTime)
         cell.dateLabel.text = "\(timeElapsedAsText(updateTimeInterval)) ago"
         return cell
     }

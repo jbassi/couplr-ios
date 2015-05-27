@@ -15,14 +15,14 @@ import CoreData
  */
 public class RootData: NSManagedObject {
     
-    @NSManaged var idBase64:String
-    @NSManaged var timeModified:Double
+    @NSManaged var idBase64: String
+    @NSManaged var timeModified: Double
     
     public func id() -> UInt64 {
         return decodeBase64(idBase64)
     }
     
-    public func set(id:UInt64, timeModified:Double) {
+    public func set(id: UInt64, timeModified: Double) {
         self.idBase64 = encodeBase64(id)
         self.timeModified = timeModified
     }
@@ -31,14 +31,14 @@ public class RootData: NSManagedObject {
         return "Root(id=\(id()), time=\"\(timeModified.description)\")"
     }
     
-    class func insert(context:NSManagedObjectContext, rootId:UInt64, timeModified:Double) {
+    class func insert(context: NSManagedObjectContext, rootId: UInt64, timeModified: Double) {
         let root = NSEntityDescription.insertNewObjectForEntityForName("RootData", inManagedObjectContext: context) as! RootData
         root.set(rootId, timeModified: timeModified)
     }
     
-    class func allObjects(context:NSManagedObjectContext) -> [RootData] {
+    class func allObjects(context: NSManagedObjectContext) -> [RootData] {
         let request = NSFetchRequest(entityName: "RootData")
-        var error:NSError? = nil
+        var error: NSError? = nil
         if let fetchResults = context.executeFetchRequest(request, error: &error) as? [RootData] {
             return fetchResults
         }
@@ -48,14 +48,14 @@ public class RootData: NSManagedObject {
 }
 
 public class IdNameMapping : NSManagedObject {
-    @NSManaged var idBase64:String
-    @NSManaged var name:String
+    @NSManaged var idBase64: String
+    @NSManaged var name: String
     
     public func id() -> UInt64 {
         return decodeBase64(idBase64)
     }
     
-    public func set(nodeId:UInt64, name:String) {
+    public func set(nodeId: UInt64, name: String) {
         self.name = name
         self.idBase64 = encodeBase64(nodeId)
     }
@@ -71,14 +71,14 @@ public class IdNameMapping : NSManagedObject {
  * social graph.
  */
 public class NodeData : IdNameMapping {
-    class func insert(context:NSManagedObjectContext, nodeId:UInt64, name:String) {
-        let node:NodeData = NSEntityDescription.insertNewObjectForEntityForName("NodeData", inManagedObjectContext: context) as! NodeData
+    class func insert(context: NSManagedObjectContext, nodeId: UInt64, name: String) {
+        let node: NodeData = NSEntityDescription.insertNewObjectForEntityForName("NodeData", inManagedObjectContext: context) as! NodeData
         node.set(nodeId, name: name)
     }
     
-    class func allObjects(context:NSManagedObjectContext) -> [NodeData] {
+    class func allObjects(context: NSManagedObjectContext) -> [NodeData] {
         let request = NSFetchRequest(entityName: "NodeData")
-        var error:NSError? = nil
+        var error: NSError? = nil
         if let fetchResults = context.executeFetchRequest(request, error: &error) as? [NodeData] {
             return fetchResults
         }
@@ -94,14 +94,14 @@ public class NodeData : IdNameMapping {
  * information in NodeData.
  */
 public class NameData: IdNameMapping {
-    class func insert(context:NSManagedObjectContext, nodeId:UInt64, name:String) {
-        let nameData:NameData = NSEntityDescription.insertNewObjectForEntityForName("NameData", inManagedObjectContext: context) as! NameData
+    class func insert(context: NSManagedObjectContext, nodeId: UInt64, name: String) {
+        let nameData: NameData = NSEntityDescription.insertNewObjectForEntityForName("NameData", inManagedObjectContext: context) as! NameData
         nameData.set(nodeId, name: name)
     }
     
-    class func allObjects(context:NSManagedObjectContext) -> [NameData] {
+    class func allObjects(context: NSManagedObjectContext) -> [NameData] {
         let request = NSFetchRequest(entityName: "NameData")
-        var error:NSError? = nil
+        var error: NSError? = nil
         if let fetchResults = context.executeFetchRequest(request, error: &error) as? [NameData] {
             return fetchResults
         }
@@ -117,9 +117,9 @@ public class NameData: IdNameMapping {
  */
 public class EdgeData: NSManagedObject {
     
-    @NSManaged var fromBase64:String
-    @NSManaged var toBase64:String
-    @NSManaged var weight:Float
+    @NSManaged var fromBase64: String
+    @NSManaged var toBase64: String
+    @NSManaged var weight: Float
     
     public func from() -> UInt64 {
         return decodeBase64(fromBase64)
@@ -129,7 +129,7 @@ public class EdgeData: NSManagedObject {
         return decodeBase64(toBase64)
     }
     
-    public func set(fromId:UInt64, toId:UInt64, weight:Float) {
+    public func set(fromId: UInt64, toId: UInt64, weight: Float) {
         self.fromBase64 = encodeBase64(fromId)
         self.toBase64 = encodeBase64(toId)
         self.weight = weight
@@ -139,14 +139,14 @@ public class EdgeData: NSManagedObject {
         return "Edge(to=\(from), from=\(to()), weight=\(weight))"
     }
     
-    class func insert(context:NSManagedObjectContext, fromId:UInt64, toId:UInt64, weight:Float) {
-        let edge:EdgeData = NSEntityDescription.insertNewObjectForEntityForName("EdgeData", inManagedObjectContext: context) as! EdgeData
+    class func insert(context: NSManagedObjectContext, fromId: UInt64, toId: UInt64, weight: Float) {
+        let edge: EdgeData = NSEntityDescription.insertNewObjectForEntityForName("EdgeData", inManagedObjectContext: context) as! EdgeData
         edge.set(fromId, toId: toId, weight: weight)
     }
     
-    class func allObjects(context:NSManagedObjectContext) -> [EdgeData] {
+    class func allObjects(context: NSManagedObjectContext) -> [EdgeData] {
         let request = NSFetchRequest(entityName: "EdgeData")
-        var error:NSError? = nil
+        var error: NSError? = nil
         if let fetchResults = context.executeFetchRequest(request, error: &error) as? [EdgeData] {
             return fetchResults
         }
@@ -170,19 +170,19 @@ public class GenderData: NSManagedObject {
         return Gender.fromString(self.genderAsString)
     }
     
-    public func set(name:String, gender:Gender) {
+    public func set(name: String, gender: Gender) {
         self.firstName = name
         self.genderAsString = gender.toString()
     }
     
-    class func insert(context:NSManagedObjectContext, name:String, gender:Gender) {
-        let genderData:GenderData = NSEntityDescription.insertNewObjectForEntityForName("GenderData", inManagedObjectContext: context) as! GenderData
+    class func insert(context: NSManagedObjectContext, name: String, gender: Gender) {
+        let genderData: GenderData = NSEntityDescription.insertNewObjectForEntityForName("GenderData", inManagedObjectContext: context) as! GenderData
         genderData.set(name, gender: gender)
     }
     
-    class func allObjects(context:NSManagedObjectContext) -> [GenderData] {
+    class func allObjects(context: NSManagedObjectContext) -> [GenderData] {
         let request = NSFetchRequest(entityName: "GenderData")
-        var error:NSError? = nil
+        var error: NSError? = nil
         if let fetchResults = context.executeFetchRequest(request, error: &error) as? [GenderData] {
             return fetchResults
         }

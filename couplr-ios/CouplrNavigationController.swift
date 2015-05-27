@@ -51,7 +51,7 @@ class CouplrViewCoordinator {
         matchViewController?.isInitializingSocialNetwork = false
     }
     
-    func tryToCreateAndShowLoadingView(animated:Bool = true) -> Bool {
+    func tryToCreateAndShowLoadingView(animated: Bool = true) -> Bool {
         let mainView = UIApplication.sharedApplication().delegate!.window!!
         if loadingViewIsActive {
             return false
@@ -80,13 +80,13 @@ class CouplrViewCoordinator {
         }
     }
     
-    weak var profileViewController:ProfileViewController?
-    weak var matchViewController:MatchViewController?
-    weak var newsfeedViewController:NewsfeedViewController?
-    weak var historyViewController:HistoryViewController?
-    weak var navigationController:CouplrNavigationController?
-    var loadingViewIsActive:Bool = false;
-    var loadingView:LoadingView? = nil;
+    weak var profileViewController: ProfileViewController?
+    weak var matchViewController: MatchViewController?
+    weak var newsfeedViewController: NewsfeedViewController?
+    weak var historyViewController: HistoryViewController?
+    weak var navigationController: CouplrNavigationController?
+    var loadingViewIsActive: Bool = false;
+    var loadingView: LoadingView? = nil;
 }
 
 class CouplrNavigationController: UINavigationController {
@@ -125,7 +125,7 @@ class CouplrNavigationController: UINavigationController {
     }
     
     func resetNavigation() {
-        pageViewController!.setViewControllers([viewControllerArray[kInitialPageIndex]], direction: .Forward, animated: false, completion: {(completed:Bool) in
+        pageViewController!.setViewControllers([viewControllerArray[kInitialPageIndex]], direction: .Forward, animated: false, completion: {(completed: Bool) in
             if completed {
                 self.currentPageIndex = kInitialPageIndex
                 self.lastPageIndex = kInitialPageIndex
@@ -144,11 +144,11 @@ class CouplrNavigationController: UINavigationController {
     
     func setupNavigationBarButtons() {
         customNavigationBar.frame = CGRectMake(0, view.frame.size.height-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight)
-        let buttonTags:[Int] = [kProfileViewButtonTag, kNewsfeedViewButtonTag, kMatchViewButtonTag, kHistoryViewButtonTag]
-        let buttonIconNames:[String] = ["nav-profile", "nav-newsfeed", "nav-match", "nav-history"]
+        let buttonTags: [Int] = [kProfileViewButtonTag, kNewsfeedViewButtonTag, kMatchViewButtonTag, kHistoryViewButtonTag]
+        let buttonIconNames: [String] = ["nav-profile", "nav-newsfeed", "nav-match", "nav-history"]
         let buttonWidth = view.frame.width / CGFloat(viewControllerArray.count)
-        for (index:Int, button:UIButton) in enumerate(buttonArray) {
-            let buttonOffset:CGFloat = buttonWidth * CGFloat(index)
+        for (index: Int, button: UIButton) in enumerate(buttonArray) {
+            let buttonOffset: CGFloat = buttonWidth * CGFloat(index)
             button.frame = CGRectMake(buttonOffset, 0, buttonWidth, kCouplrNavigationBarButtonHeight)
             button.backgroundColor = UIColor.grayColor()
             button.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
@@ -162,7 +162,7 @@ class CouplrNavigationController: UINavigationController {
         setupNavigationSelectionBar()
     }
     
-    func setupNavigationSelectionBar(andAddSubview:Bool = true) {
+    func setupNavigationSelectionBar(andAddSubview: Bool = true) {
         let selectionBarWidth = view.frame.width / CGFloat(viewControllerArray.count)
         navigationSelectionBar.frame = CGRectMake(selectionBarWidth*2, 0, selectionBarWidth, kCouplrNavigationBarSelectionIndicatorHeight)
         navigationSelectionBar.backgroundColor = kCouplrRedColor
@@ -188,7 +188,7 @@ class CouplrNavigationController: UINavigationController {
             if offset > 0 {
                 // Positive direction
                 for i in (currentPageIndex+1)...(button.tag) {
-                    pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Forward, animated: true, completion: {(completed:Bool) in
+                    pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Forward, animated: true, completion: {(completed: Bool) in
                         if completed {
                             self.currentPageIndex = i
                             self.lastPageIndex = button.tag
@@ -202,7 +202,7 @@ class CouplrNavigationController: UINavigationController {
             } else {
                 // Negative direction
                 for i in reverse(button.tag...(currentPageIndex-1)) {
-                    pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Reverse, animated: true, completion: {(completed:Bool) in
+                    pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Reverse, animated: true, completion: {(completed: Bool) in
                         if completed {
                             self.currentPageIndex = i
                             self.lastPageIndex = button.tag
@@ -226,7 +226,7 @@ class CouplrNavigationController: UINavigationController {
         return NSNotFound
     }
     
-    func pageNameFromIndex(index:NSInteger) -> String {
+    func pageNameFromIndex(index: NSInteger) -> String {
         if index == kProfileViewButtonTag {
             return "Profile"
         } else if index == kMatchViewButtonTag {

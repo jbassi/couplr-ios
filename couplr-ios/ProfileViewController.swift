@@ -16,7 +16,7 @@ class ProfileViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let rootId:UInt64 = socialGraphController.rootId()
+        let rootId: UInt64 = socialGraphController.rootId()
         
         profileDetailView = ProfileDetailView(frame: CGRectMake(0, kStatusBarHeight, view.bounds.size.width, kProfileViewControllerDetailViewHeight))
         profileDetailView!.profileNameLabel.text = socialGraphController.nameFromId(rootId)
@@ -47,7 +47,7 @@ class ProfileViewController: UIViewController {
 extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        let rootId:UInt64 = socialGraphController.rootId()
+        let rootId: UInt64 = socialGraphController.rootId()
         if rootId == 0 {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")
             return 0
@@ -71,7 +71,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let rootId:UInt64 = socialGraphController.rootId()
+        let rootId: UInt64 = socialGraphController.rootId()
         if rootId == 0 {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")
             return 0
@@ -81,19 +81,19 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("ProfileViewCell", forIndexPath: indexPath) as! ImageTableViewCell
-        let rootId:UInt64 = socialGraphController.rootId()
+        let rootId: UInt64 = socialGraphController.rootId()
         if rootId == 0 {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")
             return cell
         }
-        let sortedMatches:[(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
+        let sortedMatches: [(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
         let titleId: Int = sortedMatches[indexPath.row].0
         if let title: MatchTitle? = matchGraphController.matchTitleFromId(titleId) {
             cell.cellText.text = title!.text
             cell.cellImage.image = UIImage(named: title!.picture)
         }
-        var voteCount:Int = 0
-        for (neighbor:UInt64, numVotes:Int) in sortedMatches[indexPath.row].1 {
+        var voteCount: Int = 0
+        for (neighbor: UInt64, numVotes: Int) in sortedMatches[indexPath.row].1 {
             voteCount += numVotes
         }
         cell.numberOfTimesVotedLabel.text = Int(voteCount) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : String(voteCount)
@@ -107,12 +107,12 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let pickerView = ProfileDetailLayoverView.createDetailLayoverInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
-        let rootId:UInt64 = socialGraphController.rootId()
+        let rootId: UInt64 = socialGraphController.rootId()
         if rootId == 0 {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")
         }
-        let sortedMatches:[(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
-        let titleId:Int = sortedMatches[indexPath.row].0
+        let sortedMatches: [(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
+        let titleId: Int = sortedMatches[indexPath.row].0
         
         pickerView.title = matchGraphController.matchTitleFromId(titleId)
         pickerView.imageName = pickerView.title?.picture

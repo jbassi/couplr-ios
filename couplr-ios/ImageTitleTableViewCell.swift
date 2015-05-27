@@ -22,7 +22,7 @@ class ImageTitleTableViewCell: ImageTableViewCell {
         super.layoutSubviews()
         
         cellText.frame.origin.y = 10
-        let cellSubTextY:CGFloat = cellText.frame.height + 5
+        let cellSubTextY: CGFloat = cellText.frame.height + 5
         cellSubText.frame = CGRectMake(cellText.frame.origin.x, cellSubTextY, cellText.frame.width, cellText.frame.height)
         cellSubText.textColor = UIColor.lightGrayColor()
     }

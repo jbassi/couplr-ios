@@ -10,39 +10,39 @@ import Parse
 import CoreData
 
 // MARK: - Social graph parameters
-let kUnconnectedEdgeWeight:Float = -1000.0          // The weight of an unconnected "edge".
-let kMinNumPosts:Int = 100                          // Number of posts to query.
-let kMaxNumPhotos:Int = 200                         // Number of photos to query.
-let kMaxPhotoGroupSize:Int = 15                     // Max number of people considered in a photo.
-let kMinGraphEdgeWeight:Float = 0.25                // The minimum edge weight threshold when cleaning the graph.
-let kMatchExistsBetweenUsersWeight:Float = 1        // The connection weight between two users who are matched at least once.
-let kUserMatchVoteScore:Float = 1.0                 // Score for the user voting on title for a match.
+let kUnconnectedEdgeWeight: Float = -1000.0          // The weight of an unconnected "edge".
+let kMinNumPosts: Int = 100                          // Number of posts to query.
+let kMaxNumPhotos: Int = 200                         // Number of photos to query.
+let kMaxPhotoGroupSize: Int = 15                     // Max number of people considered in a photo.
+let kMinGraphEdgeWeight: Float = 0.25                // The minimum edge weight threshold when cleaning the graph.
+let kMatchExistsBetweenUsersWeight: Float = 1        // The connection weight between two users who are matched at least once.
+let kUserMatchVoteScore: Float = 1.0                 // Score for the user voting on title for a match.
 // Like and comment scores.
-let kCommentRootScore:Float = 0.5                   // Score for commenting on the root user's status.
-let kCommentPrevScore:Float = 0.1                   // Score for being the next to comment on the root user's status.
-let kLikeRootScore:Float = 0.2                      // Score for a like on the root user's status.
-let kCommentLikeScore:Float = 0.4                   // Score for a like on someone's comment on the root user's status.
+let kCommentRootScore: Float = 0.5                   // Score for commenting on the root user's status.
+let kCommentPrevScore: Float = 0.1                   // Score for being the next to comment on the root user's status.
+let kLikeRootScore: Float = 0.2                      // Score for a like on the root user's status.
+let kCommentLikeScore: Float = 0.4                   // Score for a like on someone's comment on the root user's status.
 // Constants for scoring photo data.
-let kMaxPairwisePhotoScore:Float = 2.0              // A base photo score for a picture containing only 2 people.
-let kMinPhotoPairwiseWeight:Float = 0.1             // Only add edges from photo data with at least this weight.
+let kMaxPairwisePhotoScore: Float = 2.0              // A base photo score for a picture containing only 2 people.
+let kMinPhotoPairwiseWeight: Float = 0.1             // Only add edges from photo data with at least this weight.
 
-let kSamplingWeightLimit:Float = 10                 // The coefficient for the sigmoid function.
-let kSigmoidExponentialBase:Float = 2.0             // The exponential base for the sigmoid function.
-let kRandomSampleCount:Int = 9                      // The number of people to randomly sample.
-let kExpectedNumRandomHops:Float = 1.0              // The expected number of random hops when performing random walk sampling.
+let kSamplingWeightLimit: Float = 10                 // The coefficient for the sigmoid function.
+let kSigmoidExponentialBase: Float = 2.0             // The exponential base for the sigmoid function.
+let kRandomSampleCount: Int = 9                      // The number of people to randomly sample.
+let kExpectedNumRandomHops: Float = 1.0              // The expected number of random hops when performing random walk sampling.
 
-let kMaxGraphDataQueries:Int = 5                    // Max number of friends to query graph data from.
-let kMinExportEdgeWeight:Float = 0.75               // Only export edges with more than this weight.
-let kScaleFactorForExportingRootEdges:Float = 0.25  // Export root edges scaled by this number.
-let kMutualFriendsThreshold:Int = 5                 // This many mutual friends to pull a friend over to the user's graph.
-let kUseMedianAsWeightBaseline:Bool = false         // Whether to use median for the baseline (if false, mean is used).
+let kMaxGraphDataQueries: Int = 5                    // Max number of friends to query graph data from.
+let kMinExportEdgeWeight: Float = 0.75               // Only export edges with more than this weight.
+let kScaleFactorForExportingRootEdges: Float = 0.25  // Export root edges scaled by this number.
+let kMutualFriendsThreshold: Int = 5                 // This many mutual friends to pull a friend over to the user's graph.
+let kUseMedianAsWeightBaseline: Bool = false         // Whether to use median for the baseline (if false, mean is used).
 
-let kGenderBiasRatio:Float = 4.0                    // Make it this much more likely to land on the opposite gender.
-let kWalkWeightUserMatchBoost:Float = 1.5           // The walk weight "bonus" for a node when the user selects a match.
-let kWalkWeightDecayRate:Float = 0.5                // The decay rate for the walk weight bonus.
-let kWalkWeightPenalty:Float = 0.5                  // Constant penalty per step to encourage choosing new nodes.
+let kGenderBiasRatio: Float = 4.0                    // Make it this much more likely to land on the opposite gender.
+let kWalkWeightUserMatchBoost: Float = 1.5           // The walk weight "bonus" for a node when the user selects a match.
+let kWalkWeightDecayRate: Float = 0.5                // The decay rate for the walk weight bonus.
+let kWalkWeightPenalty: Float = 0.5                  // Constant penalty per step to encourage choosing new nodes.
 // Debugging output
-let kShowRandomWalkDebugOutput:Bool = false
+let kShowRandomWalkDebugOutput: Bool = false
 
 // MARK: - Gender enum
 
@@ -67,8 +67,8 @@ public enum Gender {
      * Maps "male" to Gender.Male, "female" to Gender.Female, and anything
      * else to Undetermined.
      */
-    static func fromString(gender:String) -> Gender {
-        let lowercaseGender:String = gender.lowercaseString
+    static func fromString(gender: String) -> Gender {
+        let lowercaseGender: String = gender.lowercaseString
         if lowercaseGender == "1" || lowercaseGender == "female" {
             return Gender.Female
         } else if lowercaseGender == "0" || lowercaseGender == "male" {
@@ -89,22 +89,22 @@ public class SocialGraph {
      * Initializes an empty graph rooted at a given user with a mapping from
      * user ID.
      */
-    public init(root:UInt64, nodes:[UInt64:String]) {
+    public init(root: UInt64, nodes: [UInt64: String]) {
         self.root = root
         self.nodes = nodes
-        self.names = [UInt64:String]()
-        for (id:UInt64,name:String) in nodes {
+        self.names = [UInt64: String]()
+        for (id: UInt64,name: String) in nodes {
             self.names[id] = name
         }
-        self.edges = [UInt64:[UInt64:Float]]()
+        self.edges = [UInt64: [UInt64: Float]]()
         self.totalEdgeWeight = 0
         self.edgeCount = 0
         self.totalEdgeWeightFromRoot = 0
-        self.genders = [String:Gender]()
+        self.genders = [String: Gender]()
         self.isCurrentlyUpdatingGender = false
         self.shouldReupdateGender = false
         self.didLoadGendersFromCache = false
-        self.walkWeightMultipliers = [UInt64:Float]()
+        self.walkWeightMultipliers = [UInt64: Float]()
         self.currentSample = [UInt64]()
     }
 
@@ -112,15 +112,15 @@ public class SocialGraph {
      * Returns a string representation of this graph, displaying its edges.
      */
     public func toString() -> String {
-        var out:String = "{"
+        var out: String = "{"
         out += "\"node_count\":\(self.nodes.count),"
         out += "\"edge_count\":\(edgeCount),"
         out += "\"total_weight\":\(totalEdgeWeight),"
         out += "\"root\":\"\(root)\","
         out += "\"edges\":{"
-        for (outerIndex:Int, (node:UInt64, neighbors)) in enumerate(edges) {
+        for (outerIndex: Int, (node: UInt64, neighbors)) in enumerate(edges) {
             out += "\"\(String(node))\":{"
-            for (innerIndex:Int, (neighbor:UInt64, weight:Float)) in enumerate(neighbors) {
+            for (innerIndex: Int, (neighbor: UInt64, weight: Float)) in enumerate(neighbors) {
                 out += "\"\(neighbor)\":\(weight)"
                 if innerIndex != neighbors.count - 1 {
                     out += ","
@@ -133,7 +133,7 @@ public class SocialGraph {
         }
         out += "},"
         out += "\"nodes\":{"
-        for (index:Int, (node:UInt64, _)) in enumerate(edges) {
+        for (index: Int, (node: UInt64, _)) in enumerate(edges) {
             out += "\"\(String(node))\":\"\(names[node]!)\""
             if index != edges.count - 1 {
                 out += ","
@@ -152,11 +152,11 @@ public class SocialGraph {
      * gender mapping if the first name does not already appear, with an initial
      * value of Gender.Undetermined.
      */
-    public func updateNodeWithId(id:UInt64, andName:String, andUpdateGender:Bool = true) {
+    public func updateNodeWithId(id: UInt64, andName: String, andUpdateGender: Bool = true) {
         names[id] = andName
         if nodes[id] == nil {
             nodes[id] = andName
-            let firstName:String = firstNameFromFullName(andName)
+            let firstName: String = firstNameFromFullName(andName)
             if andUpdateGender && genders[firstName] == nil {
                 genders[firstName] = Gender.Undetermined
             }
@@ -168,7 +168,7 @@ public class SocialGraph {
      * edges in reverse directions. Using connectNode to modify the graph will
      * enforce symmetry.
      */
-    public func connectNode(node:UInt64, toNode:UInt64, withWeight:Float = 1) {
+    public func connectNode(node: UInt64, toNode: UInt64, withWeight: Float = 1) {
         if node == toNode { // Never add self-edges.
             return
         }
@@ -188,8 +188,8 @@ public class SocialGraph {
      * Removes all edges between two users. Using disconnectNode to modify the
      * graph will enforce symmetry.
      */
-    public func disconnectNode(node:UInt64, fromNode:UInt64) {
-        let currentEdgeWeight:Float = self[node, fromNode]
+    public func disconnectNode(node: UInt64, fromNode: UInt64) {
+        let currentEdgeWeight: Float = self[node, fromNode]
         if currentEdgeWeight > kUnconnectedEdgeWeight {
             medianEdgeWeight = nil
             edgeCount--
@@ -205,14 +205,14 @@ public class SocialGraph {
     /**
      * Returns whether or not two nodes are connected. Assumes that all edges are undirected.
      */
-    public func hasEdgeFromNode(node:UInt64, to:UInt64) -> Bool {
+    public func hasEdgeFromNode(node: UInt64, to: UInt64) -> Bool {
         return self[node, to] > kUnconnectedEdgeWeight
     }
 
     /**
      * Returns the connection weight between two given nodes.
      */
-    public subscript(node:UInt64, toNode:UInt64) -> Float {
+    public subscript(node: UInt64, toNode: UInt64) -> Float {
         return weightFrom(node, toNode: toNode)
     }
 
@@ -223,11 +223,11 @@ public class SocialGraph {
      * In general, you should not be adding directed edges to the social graph.
      * Instead, use connectNode to update the graph.
      */
-    private func addEdgeFrom(node:UInt64, toNode:UInt64, withWeight:Float = 1) {
+    private func addEdgeFrom(node: UInt64, toNode: UInt64, withWeight: Float = 1) {
         if edges[node] == nil {
-            edges[node] = [UInt64:Float]()
+            edges[node] = [UInt64: Float]()
         }
-        var currentWeight:Float = weightFrom(node, toNode: toNode)
+        var currentWeight: Float = weightFrom(node, toNode: toNode)
         if currentWeight <= kUnconnectedEdgeWeight {
             currentWeight = 0
         }
@@ -239,7 +239,7 @@ public class SocialGraph {
      * you should not be removing directed edges from the social graph.
      * Instead, use disconnectNode to update the graph.
      */
-    private func removeEdgeFrom(node:UInt64, toNode:UInt64) {
+    private func removeEdgeFrom(node: UInt64, toNode: UInt64) {
         if edges[node] != nil && edges[node]![toNode] != nil {
             edges[node]![toNode] = nil
             if edges[node]!.count == 0 {
@@ -251,7 +251,7 @@ public class SocialGraph {
     /**
      * Returns the connection weight between two given nodes.
      */
-    private func weightFrom(node:UInt64, toNode:UInt64) -> Float {
+    private func weightFrom(node: UInt64, toNode: UInt64) -> Float {
         return (edges[node] == nil || edges[node]![toNode] == nil) ? kUnconnectedEdgeWeight : edges[node]![toNode]!
     }
 
@@ -280,16 +280,16 @@ public class SocialGraph {
         log("Requesting gender update...", withFlag: "!")
         updateFirstNames()
         let addGenders:(NSData?, NSURLResponse?, NSError?) -> Void = {
-            (data:NSData?, response:NSURLResponse?, error:NSError?) in
+            (data: NSData?, response: NSURLResponse?, error: NSError?) in
             if error == nil && data != nil {
-                var parsingError:NSError? = NSError()
-                let rawGenderData:AnyObject? = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions(0), error: &parsingError)
+                var parsingError: NSError? = NSError()
+                let rawGenderData: AnyObject? = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions(0), error: &parsingError)
                 if rawGenderData == nil {
                     onComplete?(success: false)
                     return
                 }
                 if let genderData = rawGenderData as? [String : AnyObject] {
-                    for (firstName:String, genderIndicator:AnyObject) in genderData {
+                    for (firstName: String, genderIndicator: AnyObject) in genderData {
                         let gender = Gender.fromString(genderIndicator.description!)
                         self.genders[firstName] = gender
                         if gender != Gender.Undetermined && SocialGraphController.sharedInstance.managedObjectContext != nil {
@@ -299,7 +299,7 @@ public class SocialGraph {
                     if SocialGraphController.sharedInstance.managedObjectContext != nil {
                         SocialGraphController.sharedInstance.managedObjectContext!.save(nil)
                     }
-                    let (males:Int, females:Int, undetermined:Int) = self.overallGenderCount()
+                    let (males: Int, females: Int, undetermined: Int) = self.overallGenderCount()
                     log("Gender response received (\(genderData.count) predictions).", withIndent: 1)
                     log("Current breakdown: \(males) males, \(females) females, \(undetermined) undetermined.", withIndent: 1, withNewline: true)
                     onComplete?(success: true)
@@ -313,8 +313,8 @@ public class SocialGraph {
                 self.updateGenders(onComplete: onComplete)
             }
         }
-        var requestURL:String = kGenderizeURLPrefix
-        for (firstName:String, gender:Gender) in genders {
+        var requestURL: String = kGenderizeURLPrefix
+        for (firstName: String, gender: Gender) in genders {
             if gender == Gender.Undetermined && isUTF8Compatible(firstName) {
                 requestURL += "\(firstName),"
             }
@@ -332,7 +332,7 @@ public class SocialGraph {
         if !didLoadGendersFromCache {
             updateFirstNames()
             if SocialGraphController.sharedInstance.managedObjectContext != nil {
-                let cachedGenders:[GenderData] = GenderData.allObjects(SocialGraphController.sharedInstance.managedObjectContext!)
+                let cachedGenders: [GenderData] = GenderData.allObjects(SocialGraphController.sharedInstance.managedObjectContext!)
                 for genderData in cachedGenders {
                     genders[genderData.firstName] = genderData.gender()
                 }
@@ -347,8 +347,8 @@ public class SocialGraph {
      * are initially mapped to Gender.Undetermined.
      */
     private func updateFirstNames() {
-        for (id:UInt64, fullName:String) in self.nodes {
-            let firstName:String = firstNameFromFullName(fullName)
+        for (id: UInt64, fullName: String) in self.nodes {
+            let firstName: String = firstNameFromFullName(fullName)
             if genders[firstName] == nil {
                 genders[firstName] = Gender.Undetermined
             }
@@ -361,9 +361,9 @@ public class SocialGraph {
      * fly whenever a new edge is added or an edge is removed?
      */
     public func updateMedianEdgeWeight() {
-        var allEdges:[Float] = [Float]()
-        for (node:UInt64, neighbors:[UInt64:Float]) in edges {
-            for (neighbor:UInt64, weight:Float) in neighbors {
+        var allEdges: [Float] = [Float]()
+        for (node: UInt64, neighbors: [UInt64: Float]) in edges {
+            for (neighbor: UInt64, weight: Float) in neighbors {
                 if node < neighbor {
                     allEdges.append(weight)
                 }
@@ -377,7 +377,7 @@ public class SocialGraph {
     /**
      * Notifies the social graph that the user voted on a new match.
      */
-    public func userDidMatch(firstId:UInt64, toSecondId:UInt64) {
+    public func userDidMatch(firstId: UInt64, toSecondId: UInt64) {
         walkWeightMultipliers[firstId] = walkWeightBonusForNode(firstId) + kWalkWeightUserMatchBoost
         walkWeightMultipliers[toSecondId] = walkWeightBonusForNode(toSecondId) + kWalkWeightUserMatchBoost
     }
@@ -389,13 +389,13 @@ public class SocialGraph {
      * include edges GREATER THAN a given threshold. By default, kMinExportEdgeWeight
      * is chosen to remove all links that may have occured due to error.
      */
-    public func exportGraphToParse(minWeight:Float = kMinExportEdgeWeight, andLoadFriendGraphs:Bool = true) {
-        var query:PFQuery = PFQuery(className:"GraphData")
+    public func exportGraphToParse(minWeight: Float = kMinExportEdgeWeight, andLoadFriendGraphs: Bool = true) {
+        var query: PFQuery = PFQuery(className:"GraphData")
         query.whereKey("rootId", equalTo: encodeBase64(root))
         log("Searching for objectId of \(root)'s graph data...", withFlag: "!")
         query.findObjectsInBackgroundWithBlock({
-            (objects:[AnyObject]!, error:NSError?) -> Void in
-            var graphData:PFObject = PFObject(className: "GraphData")
+            (objects: [AnyObject]!, error: NSError?) -> Void in
+            var graphData: PFObject = PFObject(className: "GraphData")
             if objects.count > 0 {
                 graphData.objectId = objects[0].objectId
                 log("Found objectId: \(graphData.objectId)", withIndent: 1, withNewline: true)
@@ -403,17 +403,17 @@ public class SocialGraph {
                 log("No existing objectId found.", withIndent: 1, withFlag: "?", withNewline: true)
             }
             graphData["rootId"] = encodeBase64(self.root)
-            var edgeArray:[[NSString]] = [[NSString]]()
-            var nameDictionary:[NSString:NSString] = [NSString:NSString]()
-            for (node:UInt64, neighbors:[UInt64:Float]) in self.edges {
-                for (neighbor:UInt64, var weight:Float) in neighbors {
+            var edgeArray: [[NSString]] = [[NSString]]()
+            var nameDictionary: [NSString: NSString] = [NSString: NSString]()
+            for (node: UInt64, neighbors: [UInt64: Float]) in self.edges {
+                for (neighbor: UInt64, var weight: Float) in neighbors {
                     if node == self.root || neighbor == self.root {
                         weight *= kScaleFactorForExportingRootEdges
                     }
                     if node < neighbor && weight > minWeight {
-                        let weightAsTruncatedString:String = String(format: "%.2f", weight)
-                        let base64Node:String = encodeBase64(node)
-                        let base64Neighbor:String = encodeBase64(neighbor)
+                        let weightAsTruncatedString: String = String(format: "%.2f", weight)
+                        let base64Node: String = encodeBase64(node)
+                        let base64Neighbor: String = encodeBase64(neighbor)
                         edgeArray.append([base64Node, base64Neighbor, weightAsTruncatedString])
                         if nameDictionary[base64Node] == nil {
                             nameDictionary[base64Node] = self.nodes[node]
@@ -428,7 +428,7 @@ public class SocialGraph {
             graphData["edges"] = edgeArray
             log("Saving graph with \(nameDictionary.count) nodes, \(edgeArray.count) edges.", withFlag: "!")
             graphData.saveInBackgroundWithBlock({
-                (succeeded:Bool, error:NSError?) -> Void in
+                (succeeded: Bool, error: NSError?) -> Void in
                 if succeeded && error == nil {
                     log("Successfully saved graph to Parse.", withIndent: 1, withNewline: true)
                     if andLoadFriendGraphs {
@@ -452,9 +452,9 @@ public class SocialGraph {
      * to map ID -> name -> first name -> gender. Returns Gender.Undetermined if ID
      * lookup failed.
      */
-    public func genderFromId(id:UInt64) -> Gender {
-        if let name:String = nodes[id] {
-            let firstName:String = firstNameFromFullName(name)
+    public func genderFromId(id: UInt64) -> Gender {
+        if let name: String = nodes[id] {
+            let firstName: String = firstNameFromFullName(name)
             return genders[firstName] == nil ? Gender.Undetermined : genders[firstName]!
         }
         return Gender.Undetermined
@@ -466,14 +466,14 @@ public class SocialGraph {
      * female, # undetermined).
      */
     private func overallGenderCount() -> (Int, Int, Int) {
-        var mcount:Int = 0
-        var fcount:Int = 0
-        var ucount:Int = 0
-        for (id:UInt64, name:String) in nodes {
+        var mcount: Int = 0
+        var fcount: Int = 0
+        var ucount: Int = 0
+        for (id: UInt64, name: String) in nodes {
             if id == root {
                 continue
             }
-            let gender:Gender = genderFromId(id)
+            let gender: Gender = genderFromId(id)
             switch gender {
             case .Undetermined:
                 ucount++
@@ -492,27 +492,27 @@ public class SocialGraph {
     // MARK: - Instance variables
 
     // Core app-related data.
-    var root:UInt64
-    var edges:[UInt64:[UInt64:Float]]
-    var nodes:[UInt64:String]
-    var genders:[String:Gender]
-    var currentSample:[UInt64]
+    var root: UInt64
+    var edges: [UInt64: [UInt64: Float]]
+    var nodes: [UInt64: String]
+    var genders: [String: Gender]
+    var currentSample: [UInt64]
     // Unlike nodes, names does not reflect the graph topology. Operations such as pruning do not affect names.
-    var names:[UInt64:String]
+    var names: [UInt64: String]
 
     // Edge-based metadata for computing heuristics.
-    var totalEdgeWeight:Float
-    var edgeCount:Int
-    var totalEdgeWeightFromRoot:Float
+    var totalEdgeWeight: Float
+    var edgeCount: Int
+    var totalEdgeWeightFromRoot: Float
 
     // Match graph used to improve heuristics.
-    var walkWeightMultipliers:[UInt64:Float]
+    var walkWeightMultipliers: [UInt64: Float]
 
     // Miscellaneous state variables.
-    var isCurrentlyUpdatingGender:Bool
-    var shouldReupdateGender:Bool
-    var didLoadGendersFromCache:Bool
-    var medianEdgeWeight:Float? = nil
+    var isCurrentlyUpdatingGender: Bool
+    var shouldReupdateGender: Bool
+    var didLoadGendersFromCache: Bool
+    var medianEdgeWeight: Float? = nil
 
     // For thread safety.
     var genderUpdateSemaphore = dispatch_semaphore_create(1)

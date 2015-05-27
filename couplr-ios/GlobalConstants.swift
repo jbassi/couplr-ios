@@ -35,8 +35,8 @@ let kCouplrRedColor = UIColor(red: 246/255.0, green: 71/255.0, blue: 71/255.0, a
 let kEmptyTableViewMessage = "It looks like cupid is on hiatus. Please check back later!"
 
 /* Facebook API */
-let kMaxAllowedBatchRequestSize:Int = 50
-let kFacebookAPIVersion:String = "v2.2"
+let kMaxAllowedBatchRequestSize: Int = 50
+let kFacebookAPIVersion: String = "v2.2"
 
 /* General TableViewCell Constatns */
 let kTableViewCellHeight: CGFloat = 80
@@ -101,7 +101,7 @@ let kImageTableViewCellWidth: CGFloat = 40.0
 let kProfileViewControllerMaximumNumberOfMatches = 99
 let kProfileViewControllerMaximumNumberOfMatchesString = "99+"
 let kProfileViewControllerDetailViewHeight: CGFloat = 150
-let kMaxNameDisplayLength:Int = 25
+let kMaxNameDisplayLength: Int = 25
 
 /* ProfileDetailView Constants */
 let kProfileDetailViewProfilePictureRatio: CGFloat = 0.70
@@ -125,27 +125,27 @@ let kPickerTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, alpha:
 let kLoadingViewTransparentLayerBackgroundColor: UIColor = UIColor(white: 0.1, alpha: 0.7)
 
 /* Parse-related constants */
-let kParseApplicationID:String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
-let kParseClientKey:String = "3qw7fEgFDKJgCT1hPSii3JhF0NZHo1fCym3of2Wh"
+let kParseApplicationID: String = "p8dTK5IiYdEKfubkxz1SqFigEuF9BRMHTlnOebNz"
+let kParseClientKey: String = "3qw7fEgFDKJgCT1hPSii3JhF0NZHo1fCym3of2Wh"
 
 /* URL request prefixes */
-let kGenderizeURLPrefix:String = "http://couplr.herokuapp.com/gender?secret=FFE8382A3E3B4A1282CE59CAE7910BF7&names="
-let kFBGraphURLPrefix:String = "https://graph.facebook.com/"
+let kGenderizeURLPrefix: String = "http://couplr.herokuapp.com/gender?secret=FFE8382A3E3B4A1282CE59CAE7910BF7&names="
+let kFBGraphURLPrefix: String = "https://graph.facebook.com/"
 
 /* For managing local storage (core data) */
-let kSecondsBeforeNextGraphUpdate:Double = 345600 // In seconds. This is about 4 days.
-let kEnableGraphCaching:Bool = true
+let kSecondsBeforeNextGraphUpdate: Double = 345600 // In seconds. This is about 4 days.
+let kEnableGraphCaching: Bool = true
 
 /* Recent match view */
-let kMaxNumRecentMatches:Int = 10
+let kMaxNumRecentMatches: Int = 10
 
 /* Graph paths for posts and photos. */
-let kPostGraphPathFields:String = "fields=from,likes,comments.fields(from,likes)"
-let kPhotosGraphPathFields:String = "fields=from,tags.fields(id,name)"
+let kPostGraphPathFields: String = "fields=from,likes,comments.fields(from,likes)"
+let kPhotosGraphPathFields: String = "fields=from,tags.fields(id,name)"
 
 /* News feed */
-let kMaxNumNewsfeedMatches:Int = 25
-let kMaxNumClosestFriends:Int = 25
+let kMaxNumNewsfeedMatches: Int = 25
+let kMaxNumClosestFriends: Int = 25
 
 /* Debugging output */
-let kOutputLogMessages:Bool = false
+let kOutputLogMessages: Bool = false

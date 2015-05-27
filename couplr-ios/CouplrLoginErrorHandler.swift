@@ -8,7 +8,7 @@
 
 import UIKit
 
-func showLoginWithAlertViewErrorMessage(message: String, alertTitle:String, completionHandler:AlertViewHandler? = nil) {
+func showLoginWithAlertViewErrorMessage(message: String, alertTitle: String, completionHandler: AlertViewHandler? = nil) {
     let alertView = UIAlertView(title: alertTitle, message: message, delegate: completionHandler, cancelButtonTitle: "OK")
     alertView.show()
     CouplrViewCoordinator.sharedInstance.dismissLoadingScreen()

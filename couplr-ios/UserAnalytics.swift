@@ -22,8 +22,8 @@ public class UserSessionTracker {
         return UserSessionTrackerSingleton.instance
     }
     
-    public func notify(action:String) {
-        let timeElapsed:Double = currentTimeInSeconds() - self.appStartTime
+    public func notify(action: String) {
+        let timeElapsed: Double = currentTimeInSeconds() - self.appStartTime
         if session.count < 99 {
             session.append(action, timeElapsed)
         } else if session.count == 99 {
@@ -32,16 +32,16 @@ public class UserSessionTracker {
     }
     
     public func flushUserSession() {
-        var userSession:PFObject = PFObject(className: "UserSession")
+        var userSession: PFObject = PFObject(className: "UserSession")
         userSession["userId"] = encodeBase64(SocialGraphController.sharedInstance.rootId())
         userSession["startTime"] = round(self.appStartTime)
-        userSession["data"] = "[" + ", ".join(session.map { (action:String, time:Double) -> String in
+        userSession["data"] = "[" + ", ".join(session.map { (action: String, time: Double) -> String in
             return "{\"action\": \"\(action)\", \"time\": \(round(100 * time) / 100)}"
         }) + "]"
         userSession.save()
         session = []
     }
     
-    var appStartTime:Double
-    var session:[(String, Double)]
+    var appStartTime: Double
+    var session: [(String, Double)]
 }

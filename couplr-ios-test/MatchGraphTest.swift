@@ -106,5 +106,5 @@ class MatchGraphTest: XCTestCase {
         XCTAssertEqual(matches!.matchListsForUserId(userId).count, numMatches, "Expected \(userId) to have \(numMatches) matches.")
     }
     
-    var matches:MatchGraph? = nil
+    var matches: MatchGraph? = nil
 }

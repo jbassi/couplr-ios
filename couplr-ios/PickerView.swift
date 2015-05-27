@@ -78,7 +78,7 @@ class PickerView: UIPickerView {
                     self.frame.origin.y = self.superview!.frame.size.height + self.frame.size.height
                     self.transparentLayer.alpha = 0
                     self.blurView.alpha = 0
-                }, completion: { (completed:Bool) in
+                }, completion: { (completed: Bool) in
                     self.blurView.removeFromSuperview()
                     self.transparentLayer.removeFromSuperview()
                     self.removeFromSuperview()

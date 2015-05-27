@@ -12,9 +12,9 @@ class NewsfeedViewController: UIViewController {
 
     let socialGraphController = SocialGraphController.sharedInstance
     let matchGraphController = MatchGraphController.sharedInstance
-    var headerView:MatchPairHeaderView?
-    var newsfeedTableView:UITableView?
-    var cachedNewsfeedMatches:[(MatchTuple, NSDate)]?
+    var headerView: MatchPairHeaderView?
+    var newsfeedTableView: UITableView?
+    var cachedNewsfeedMatches: [(MatchTuple, NSDate)]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,10 +47,10 @@ class NewsfeedViewController: UIViewController {
     func showAllNamesInVisibleCells() {
         for cell in newsfeedTableView!.visibleCells() {
             let newsCell = cell as! MatchPairTableViewCell
-            if let matches:[(MatchTuple, NSDate)]? = newsfeedMatches() {
-                let match:MatchTuple = matches![newsfeedTableView!.indexPathForCell(newsCell)!.row].0
-                let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
-                let nameForSecondId:String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
+            if let matches: [(MatchTuple, NSDate)]? = newsfeedMatches() {
+                let match: MatchTuple = matches![newsfeedTableView!.indexPathForCell(newsCell)!.row].0
+                let nameForFirstId: String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
+                let nameForSecondId: String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
                 newsCell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
             }
         }
@@ -63,7 +63,7 @@ class NewsfeedViewController: UIViewController {
         }
     }
     
-    func switchToggled(sender:UISwitch) {
+    func switchToggled(sender: UISwitch) {
         if sender.on {
             showAllNamesInVisibleCells()
             UserSessionTracker.sharedInstance.notify("toggled newsfeed names on")
@@ -79,7 +79,7 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         self.cachedNewsfeedMatches = nil
-        let matches:[(MatchTuple, NSDate)]? = newsfeedMatches()
+        let matches: [(MatchTuple, NSDate)]? = newsfeedMatches()
         
         if let numberOfMatches = matches?.count {
             if numberOfMatches > 0 {
@@ -108,26 +108,26 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         self.cachedNewsfeedMatches = nil
-        let matches:[(MatchTuple, NSDate)]? = newsfeedMatches()
+        let matches: [(MatchTuple, NSDate)]? = newsfeedMatches()
         return matches == nil ? 0 : matches!.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as! MatchPairTableViewCell
-        if let matchesAndUpdateTimes:[(MatchTuple, NSDate)]? = newsfeedMatches() {
-            let (match:MatchTuple, updateTime:NSDate) = matchesAndUpdateTimes![indexPath.row]
+        if let matchesAndUpdateTimes: [(MatchTuple, NSDate)]? = newsfeedMatches() {
+            let (match: MatchTuple, updateTime: NSDate) = matchesAndUpdateTimes![indexPath.row]
             cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text
             cell.selectionStyle = .None
             cell.leftCellImage.sd_setImageWithURL(profilePictureURLFromId(match.firstId), placeholderImage: UIImage(named: "unknown"))
             cell.rightCellImage.sd_setImageWithURL(profilePictureURLFromId(match.secondId), placeholderImage: UIImage(named: "unknown"))
             if headerView!.nameSwitch.on {
-                let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
-                let nameForSecondId:String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
+                let nameForFirstId: String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
+                let nameForSecondId: String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
                 cell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
             } else {
                 cell.removeTransparentLayer()
             }
-            let updateTimeInterval:NSTimeInterval = NSDate().timeIntervalSinceDate(updateTime)
+            let updateTimeInterval: NSTimeInterval = NSDate().timeIntervalSinceDate(updateTime)
             cell.dateLabel.text = "\(timeElapsedAsText(updateTimeInterval)) ago"
         }
         return cell
