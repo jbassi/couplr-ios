@@ -54,14 +54,12 @@ class LoadingView: UIView {
     // MARK: - Animation Functions
     
     func advanceLoadingMessage() {
-        UIView.animateWithDuration(0.5, animations: {
+        UIView.animateWithDuration(0.4, animations: {
             self.loadingLabel.alpha = 0
-            return
         }, completion: { (success: Bool) -> Void in
             self.loadingLabel.text = self.loadingMessage.next()
-            UIView.animateWithDuration(0.5, animations: {
+            UIView.animateWithDuration(0.4, animations: {
                 self.loadingLabel.alpha = 1
-                return
             }, completion: nil)
         })
     }

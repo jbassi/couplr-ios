@@ -66,28 +66,27 @@ let kRandomLoadingMessages: [[String]] = [
         "Pinging certified cupids…",
         "Building relationship trees…",
         "Optimizing match hilarity…",
-        "Incrementing relationship counters…"
+        "Incrementing relationship counters…",
+        "Tracing compatibility rays…",
+        "Identifying probable crushes…"
     ], [
         "Friendzoning local optima…",
         "Gossiping with support vectors…",
         "Compiling relationship heuristics…",
         "Enjoying random walks…",
         "Completing infinite loops…",
-        "Hashing love notes…"
+        "Hashing love notes…",
+        "Factoring massive primes…",
+        "Avoiding that one annoying bug…"
     ], [
         "Converging on true love…",
         "Searching the network for love…",
         "Decrypting secret admirers…",
         "Initializing NSLoveQueue…",
         "Attempting to make fetch happen…",
-        "Encoding attractiveness coefficients…"
-    ], [
+        "Encoding attractiveness coefficients…",
         "Dancing with eigenvectors…",
-        "Solving P = NP…",
-        "Factoring massive primes…",
-        "Avoiding that one annoying bug…",
-        "Tracing compatibility rays…",
-        "Identifying probable crushes…"
+        "Solving P = NP…"
     ]
 ]
 
