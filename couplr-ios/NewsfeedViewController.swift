@@ -118,8 +118,8 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
             let (match:MatchTuple, updateTime:NSDate) = matchesAndUpdateTimes![indexPath.row]
             cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text
             cell.selectionStyle = .None
-            cell.leftCellImage.sd_setImageWithURL(profilePictureURLFromId(match.firstId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
-            cell.rightCellImage.sd_setImageWithURL(profilePictureURLFromId(match.secondId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
+            cell.leftCellImage.sd_setImageWithURL(profilePictureURLFromId(match.firstId), placeholderImage: UIImage(named: "unknown"))
+            cell.rightCellImage.sd_setImageWithURL(profilePictureURLFromId(match.secondId), placeholderImage: UIImage(named: "unknown"))
             if headerView!.nameSwitch.on {
                 let nameForFirstId:String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
                 let nameForSecondId:String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)

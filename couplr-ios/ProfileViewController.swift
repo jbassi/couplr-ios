@@ -9,8 +9,6 @@
 import UIKit
 
 class ProfileViewController: UIViewController {
-    let imageNames = ["sample-1049-at-sign", "sample-1055-ticket", "sample-1067-enter-fullscreen", "sample-1079-fork-path", "sample-1082-merge"]
-    
     let socialGraphController = SocialGraphController.sharedInstance
     let matchGraphController = MatchGraphController.sharedInstance
     var profileDetailView: ProfileDetailView?
@@ -23,7 +21,7 @@ class ProfileViewController: UIViewController {
         profileDetailView = ProfileDetailView(frame: CGRectMake(0, kStatusBarHeight, view.bounds.size.width, kProfileViewControllerDetailViewHeight))
         profileDetailView!.profileNameLabel.text = socialGraphController.nameFromId(rootId)
         profileDetailView!.recentMatchesButton.addTarget(self, action: "showRecentMatches:", forControlEvents: .TouchUpInside)
-        profileDetailView!.profilePictureView.sd_setImageWithURL(profilePictureURLFromId(rootId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
+        profileDetailView!.profilePictureView.sd_setImageWithURL(profilePictureURLFromId(rootId), placeholderImage: UIImage(named: "unknown"))
         
         let profileDetailViewTotalHeight = kProfileViewControllerDetailViewHeight + (kStatusBarHeight * 2)
         let matchTableViewHeight = view.bounds.size.height - profileDetailViewTotalHeight - kCouplrNavigationBarButtonHeight
@@ -89,10 +87,11 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
             return cell
         }
         let sortedMatches:[(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
-        let titleId:Int = sortedMatches[indexPath.row].0
-        cell.cellText.text = matchGraphController.matchTitleFromId(titleId)?.text
-        let imageName = imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))]
-        cell.cellImage.image = UIImage(named: imageName)
+        let titleId: Int = sortedMatches[indexPath.row].0
+        if let title: MatchTitle? = matchGraphController.matchTitleFromId(titleId) {
+            cell.cellText.text = title!.text
+            cell.cellImage.image = UIImage(named: title!.picture)
+        }
         var voteCount:Int = 0
         for (neighbor:UInt64, numVotes:Int) in sortedMatches[indexPath.row].1 {
             voteCount += numVotes
@@ -115,8 +114,8 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         let sortedMatches:[(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
         let titleId:Int = sortedMatches[indexPath.row].0
         
-        pickerView.title = matchGraphController.matchTitleFromId(titleId)!
-        pickerView.imageName = imageNames[Int(arc4random_uniform(UInt32(imageNames.count)))]
+        pickerView.title = matchGraphController.matchTitleFromId(titleId)
+        pickerView.imageName = pickerView.title?.picture
         pickerView.showAnimated(true)
         UserSessionTracker.sharedInstance.notify("selected profile entry \(indexPath.row)")
     }

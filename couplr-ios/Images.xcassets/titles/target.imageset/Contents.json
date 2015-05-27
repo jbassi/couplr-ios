@@ -2,12 +2,12 @@
   "images" : [
     {
       "idiom" : "universal",
-      "scale" : "1x"
+      "scale" : "1x",
+      "filename" : "target.png"
     },
     {
       "idiom" : "universal",
-      "scale" : "2x",
-      "filename" : "sample-1082-merge@2x.png"
+      "scale" : "2x"
     },
     {
       "idiom" : "universal",

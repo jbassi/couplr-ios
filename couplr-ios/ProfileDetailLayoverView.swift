@@ -226,7 +226,7 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
                 cell.cellImage.layer.masksToBounds = true
                 cell.cellText.text = socialGraphController.nameFromId(matchedWithId)
                 cell.cellSubText.text = matchGraphController.matchTitleFromId(matchTuple.titleId)?.text
-                cell.cellImage.sd_setImageWithURL(profilePictureURLFromId(matchedWithId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
+                cell.cellImage.sd_setImageWithURL(profilePictureURLFromId(matchedWithId), placeholderImage: UIImage(named: "unknown"))
             }
             return cell
             
@@ -238,7 +238,7 @@ extension ProfileDetailLayoverView: UITableViewDelegate, UITableViewDataSource {
                 cell.cellText.text = socialGraphController.nameFromId(matchedWithId, maxStringLength: 20)
                 cell.cellImage.layer.cornerRadius = 30
                 cell.cellImage.layer.masksToBounds = true
-                cell.cellImage.sd_setImageWithURL(profilePictureURLFromId(matchedWithId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
+                cell.cellImage.sd_setImageWithURL(profilePictureURLFromId(matchedWithId), placeholderImage: UIImage(named: "unknown"))
                 cell.numberOfTimesVotedLabel.text = Int(voteCount) > kProfileViewControllerMaximumNumberOfMatches ? kProfileViewControllerMaximumNumberOfMatchesString : voteCount.description
             }
             return cell

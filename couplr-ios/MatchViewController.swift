@@ -318,7 +318,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
         if randomSample.count > 0 {
             let userId = randomSample[indexPath.row]
             dispatch_async(dispatch_get_main_queue()) {
-                cell.imageView.sd_setImageWithURL(profilePictureURLFromId(userId), placeholderImage: UIImage(named: "sample-1049-at-sign"))
+                cell.imageView.sd_setImageWithURL(profilePictureURLFromId(userId), placeholderImage: UIImage(named: "unknown"))
             }
         }
         return cell
