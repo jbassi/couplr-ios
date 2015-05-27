@@ -59,6 +59,37 @@ let kLoadingViewHideAnimationDuration: NSTimeInterval = 0.2
 let kLoadingLabelShowAnimationDuration: NSTimeInterval = 0.5
 let kLoadingLabelHideAnimationDuration: NSTimeInterval = 0.1
 let kMinLoadingDelay: Double = 0.75
+let kRandomLoadingMessages: [[String]] = [
+    [
+        "Evaluating cardioid functions…",
+        "Buffering heart-shaped assets…",
+        "Pinging certified cupids…",
+        "Building relationship trees…",
+        "Optimizing match hilarity…",
+        "Incrementing relationship counters…"
+    ], [
+        "Friendzoning local optima…",
+        "Gossiping with support vectors…",
+        "Compiling relationship heuristics…",
+        "Enjoying random walks…",
+        "Completing infinite loops…",
+        "Hashing love notes…"
+    ], [
+        "Converging on true love…",
+        "Searching the network for love…",
+        "Decrypting secret admirers…",
+        "Initializing NSLoveQueue…",
+        "Attempting to make fetch happen…",
+        "Encoding attractiveness coefficients…"
+    ], [
+        "Dancing with eigenvectors…",
+        "Solving P = NP…",
+        "Factoring massive primes…",
+        "Avoiding that one annoying bug…",
+        "Tracing compatibility rays…",
+        "Identifying probable crushes…"
+    ]
+]
 
 /* ProfilePictureCollectionViewCell Constants */
 let kProfilePictureCollectionViewCellHideAnimationDuration = 0.2

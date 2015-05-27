@@ -14,16 +14,19 @@ class LoadingView: UIView {
     let imageLayer: UIView = UIView()
     let backgroundView: UIView = UIView()
     let loadingLabel = UILabel()
+    var loadingMessage: RandomLoadingMessage = RandomLoadingMessage()
+    var loadingMessageTimer: NSTimer? = nil
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
+        loadingMessage = RandomLoadingMessage()
         loadingLabel.frame = CGRectMake(0, self.frame.height-80, self.frame.width, 40)
-        loadingLabel.text = "Loading..."
+        loadingLabel.text = loadingMessage.get()
         loadingLabel.alpha = 0
         loadingLabel.textColor = UIColor.whiteColor()
         loadingLabel.textAlignment = NSTextAlignment.Center
-        loadingLabel.font = UIFont(name: "HelveticaNeue-Light", size: 24)
+        loadingLabel.font = UIFont(name: "HelveticaNeue-Light", size: 18)
         
         imageLayer.frame = frame
         imageLayer.backgroundColor = UIColor.whiteColor()
@@ -50,7 +53,21 @@ class LoadingView: UIView {
     
     // MARK: - Animation Functions
     
+    func advanceLoadingMessage() {
+        UIView.animateWithDuration(0.5, animations: {
+            self.loadingLabel.alpha = 0
+            return
+        }, completion: { (success: Bool) -> Void in
+            self.loadingLabel.text = self.loadingMessage.next()
+            UIView.animateWithDuration(0.5, animations: {
+                self.loadingLabel.alpha = 1
+                return
+            }, completion: nil)
+        })
+    }
+    
     func showAnimated(animated: Bool) {
+        loadingMessageTimer = NSTimer.scheduledTimerWithTimeInterval(3, target: self, selector: Selector("advanceLoadingMessage"), userInfo: nil, repeats: true)
         if animated {
             self.addSubview(backgroundView)
             UIView.animateWithDuration(kLoadingViewShowAnimationDuration, animations: {
@@ -82,6 +99,8 @@ class LoadingView: UIView {
         keyFrameAnimation.removedOnCompletion = false
         
         self.mask!.addAnimation(keyFrameAnimation, forKey: "bounds")
+        self.loadingMessageTimer?.invalidate()
+        self.loadingMessage.next()
     }
     
     override func animationDidStart(anim: CAAnimation!) {

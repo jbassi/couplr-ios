@@ -49,6 +49,7 @@
 		11FDBBBA1AC5F206006DFD9B /* UIImageView+HighlightedWebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBA81AC5F206006DFD9B /* UIImageView+HighlightedWebCache.m */; };
 		11FDBBBB1AC5F206006DFD9B /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBAA1AC5F206006DFD9B /* UIImageView+WebCache.m */; };
 		11FDBBBC1AC5F206006DFD9B /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBAC1AC5F206006DFD9B /* UIView+WebCacheOperation.m */; };
+		F444E6CE1B155AAB00C8521F /* RandomLoadingMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F444E6CD1B155AAB00C8521F /* RandomLoadingMessage.swift */; };
 		F45AF54F1ADB916A0051FA90 /* UserAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */; };
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
 		F4875BA81B0D9FBF006FCB94 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4875BA71B0D9FBF006FCB94 /* HistoryViewController.swift */; };
@@ -155,6 +156,7 @@
 		11FDBBAA1AC5F206006DFD9B /* UIImageView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+WebCache.m"; sourceTree = "<group>"; };
 		11FDBBAB1AC5F206006DFD9B /* UIView+WebCacheOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+WebCacheOperation.h"; sourceTree = "<group>"; };
 		11FDBBAC1AC5F206006DFD9B /* UIView+WebCacheOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+WebCacheOperation.m"; sourceTree = "<group>"; };
+		F444E6CD1B155AAB00C8521F /* RandomLoadingMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RandomLoadingMessage.swift; sourceTree = "<group>"; };
 		F44EECDF1B139526003AA77E /* couplr-ios-test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "couplr-ios-test.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F44EECE21B139526003AA77E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserAnalytics.swift; sourceTree = "<group>"; };
@@ -356,6 +358,7 @@
 				11E587101AC3A92F00D61CDB /* ImageTitleTableViewCell.swift */,
 				11996CB71AC4D1B400C45DB0 /* MatchPairHeaderView.swift */,
 				11276E351AC4F5FE00ADD063 /* MatchPairTableViewCell.swift */,
+				F444E6CD1B155AAB00C8521F /* RandomLoadingMessage.swift */,
 			);
 			name = "Generic Views";
 			sourceTree = "<group>";
@@ -564,6 +567,7 @@
 				11FDBBBC1AC5F206006DFD9B /* UIView+WebCacheOperation.m in Sources */,
 				F4EA6F241AC8754E004D6133 /* SocialGraphSamplingUtilities.swift in Sources */,
 				114E42991AE2143D00CC9EB7 /* TutorialPageViewController.swift in Sources */,
+				F444E6CE1B155AAB00C8521F /* RandomLoadingMessage.swift in Sources */,
 				11E587131AC3B85100D61CDB /* NewsfeedViewController.swift in Sources */,
 				F4F0DCE91A63335B007FC931 /* CouplrStorage.swift in Sources */,
 				11276E361AC4F5FE00ADD063 /* MatchPairTableViewCell.swift in Sources */,
