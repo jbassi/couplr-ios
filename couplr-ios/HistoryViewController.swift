@@ -112,10 +112,6 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
         return voteHistory().count
     }
     
-    func tableView(tableView: UITableView, titleForDeleteConfirmationButtonForRowAtIndexPath indexPath: NSIndexPath) -> String! {
-        return "Undo"
-    }
-    
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         let match: MatchTuple = voteHistory()[indexPath.row].0
         matchGraphController.userDidUndoMatch(match.firstId, to: match.secondId, withTitleId: match.titleId, onComplete: { success in
@@ -128,6 +124,7 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
                 } else {
                     // This is the case where the table is now empty.
                     tableView.deleteSections(NSIndexSet(index: indexPath.section), withRowAnimation: UITableViewRowAnimation.Fade)
+                    self.cachedVoteHistory = []
                 }
             }
         })

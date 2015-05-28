@@ -32,8 +32,12 @@ public class UserSessionTracker {
     }
     
     public func flushUserSession() {
+        let encodedRoot: String = encodeBase64(SocialGraphController.sharedInstance.rootId())
+        if encodedRoot == "2I8<O^K4T00" || encodedRoot == "860JAQC@T00" {
+            return // HACK This is to stop our usage sessions from flooding our analytics data.
+        }
         var userSession: PFObject = PFObject(className: "UserSession")
-        userSession["userId"] = encodeBase64(SocialGraphController.sharedInstance.rootId())
+        userSession["userId"] = encodedRoot
         userSession["startTime"] = round(self.appStartTime)
         userSession["data"] = "[" + ", ".join(session.map { (action: String, time: Double) -> String in
             return "{\"action\": \"\(action)\", \"time\": \(round(100 * time) / 100)}"

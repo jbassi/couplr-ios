@@ -144,8 +144,6 @@ class CouplrNavigationController: UINavigationController {
     
     func setupNavigationBarButtons() {
         customNavigationBar.frame = CGRectMake(0, view.frame.size.height-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight)
-        let buttonTags: [Int] = [kProfileViewButtonTag, kNewsfeedViewButtonTag, kMatchViewButtonTag, kHistoryViewButtonTag]
-        let buttonIconNames: [String] = ["nav-profile", "nav-newsfeed", "nav-match", "nav-history"]
         let buttonWidth = view.frame.width / CGFloat(viewControllerArray.count)
         for (index: Int, button: UIButton) in enumerate(buttonArray) {
             let buttonOffset: CGFloat = buttonWidth * CGFloat(index)
@@ -154,10 +152,12 @@ class CouplrNavigationController: UINavigationController {
             button.addTarget(self, action: Selector("tapSegmentButton:"), forControlEvents: UIControlEvents.TouchUpInside)
             let horizontalInset: CGFloat = (button.bounds.width - (button.bounds.height - kCouplrNavigationBarBottomInset - kCouplrNavigationBarTopInset)) / 2
             button.imageEdgeInsets = UIEdgeInsetsMake(kCouplrNavigationBarTopInset, horizontalInset, kCouplrNavigationBarBottomInset, horizontalInset)
-            button.setImage(UIImage(named: buttonIconNames[index]), forState: .Normal)
-            button.tag = buttonTags[index]
+            button.setImage(UIImage(named: kCouplrNavigationBarButtonIconNames[index]), forState: .Normal)
+            button.setImage(UIImage(named: kCouplrNavigationBarButtonDarkIconNames[index]), forState: .Selected)
+            button.tag = kCouplrNavigationBarButtonTags[index]
             customNavigationBar.addSubview(button)
         }
+        buttonArray[kInitialPageIndex].selected = true
         view.addSubview(customNavigationBar)
         setupNavigationSelectionBar()
     }
@@ -191,6 +191,8 @@ class CouplrNavigationController: UINavigationController {
                     pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Forward, animated: true, completion: {(completed: Bool) in
                         if completed {
                             self.currentPageIndex = i
+                            self.buttonArray[self.lastPageIndex].selected = false
+                            self.buttonArray[button.tag].selected = true
                             self.lastPageIndex = button.tag
                             if i == button.tag {
                                 self.animating = false
@@ -205,6 +207,8 @@ class CouplrNavigationController: UINavigationController {
                     pageViewController!.setViewControllers([viewControllerArray[i]], direction: .Reverse, animated: true, completion: {(completed: Bool) in
                         if completed {
                             self.currentPageIndex = i
+                            self.buttonArray[self.lastPageIndex].selected = false
+                            self.buttonArray[button.tag].selected = true
                             self.lastPageIndex = button.tag
                             if i == button.tag {
                                 self.animating = false
@@ -269,6 +273,8 @@ extension CouplrNavigationController: UIPageViewControllerDelegate, UIPageViewCo
     func pageViewController(pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [AnyObject], transitionCompleted completed: Bool) {
         if completed {
             currentPageIndex = indexOfViewController(pageViewController.viewControllers.last as! UIViewController)
+            buttonArray[lastPageIndex].selected = false
+            buttonArray[currentPageIndex].selected = true
             lastPageIndex = currentPageIndex
             UserSessionTracker.sharedInstance.notify("scrolled to \(self.pageNameFromIndex(currentPageIndex))")
         }
