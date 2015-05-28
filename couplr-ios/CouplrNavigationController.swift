@@ -155,6 +155,7 @@ class CouplrNavigationController: UINavigationController {
             button.setImage(UIImage(named: kCouplrNavigationBarButtonIconNames[index]), forState: .Normal)
             button.setImage(UIImage(named: kCouplrNavigationBarButtonDarkIconNames[index]), forState: .Selected)
             button.tag = kCouplrNavigationBarButtonTags[index]
+            button.adjustsImageWhenHighlighted = false
             customNavigationBar.addSubview(button)
         }
         buttonArray[kInitialPageIndex].selected = true
