@@ -42,7 +42,7 @@ public class UserSessionTracker {
         userSession["data"] = "[" + ", ".join(session.map { (action: String, time: Double) -> String in
             return "{\"action\": \"\(action)\", \"time\": \(round(100 * time) / 100)}"
         }) + "]"
-        userSession.save()
+        userSession.saveEventually()
         session = []
     }
     

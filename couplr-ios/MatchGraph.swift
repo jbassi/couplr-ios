@@ -412,8 +412,16 @@ public class MatchGraph {
             newMatch["titleId"] = match.titleId
             newMatches.append(newMatch)
         }
-        PFObject.saveAll(newMatches)
-        log("Successfully saved \(self.unregisteredMatches.count) matches to Parse.", withIndent: 1)
+        PFObject.saveAllInBackground(newMatches, block: { (succeeded: Bool, error: NSError?) -> Void in
+            if succeeded && error == nil {
+                log("Successfully saved \(self.unregisteredMatches.count) matches to Parse.", withIndent: 1)
+                self.unregisteredMatches.removeAll()
+                self.matchesBeforeUserHistoryLoaded.removeAll()
+                self.currentlyFlushingMatches = false
+            } else {
+                log("An error occurred while saving to Parse.", withIndent: 1)
+            }
+        })
     }
     
     /**

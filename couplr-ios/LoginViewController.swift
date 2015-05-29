@@ -45,13 +45,13 @@ class LoginViewController: UIViewController {
         
         let pageOne = TutorialPageViewController()
         pageOne.pageIndex = 0
-        pageOne.imageFileName = "1"
+        pageOne.imageFileName = "tutorial-screen-match"
         let pageTwo = TutorialPageViewController()
         pageTwo.pageIndex = 1
-        pageTwo.imageFileName = "2"
+        pageTwo.imageFileName = "tutorial-screen-profile"
         let pageThree = TutorialPageViewController()
         pageThree.pageIndex = 2
-        pageThree.imageFileName = "3"
+        pageThree.imageFileName = "tutorial-screen-newsfeed"
         
         viewControllerArray.append(pageOne)
         viewControllerArray.append(pageTwo)
