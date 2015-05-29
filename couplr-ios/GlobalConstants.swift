@@ -55,6 +55,16 @@ let kPickerShowSpringDamping: CGFloat = 0.7
 let kPickerHideSpringDamping: CGFloat = 0.5
 let kPickerSpringVelocity: CGFloat = 0.5
 
+/* Tutorial Constants */
+let kTutorialPhoneImage: UIImage = UIImage(named: "tutorial-screen-iphone")!
+let kTutorialPhoneContentRect: CGRect = CGRectMake(0.0645, 0.1152, 0.8711, 0.7689)
+let kTutorialPhoneSize: CGSize = CGSizeMake(861, 1735)
+let kTutorialDescriptionHeightRatio: CGFloat = 0.25
+let kTutorialDescriptionHorizontalPadding: CGFloat = 15.0
+let kTutorialMatchDescription: String = "Select a title and anonymously match 2 friends together."
+let kTutorialProfileDescription: String = "See who you've been matched with in your profile."
+let kTutorialNewsfeedDescription: String = "See your friends' recent matches in your newsfeed."
+
 /* LoadingView Constants */
 let kLoadingViewBlurViewBlurRadius: CGFloat = 20.0
 let kLoadingViewShowAnimationDuration: NSTimeInterval = 0.3

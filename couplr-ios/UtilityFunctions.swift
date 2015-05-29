@@ -310,6 +310,17 @@ func unapprovedUserPermissions(permissions: [String]) -> [String] {
     return permissions.filter({ find(approvedPermissions, $0) == nil })
 }
 
+extension CGSize {
+    /**
+     * Fits a given an element of some size to a container size, maximizing either horizontal or
+     * vertical scaling.
+     */
+    func resizeDimensionsToFit(containerSize: CGSize) -> CGSize {
+        let minimumScale = min(containerSize.width / width, containerSize.height / height)
+        return CGSizeMake(width * minimumScale, height * minimumScale)
+    }
+}
+
 /**
  * TODO It's super awkward to put a class in a file called UtilityFunctions. Maybe refactor
  * the file to be something more general like Utilities?

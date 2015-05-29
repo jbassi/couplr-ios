@@ -84,6 +84,7 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
         if let numberOfMatches = matches?.count {
             if numberOfMatches > 0 {
                 tableView.separatorStyle = .SingleLine
+                tableView.backgroundView = nil
                 headerView!.nameSwitch.enabled = true
                 return 1
             } else {

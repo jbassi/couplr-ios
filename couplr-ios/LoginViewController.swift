@@ -43,19 +43,22 @@ class LoginViewController: UIViewController {
         continueButton.setTitleColor(UIColor.blueColor(), forState: .Normal)
         continueButton.addTarget(self, action: "continueButtonPressed:", forControlEvents: .TouchUpInside)
         
-        let pageOne = TutorialPageViewController()
-        pageOne.pageIndex = 0
-        pageOne.imageFileName = "tutorial-screen-match"
-        let pageTwo = TutorialPageViewController()
-        pageTwo.pageIndex = 1
-        pageTwo.imageFileName = "tutorial-screen-profile"
-        let pageThree = TutorialPageViewController()
-        pageThree.pageIndex = 2
-        pageThree.imageFileName = "tutorial-screen-newsfeed"
+        let matchTutorialPage = TutorialPageViewController()
+        matchTutorialPage.pageIndex = 0
+        matchTutorialPage.screenFileName = "tutorial-screen-match"
+        matchTutorialPage.descriptionText = kTutorialMatchDescription
+        let profileTutorialPage = TutorialPageViewController()
+        profileTutorialPage.pageIndex = 1
+        profileTutorialPage.screenFileName = "tutorial-screen-profile"
+        profileTutorialPage.descriptionText = kTutorialProfileDescription
+        let newsfeedTutorialPage = TutorialPageViewController()
+        newsfeedTutorialPage.pageIndex = 2
+        newsfeedTutorialPage.screenFileName = "tutorial-screen-newsfeed"
+        newsfeedTutorialPage.descriptionText = kTutorialNewsfeedDescription
         
-        viewControllerArray.append(pageOne)
-        viewControllerArray.append(pageTwo)
-        viewControllerArray.append(pageThree)
+        viewControllerArray.append(matchTutorialPage)
+        viewControllerArray.append(profileTutorialPage)
+        viewControllerArray.append(newsfeedTutorialPage)
         
         let pageControlX: CGFloat = (view.bounds.width / 2) - (pageControl.bounds.width / 2)
         let pageControlY: CGFloat = loginViewY - 20
