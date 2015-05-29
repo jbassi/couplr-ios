@@ -246,14 +246,15 @@ func encodeBase64(value: UInt64) -> String {
         result.append(Character(UnicodeScalar(num + 48)))
         temp = temp >> 6
     }
-    return "".join(result.map({String($0)}))
+    let unsafeString: String = "".join(result.map{String($0)})
+    return unsafeString.replace("\\", withString: "/")
 }
 
 /**
  * Deserialize a string as an unsigned long long.
  */
 func decodeBase64(string: String) -> UInt64 {
-    let values = string.unicodeScalars
+    let values = string.replace("/", withString: "\\").unicodeScalars
     var cursor = values.endIndex.predecessor()
     var result: UInt64 = 0
     for i in 0..<11 {
