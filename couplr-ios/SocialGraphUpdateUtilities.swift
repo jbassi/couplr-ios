@@ -47,7 +47,7 @@ extension SocialGraph {
      */
     public func updateGraphUsingPosts(minNumPosts: Int = kMinNumPosts, numQueriedPosts: Int = 0, var pagingURL: String? = nil) {
         if numQueriedPosts >= minNumPosts {
-            log("The minimum number of posts have been queried", withFlag: "+", withIndent: 1)
+            log("The minimum number of posts has been queried", withFlag: "+", withIndent: 1)
             SocialGraphController.sharedInstance.didInitializeGraph()
             return
         }

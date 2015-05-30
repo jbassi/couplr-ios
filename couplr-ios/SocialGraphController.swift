@@ -112,8 +112,8 @@ public class SocialGraphController {
                 // Export the graph and then update from friends.
                 graph!.exportGraphToParse(andLoadFriendGraphs: true)
             }
-            // Prevent the graph from saving again under any condition.
-            voteHistoryOrPhotoDataLoadProgress = 3
+            // Reset the counter for the next initialization.
+            voteHistoryOrPhotoDataLoadProgress = 0
         }
         dispatch_semaphore_signal(graphSerializationSemaphore)
     }
@@ -216,6 +216,7 @@ public class SocialGraphController {
      */
     public func didInitializeGraph() {
         if self.graph == nil {
+            showLoginWithAlertViewErrorMessage("Something unexpected just happened. Let's try that again.", "Whoa there…")
             return
         }
         if self.graph!.nodes.count <= 10 {

@@ -49,6 +49,9 @@ class CouplrViewCoordinator {
     
     func didInitializeSocialNetwork() {
         matchViewController?.isInitializingSocialNetwork = false
+        // HACK This really shouldn't be necessary, but it seems to fix the case where the user
+        // quickly unfocuses and refocuses the app.
+        dismissLoadingScreen()
     }
     
     func tryToCreateAndShowLoadingView(animated: Bool = true) -> Bool {
