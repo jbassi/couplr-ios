@@ -8,6 +8,9 @@
 
 import UIKit
 
+/* Automatically reload upon exiting/reentering the app no more than once every 2 minutes. */
+let kAutoRefreshPeriod: Double = 120
+
 /* iOS Navigation Bar Height */
 let kStatusBarSize = UIApplication.sharedApplication().statusBarFrame.size
 let kStatusBarHeight = min(kStatusBarSize.width, kStatusBarSize.height)

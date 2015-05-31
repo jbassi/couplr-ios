@@ -17,6 +17,7 @@ class CouplrViewCoordinator {
         historyViewController = nil
         navigationController = nil
         loadingView = nil
+        lastLoadTime = 0
     }
     
     class var sharedInstance: CouplrViewCoordinator {
@@ -24,6 +25,11 @@ class CouplrViewCoordinator {
             static let instance = CouplrViewCoordinator()
         }
         return CouplrControllersSingleton.instance
+    }
+    
+    func shouldResetControllers() -> Bool {
+        let currentTime: Double = currentTimeInSeconds()
+        return currentTime - lastLoadTime > kAutoRefreshPeriod && !loadingViewIsActive
     }
     
     func refreshProfileView() {
@@ -49,9 +55,7 @@ class CouplrViewCoordinator {
     
     func didInitializeSocialNetwork() {
         matchViewController?.isInitializingSocialNetwork = false
-        // HACK This really shouldn't be necessary, but it seems to fix the case where the user
-        // quickly unfocuses and refocuses the app.
-        dismissLoadingScreen()
+        lastLoadTime = currentTimeInSeconds()
     }
     
     func tryToCreateAndShowLoadingView(animated: Bool = true) -> Bool {
@@ -88,8 +92,9 @@ class CouplrViewCoordinator {
     weak var newsfeedViewController: NewsfeedViewController?
     weak var historyViewController: HistoryViewController?
     weak var navigationController: CouplrNavigationController?
-    var loadingViewIsActive: Bool = false;
-    var loadingView: LoadingView? = nil;
+    var loadingViewIsActive: Bool = false
+    var loadingView: LoadingView? = nil
+    var lastLoadTime: Double
 }
 
 class CouplrNavigationController: UINavigationController {

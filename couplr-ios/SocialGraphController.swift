@@ -39,6 +39,10 @@ public class SocialGraphController {
         }
         return SocialGraphSingleton.instance
     }
+    
+    public func refreshRequired() -> Bool {
+        return graph == nil
+    }
 
     /**
      * Resets all fields to their initial values.
