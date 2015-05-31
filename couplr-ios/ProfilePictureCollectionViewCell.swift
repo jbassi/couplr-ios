@@ -27,21 +27,14 @@ class ProfilePictureCollectionViewCell: UICollectionViewCell {
         layer.masksToBounds = true
         layer.cornerRadius = 0.15 * width
         
-        let shadowView = UIView(frame: CGRectMake(0, 0, width, height).withMargin(horizontal: 3, vertical: 3))
-        shadowView.layer.shadowColor = UIColor.blackColor().CGColor
-        shadowView.layer.shadowOffset = CGSizeZero
-        shadowView.layer.shadowOpacity = 0.5
-        shadowView.layer.shadowRadius = 1.5
-        
-        imageView.frame = shadowView.bounds
+        imageView.frame = CGRectMake(0, 0, width, height).withMargin(horizontal: 3, vertical: 3)
         imageView.backgroundColor = UIColor.whiteColor()
         imageView.layer.cornerRadius = 0.15 * width - 1
         imageView.layer.borderColor = UIColor.grayColor().CGColor
         imageView.layer.borderWidth = 0.5
         imageView.clipsToBounds = true
         
-        shadowView.addSubview(imageView)
-        contentView.addSubview(shadowView)
+        contentView.addSubview(imageView)
     }
 
     required init(coder aDecoder: NSCoder) {
