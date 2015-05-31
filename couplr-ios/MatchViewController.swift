@@ -42,9 +42,9 @@ class MatchViewController: UIViewController {
         let frameWidth: CGFloat = view.frame.width
         let frameHeight: CGFloat = view.frame.height
         let outerMatchViewRect: CGRect = CGRectMake(0, kMatchViewMarginTop, frameWidth, frameHeight - kCouplrNavigationBarHeight - kMatchViewMarginTop).withMargin(horizontal: 8)
-        var (buttonBounds, matchBounds, titleBounds) = computeComponentRects(CGSizeMake(frameWidth, frameHeight), outerBoundingRect: outerMatchViewRect)
+        var (buttonBounds, matchBounds, titleBounds) = computeComponentRects(frameHeight, outerBoundingRect: outerMatchViewRect)
         if titleBounds.origin.y > kMatchViewTitleHeight {
-            (buttonBounds, matchBounds, titleBounds) = computeComponentRects(CGSizeMake(frameWidth, frameHeight), outerBoundingRect: outerMatchViewRect, marginBetweenElements: (titleBounds.origin.y - kMatchViewTitleHeight) / 4)
+            (buttonBounds, matchBounds, titleBounds) = computeComponentRects(frameHeight, outerBoundingRect: outerMatchViewRect, marginBetweenElements: (titleBounds.origin.y - kMatchViewTitleHeight) / 4)
         }
         
         // Set up and position the match title label.
@@ -98,11 +98,11 @@ class MatchViewController: UIViewController {
     /**
      * Computes the bounding rects of the title, match, and buttons in the match view.
      */
-    private func computeComponentRects(frameSize: CGSize, outerBoundingRect: CGRect, marginBetweenElements: CGFloat = 0) -> (CGRect, CGRect, CGRect) {
+    private func computeComponentRects(frameHeight: CGFloat, outerBoundingRect: CGRect, marginBetweenElements: CGFloat = 0) -> (CGRect, CGRect, CGRect) {
         let buttonSectionSize: CGSize = CGSizeMake(4, 1).resizeDimensionsToFit(outerBoundingRect.size)
         let matchSectionSize: CGSize = CGSizeMake(1, 1).resizeDimensionsToFit(outerBoundingRect.size)
-        let titleSectionSize: CGSize = CGSizeMake(frameSize.width, kMatchViewTitleHeight)
-        let buttonSectionRect = CGRectMake(outerBoundingRect.origin.x, frameSize.height - kCouplrNavigationBarHeight - buttonSectionSize.height - marginBetweenElements, buttonSectionSize.width, buttonSectionSize.height)
+        let titleSectionSize: CGSize = CGSizeMake(outerBoundingRect.width, kMatchViewTitleHeight)
+        let buttonSectionRect = CGRectMake(outerBoundingRect.origin.x, frameHeight - kCouplrNavigationBarHeight - buttonSectionSize.height - marginBetweenElements, buttonSectionSize.width, buttonSectionSize.height)
         let matchSectionRect = CGRectMake(outerBoundingRect.origin.x, buttonSectionRect.origin.y - matchSectionSize.height - marginBetweenElements, matchSectionSize.width, matchSectionSize.height)
         let titleSectionRect = CGRectMake(outerBoundingRect.origin.x, matchSectionRect.origin.y - titleSectionSize.height - marginBetweenElements, titleSectionSize.width, titleSectionSize.height)
         return (buttonSectionRect.shrinkByRatio(0.01), matchSectionRect.shrinkByRatio(0.01), titleSectionRect.shrinkByRatio(0.01))
