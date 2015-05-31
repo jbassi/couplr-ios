@@ -363,6 +363,13 @@ extension CGRect {
     func shrinkByRatio(ratio: CGFloat) -> CGRect {
         return withMargin(horizontal: ratio * size.width, vertical: ratio * size.height)
     }
+    
+    /**
+     * Expands the rect by a given ratio, while maintaining the center.
+     */
+    func expandByRatio(ratio: CGFloat) -> CGRect {
+        return withMargin(horizontal: -ratio * size.width, vertical: -ratio * size.height)
+    }
 }
 
 

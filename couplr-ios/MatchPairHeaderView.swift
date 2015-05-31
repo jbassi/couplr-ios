@@ -11,8 +11,7 @@ import UIKit
 class MatchPairHeaderView: UIView {
 
     let headerLabel = UILabel()
-    let nameSwitch = UISwitch()
-    let namesLabel = UILabel()
+    let nameToggleButton = UIButton()
     let bottomBorder = CALayer()
     
     override init(frame: CGRect) {
@@ -24,20 +23,26 @@ class MatchPairHeaderView: UIView {
         bottomBorder.frame = CGRectMake(kProfileDetailViewBottomBorderWidth, frameHeight, frame.size.width - kProfileDetailViewBottomBorderWidth, kProfileDetailViewBottomBorderHeight)
         bottomBorder.backgroundColor = UIColor.grayColor().CGColor
         
-        nameSwitch.frame = CGRectMake(frameWidth-nameSwitch.frame.width-10, (frameHeight/2)-(nameSwitch.frame.height/2), nameSwitch.frame.width, nameSwitch.frame.height)
-        
-        namesLabel.text = "Names:"
         let namesLabelWidth: CGFloat = 66
         let namesLabelHeight: CGFloat = 30
         let namesLabelY: CGFloat = (frameHeight / 2) - (namesLabelHeight / 2)
-        let namesLabelX: CGFloat = frameWidth - nameSwitch.frame.width - namesLabelWidth - 10
-        namesLabel.frame = CGRectMake(namesLabelX, namesLabelY, namesLabelWidth, namesLabelHeight)
+        let namesLabelX: CGFloat = frameWidth - nameToggleButton.frame.width - namesLabelWidth - 10
         
-        headerLabel.frame = CGRectMake(20, 0, frameWidth-nameSwitch.frame.width-10, frameHeight)
+        headerLabel.frame = CGRectMake(20, 0, frameWidth-nameToggleButton.frame.width-10, frameHeight)
+        
+        let nameToggleButtonLength: CGFloat = 60
+        let nameToggleButtonInsets: CGFloat = 0.15 * nameToggleButtonLength
+        nameToggleButton.frame = CGRectMake(frameWidth - nameToggleButtonLength - 10, (frameHeight - nameToggleButtonLength) / 2, nameToggleButtonLength, nameToggleButtonLength)
+        nameToggleButton.backgroundColor = UIColor.whiteColor()
+        nameToggleButton.layer.cornerRadius = nameToggleButtonLength / 2 - 1
+        nameToggleButton.layer.borderColor = UIColor(white: 0.67, alpha: 1).CGColor
+        nameToggleButton.layer.borderWidth = 0.5
+        nameToggleButton.setImage(UIImage(named: "matchview-names"), forState: .Normal)
+        nameToggleButton.imageEdgeInsets = UIEdgeInsetsMake(nameToggleButtonInsets, nameToggleButtonInsets, nameToggleButtonInsets, nameToggleButtonInsets)
+        nameToggleButton.clipsToBounds = true
         
         addSubview(headerLabel)
-        addSubview(nameSwitch)
-        addSubview(namesLabel)
+        addSubview(nameToggleButton)
         layer.addSublayer(bottomBorder)
     }
     

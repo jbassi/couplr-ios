@@ -23,7 +23,7 @@ class NewsfeedViewController: UIViewController {
         headerView!.headerLabel.text = "Newsfeed"
         headerView!.headerLabel.font = UIFont(name: "HelveticaNeue-Light", size: 32)
 
-        headerView!.nameSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)
+        headerView!.nameToggleButton.addTarget(self, action: "namesToggled:", forControlEvents: .TouchUpInside)
         
         let headerViewHeight = headerView!.frame.height + kStatusBarHeight + kProfileDetailViewBottomBorderHeight
         let newsfeedTableViewHeight = view.bounds.size.height - headerViewHeight - kCouplrNavigationBarButtonHeight
@@ -63,8 +63,9 @@ class NewsfeedViewController: UIViewController {
         }
     }
     
-    func switchToggled(sender: UISwitch) {
-        if sender.on {
+    func namesToggled(sender: UISwitch) {
+        sender.selected = !sender.selected
+        if sender.selected {
             showAllNamesInVisibleCells()
             UserSessionTracker.sharedInstance.notify("toggled newsfeed names on")
         } else {
@@ -85,7 +86,7 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
             if numberOfMatches > 0 {
                 tableView.separatorStyle = .SingleLine
                 tableView.backgroundView = nil
-                headerView!.nameSwitch.enabled = true
+                headerView!.nameToggleButton.enabled = true
                 return 1
             } else {
                 let messageLabel = UILabel(frame: CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height))
@@ -98,7 +99,7 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
                 tableView.backgroundView = messageLabel;
                 tableView.separatorStyle = .None;
                 
-                headerView!.nameSwitch.enabled = false
+                headerView!.nameToggleButton.enabled = false
                 
                 return 0
             }
@@ -121,7 +122,7 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
             cell.selectionStyle = .None
             cell.leftCellImage.sd_setImageWithURL(profilePictureURLFromId(match.firstId), placeholderImage: UIImage(named: "unknown"))
             cell.rightCellImage.sd_setImageWithURL(profilePictureURLFromId(match.secondId), placeholderImage: UIImage(named: "unknown"))
-            if headerView!.nameSwitch.on {
+            if headerView!.nameToggleButton.selected {
                 let nameForFirstId: String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
                 let nameForSecondId: String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
                 cell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
@@ -139,15 +140,15 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
-        headerView!.nameSwitch.enabled = false
+        headerView!.nameToggleButton.enabled = false
     }
     
     func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
-        headerView!.nameSwitch.enabled = true
+        headerView!.nameToggleButton.enabled = true
     }
     
     func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        headerView!.nameSwitch.enabled = true
+        headerView!.nameToggleButton.enabled = true
     }
     
 }

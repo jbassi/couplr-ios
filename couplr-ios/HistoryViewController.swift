@@ -25,7 +25,7 @@ class HistoryViewController: UIViewController {
         headerView!.headerLabel.text = "My votes"
         headerView!.headerLabel.font = UIFont(name: "HelveticaNeue-Light", size: 32)
         
-        headerView!.nameSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)
+        headerView!.nameToggleButton.addTarget(self, action: "namesToggled:", forControlEvents: .TouchUpInside)
         
         let headerViewHeight = headerView!.frame.height + kStatusBarHeight + kProfileDetailViewBottomBorderHeight
         let historyTableViewHeight = view.bounds.size.height - headerViewHeight - kCouplrNavigationBarButtonHeight
@@ -74,8 +74,9 @@ class HistoryViewController: UIViewController {
         }
     }
     
-    func switchToggled(sender: UISwitch) {
-        if sender.on {
+    func namesToggled(sender: UISwitch) {
+        sender.selected = !sender.selected
+        if sender.selected {
             showAllNamesInVisibleCells()
             UserSessionTracker.sharedInstance.notify("toggled history names on")
         } else {
@@ -92,7 +93,7 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
         if voteHistory().count > 0 {
             tableView.backgroundView = nil
             tableView.separatorStyle = .SingleLine
-            headerView!.nameSwitch.enabled = true
+            headerView!.nameToggleButton.enabled = true
             return 1
         }
         let messageLabel = UILabel(frame: CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height))
@@ -103,7 +104,7 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
         messageLabel.sizeToFit()
         tableView.backgroundView = messageLabel;
         tableView.separatorStyle = .None
-        headerView!.nameSwitch.enabled = false
+        headerView!.nameToggleButton.enabled = false
         return 0
     }
     
@@ -138,7 +139,7 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
         cell.selectionStyle = .None
         cell.leftCellImage.sd_setImageWithURL(profilePictureURLFromId(match.firstId), placeholderImage: UIImage(named: "unknown"))
         cell.rightCellImage.sd_setImageWithURL(profilePictureURLFromId(match.secondId), placeholderImage: UIImage(named: "unknown"))
-        if headerView!.nameSwitch.on {
+        if headerView!.nameToggleButton.selected {
             let nameForFirstId: String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
             let nameForSecondId: String = socialGraphController.nameFromId(match.secondId, maxStringLength: 12)
             cell.addTransparentLayerWithName(nameForFirstId, rightName: nameForSecondId)
@@ -155,14 +156,14 @@ extension HistoryViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
-        headerView!.nameSwitch.enabled = false
+        headerView!.nameToggleButton.enabled = false
     }
     
     func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
-        headerView!.nameSwitch.enabled = true
+        headerView!.nameToggleButton.enabled = true
     }
     
     func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        headerView!.nameSwitch.enabled = true
+        headerView!.nameToggleButton.enabled = true
     }
 }
