@@ -162,7 +162,7 @@ class ProfileDetailLayoverView: UIView {
             return self.matchResult
         }
         let rootId: UInt64 = socialGraphController.rootId()
-        let sortedMatches: [(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
+        let sortedMatches: [(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUserByTitleId(rootId)
         let matchResult: [(UInt64, Int)] = sortedMatches.filter ({
             (titleAndMatches:(Int,[(UInt64, Int)])) -> Bool in
             return titleAndMatches.0 == self.title?.id

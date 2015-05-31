@@ -52,7 +52,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")
             return 0
         }
-        if matchGraphController.sortedMatchesForUser(rootId).count > 0 {
+        if matchGraphController.sortedMatchesForUserByTitleId(rootId).count > 0 {
             tableView.separatorStyle = .SingleLine
             return 1
         } else {
@@ -76,7 +76,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")
             return 0
         }
-        return matchGraphController.sortedMatchesForUser(rootId).count
+        return matchGraphController.sortedMatchesForUserByTitleId(rootId).count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -86,7 +86,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")
             return cell
         }
-        let sortedMatches: [(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
+        let sortedMatches: [(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUserByTitleId(rootId)
         let titleId: Int = sortedMatches[indexPath.row].0
         if let title: MatchTitle? = matchGraphController.matchTitleFromId(titleId) {
             cell.cellText.text = title!.text
@@ -111,7 +111,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         if rootId == 0 {
             log("Warning: root user must be known before loading profile view.", withFlag:"?")
         }
-        let sortedMatches: [(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUser(rootId)
+        let sortedMatches: [(Int,[(UInt64, Int)])] = matchGraphController.sortedMatchesForUserByTitleId(rootId)
         let titleId: Int = sortedMatches[indexPath.row].0
         
         pickerView.title = matchGraphController.matchTitleFromId(titleId)

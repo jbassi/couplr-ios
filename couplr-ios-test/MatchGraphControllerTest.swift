@@ -106,6 +106,21 @@ class MatchGraphControllerTest: XCTestCase {
         expectDatesToMatch(matches[1].1, NSDate(timeIntervalSinceNow: 60), "Incorrect newsfeed match time.")
     }
     
+    func testSortedMatchesByUser() {
+        matches!.tryToUpdateMatch(1, secondId: 3, voterId: 4, titleId: 2, time: NSDate())
+        matches!.tryToUpdateMatch(1, secondId: 8, voterId: 4, titleId: 1, time: NSDate())
+        matches!.tryToUpdateMatch(1, secondId: 4, voterId: 7, titleId: 3, time: NSDate())
+        matches!.tryToUpdateMatch(1, secondId: 8, voterId: 7, titleId: 1, time: NSDate())
+        let sortedMatches = controller.sortedMatchesForUserByUserId(1)
+        XCTAssertEqual(sortedMatches.count, 3, "Expected sorted matches to have 3 elements.")
+        XCTAssertEqual(sortedMatches[0].1.count, 1, "Expected the first element of sorted matches to have 3 elements.")
+        XCTAssertEqual(sortedMatches[1].1.count, 2, "Expected the second element of sorted matches to have 3 elements.")
+        XCTAssertEqual(sortedMatches[2].1.count, 1, "Expected the third element of sorted matches to have 3 elements.")
+        XCTAssertEqual(sortedMatches[0].0, 8, "Expected the first element to contain user id 8.")
+        XCTAssertEqual(sortedMatches[1].0, 3, "Expected the second element to contain user id 3.")
+        XCTAssertEqual(sortedMatches[2].0, 4, "Expected the third element to contain user id 4.")
+    }
+    
     var controller: MatchGraphController = MatchGraphController.get()
     var graph: SocialGraph? = nil
     var matches: MatchGraph? = nil

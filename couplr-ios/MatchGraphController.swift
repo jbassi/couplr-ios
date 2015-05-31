@@ -191,12 +191,36 @@ public class MatchGraphController {
     /**
      * Wraps a call to the same method of MatchGraph.
      */
-    public func sortedMatchesForUser(userId: UInt64) -> [(Int,[(UInt64, Int)])] {
+    public func sortedMatchesForUserByTitleId(userId: UInt64) -> [(Int, [(UInt64, Int)])] {
         if matches == nil {
             log("Warning: match graph not yet loaded!", withFlag:"?")
             return [(Int,[(UInt64, Int)])]()
         }
         return matches!.sortedMatchesForUser(userId)
+    }
+    
+    /**
+     * Returns a list of [userId, [titleId, count]]. Each userId is paired
+     * with a list containing (titleId, count) tuples. The list is sorted
+     * by the number of total votes under each user.
+     */
+    public func sortedMatchesForUserByUserId(userId: UInt64) -> [(UInt64, [(Int, Int)])] {
+        if matches == nil {
+            log("Warning: match graph not yet loaded!", withFlag:"?")
+            return [(UInt64, [(Int, Int)])]()
+        }
+        var numVotesForUser: [UInt64: Int] = [UInt64: Int]()
+        var voteListForUser: [UInt64: [(Int, Int)]] = [UInt64: [(Int, Int)]]()
+        for (title: Int, votes: [(UInt64, Int)]) in sortedMatchesForUserByTitleId(userId) {
+            for (user: UInt64, count: Int) in votes {
+                numVotesForUser[user] = count + (numVotesForUser[user] == nil ? 0 : numVotesForUser[user]!)
+                if voteListForUser[user] == nil {
+                    voteListForUser[user] = []
+                }
+                voteListForUser[user]!.append((title, count))
+            }
+        }
+        return sorted(numVotesForUser.keys, {numVotesForUser[$0]! > numVotesForUser[$1]!}).map {($0, voteListForUser[$0]!)}
     }
 
     /**
