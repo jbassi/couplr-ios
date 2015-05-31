@@ -40,7 +40,7 @@ class LoginViewController: UIViewController {
         continueButton.frame = CGRectMake(0, continueButtonY, view.frame.size.width, 50)
         continueButton.titleLabel?.adjustsFontSizeToFitWidth = true
         continueButton.titleLabel?.textAlignment = .Center
-        continueButton.setTitleColor(UIColor.blueColor(), forState: .Normal)
+        continueButton.setTitleColor(view.tintColor, forState: .Normal)
         continueButton.addTarget(self, action: "continueButtonPressed:", forControlEvents: .TouchUpInside)
         
         let matchTutorialPage = TutorialPageViewController()

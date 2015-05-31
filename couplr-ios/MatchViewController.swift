@@ -24,81 +24,95 @@ class MatchViewController: UIViewController {
     var isInitializingSocialNetwork = false
     
     var collectionView: UICollectionView?
-    let matchTitleLabel: UIButton = UIButton()
-    let resetButton: UIButton = UIButton()
+    let matchTitle: UIButton = UIButton()
+    let shuffleButton: UIButton = UIButton()
     let submitButton: UIButton = UIButton()
     let settingsButton: UIButton = UIButton.buttonWithType(UIButtonType.DetailDisclosure) as! UIButton
-    let toggleNamesSwitch: UISwitch = UISwitch()
+    let toggleNamesButton: UIButton = UIButton()
+    let titleSelectButton: UIButton = UIButton()
 
     let socialGraphController = SocialGraphController.sharedInstance
     let matchGraphController = MatchGraphController.sharedInstance
 
+    var matchCellSideLength: CGFloat = 100
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         let frameWidth: CGFloat = view.frame.width
         let frameHeight: CGFloat = view.frame.height
+        let outerMatchViewRect: CGRect = CGRectMake(0, kMatchViewMarginTop, frameWidth, frameHeight - kCouplrNavigationBarHeight - kMatchViewMarginTop).withMargin(horizontal: 8)
+        var (buttonBounds, matchBounds, titleBounds) = computeComponentRects(CGSizeMake(frameWidth, frameHeight), outerBoundingRect: outerMatchViewRect)
+        if titleBounds.origin.y > kMatchViewTitleHeight {
+            (buttonBounds, matchBounds, titleBounds) = computeComponentRects(CGSizeMake(frameWidth, frameHeight), outerBoundingRect: outerMatchViewRect, marginBetweenElements: (titleBounds.origin.y - kMatchViewTitleHeight) / 4)
+        }
         
+        // Set up and position the match title label.
+        matchTitle.frame = titleBounds
+        matchTitle.setTitleColor(UIColor.blueColor(), forState: .Normal)
+        // TODO Dynamically set the font size to expand to the maximum height and width.
+        matchTitle.titleLabel?.font = UIFont(name: "HelveticaNeue-Light", size: 20)
+        matchTitle.addTarget(self, action: "showTitleSelect", forControlEvents: UIControlEvents.TouchUpInside)
+        
+        // Set up and position the match collection view.
         let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.itemSize = CGSize(width: 100, height: 100)
-        flowLayout.scrollDirection = UICollectionViewScrollDirection.Horizontal
+        matchCellSideLength = (matchBounds.size.height - 10) / 3
+        flowLayout.itemSize = CGSize(width: matchCellSideLength, height: matchCellSideLength)
         flowLayout.minimumInteritemSpacing = 5
         flowLayout.minimumLineSpacing = 5
-        let collectionViewHeight: CGFloat = 315.0
-        let collectionViewWidth: CGFloat = 315.0
-        let collectionViewX: CGFloat = (frameWidth-collectionViewWidth+5)/2
-        let collectionViewY: CGFloat = (frameHeight-kStatusBarHeight-kCouplrNavigationBarButtonHeight-collectionViewHeight)/2+20
-        let collectionViewFrame: CGRect = CGRectMake(collectionViewX, collectionViewY, collectionViewWidth, collectionViewHeight)
-        collectionView = UICollectionView(frame: collectionViewFrame, collectionViewLayout: flowLayout)
-        collectionView!.registerClass(ProfilePictureCollectionViewCell.self, forCellWithReuseIdentifier: "MatchViewCell")
+        collectionView = UICollectionView(frame: matchBounds, collectionViewLayout: flowLayout)
         collectionView!.backgroundColor = UIColor.whiteColor()
+        collectionView!.registerClass(ProfilePictureCollectionViewCell.self, forCellWithReuseIdentifier: "MatchViewCell")
         collectionView!.delegate = self
         collectionView!.dataSource = self
         collectionView!.allowsMultipleSelection = true
-        
-        let matchTitleLabelHeight: CGFloat = 40
-        let matchTitleLabelWidth: CGFloat = collectionViewWidth - 5
-        let matchTitleLabelY: CGFloat = collectionViewY - matchTitleLabelHeight - 5
-        matchTitleLabel.frame = CGRectMake(collectionViewX, matchTitleLabelY, matchTitleLabelWidth, matchTitleLabelHeight)
-        matchTitleLabel.layer.cornerRadius = 10
-        matchTitleLabel.layer.masksToBounds = true
-        matchTitleLabel.backgroundColor = UIColor.lightGrayColor()
-        matchTitleLabel.addTarget(self, action: "showButtonPressed", forControlEvents: UIControlEvents.TouchUpInside)
-        
-        let buttonWidth: CGFloat = (collectionViewWidth / 3) - 5
-        let buttonHeight: CGFloat = 40
-        let buttonY: CGFloat = collectionViewY + collectionViewHeight + 5
-        
-        resetButton.frame = CGRectMake(collectionViewX, buttonY, buttonWidth, buttonHeight)
-        resetButton.backgroundColor = UIColor.lightGrayColor()
-        resetButton.setTitle("Shuffle", forState: .Normal)
-        resetButton.layer.cornerRadius = 10
-        resetButton.layer.masksToBounds = true
-        resetButton.addTarget(self, action: "shuffleUnselectedMatches", forControlEvents: .TouchUpInside)
-        
-        submitButton.frame = CGRectMake(collectionViewX+buttonWidth+5, buttonY, buttonWidth, buttonHeight)
-        submitButton.backgroundColor = UIColor.lightGrayColor()
-        submitButton.setTitle("Submit", forState: .Normal)
-        submitButton.layer.cornerRadius = 10
-        submitButton.layer.masksToBounds = true
-        submitButton.addTarget(self, action: "submitMatch", forControlEvents: .TouchUpInside)
-        
-        toggleNamesSwitch.frame.origin = CGPointMake(collectionViewX+((buttonWidth+5)*2), buttonY+5)
-        toggleNamesSwitch.on = false
-        toggleNamesSwitch.addTarget(self, action: "switchToggled:", forControlEvents: .ValueChanged)
-        
-        let settingsButtonX: CGFloat = toggleNamesSwitch.frame.origin.x + toggleNamesSwitch.frame.width + 15
-        settingsButton.frame.origin = CGPointMake(settingsButtonX, buttonY+8)
-        settingsButton.addTarget(self, action: "settingsToggled:", forControlEvents: .TouchUpInside)
-        
+
+        // Set up and position the buttons.
+        let buttons: [UIButton] = [toggleNamesButton, titleSelectButton, shuffleButton, submitButton]
+        let buttonImageNames: [String?] = ["matchview-names", nil, "matchview-shuffle", "matchview-match"]
+        let buttonActionNames: [Selector] = [Selector("namesToggled:"), Selector("showTitleSelect"), Selector("shuffleUnselectedMatches"), Selector("submitMatch")]
+        let buttonSideLength: CGFloat = buttonBounds.width / CGFloat(buttons.count)
+        let buttonInsets: CGFloat = 0.15 * buttonSideLength
+        for (index: Int, button: UIButton) in enumerate(buttons) {
+            let shadowView = UIView(frame: CGRectMake(buttonBounds.origin.x + CGFloat(index) * buttonSideLength, buttonBounds.origin.y, buttonSideLength, buttonSideLength).withMargin(horizontal: 3, vertical: 3))
+            shadowView.layer.shadowColor = UIColor.blackColor().CGColor
+            shadowView.layer.shadowOffset = CGSizeZero
+            shadowView.layer.shadowOpacity = 0.5
+            shadowView.layer.shadowRadius = 1.5
+            
+            button.frame = shadowView.bounds
+            button.backgroundColor = UIColor.whiteColor()
+            button.layer.cornerRadius = buttonSideLength / 2 - 1
+            button.layer.borderColor = UIColor.grayColor().CGColor
+            button.layer.borderWidth = 0.5
+            if buttonImageNames[index] != nil {
+                button.setImage(UIImage(named: buttonImageNames[index]!), forState: .Normal)
+            } else {
+                button.setImage(nil, forState: .Normal)
+            }
+            button.imageEdgeInsets = UIEdgeInsetsMake(buttonInsets, buttonInsets, buttonInsets, buttonInsets)
+            button.clipsToBounds = true
+            button.addTarget(self, action: buttonActionNames[index], forControlEvents: UIControlEvents.TouchUpInside)
+            
+            shadowView.addSubview(button)
+            view.addSubview(shadowView)
+        }
         view.addSubview(collectionView!)
-        view.addSubview(matchTitleLabel)
-        view.addSubview(resetButton)
-        view.addSubview(submitButton)
-        view.addSubview(toggleNamesSwitch)
-        view.addSubview(settingsButton)
-        
+        view.addSubview(matchTitle)
         initializeSocialGraphAndMatchGraphControllers()
+    }
+    
+    /**
+     * Computes the bounding rects of the title, match, and buttons in the match view.
+     */
+    private func computeComponentRects(frameSize: CGSize, outerBoundingRect: CGRect, marginBetweenElements: CGFloat = 0) -> (CGRect, CGRect, CGRect) {
+        let buttonSectionSize: CGSize = CGSizeMake(4, 1).resizeDimensionsToFit(outerBoundingRect.size)
+        let matchSectionSize: CGSize = CGSizeMake(1, 1).resizeDimensionsToFit(outerBoundingRect.size)
+        let titleSectionSize: CGSize = CGSizeMake(frameSize.width, kMatchViewTitleHeight)
+        let buttonSectionRect = CGRectMake(outerBoundingRect.origin.x, frameSize.height - kCouplrNavigationBarHeight - buttonSectionSize.height - marginBetweenElements, buttonSectionSize.width, buttonSectionSize.height)
+        let matchSectionRect = CGRectMake(outerBoundingRect.origin.x, buttonSectionRect.origin.y - matchSectionSize.height - marginBetweenElements, matchSectionSize.width, matchSectionSize.height)
+        let titleSectionRect = CGRectMake(outerBoundingRect.origin.x, matchSectionRect.origin.y - titleSectionSize.height - marginBetweenElements, titleSectionSize.width, titleSectionSize.height)
+        return (buttonSectionRect.shrinkByRatio(0.01), matchSectionRect.shrinkByRatio(0.01), titleSectionRect.shrinkByRatio(0.01))
     }
     
     func initializeSocialGraphAndMatchGraphControllers() {
@@ -118,8 +132,9 @@ class MatchViewController: UIViewController {
                 if titleList.count == 0 {
                     showLoginWithAlertViewErrorMessage("Our servers are overloaded! Try again later.", "Something went wrong.")
                 } else {
-                    self.matchTitleLabel.setTitle(titleList[0].text, forState: UIControlState.Normal)
+                    self.matchTitle.setTitle(titleList[0].text, forState: UIControlState.Normal)
                     self.selectedTitle = titleList[0]
+                    self.titleSelectButton.setImage(UIImage(named: titleList[0].picture), forState: .Normal)
                 }
             } else {
                 showLoginWithAlertViewErrorMessage("We could not connect to our servers from here!", "Something went wrong.")
@@ -148,8 +163,9 @@ class MatchViewController: UIViewController {
         }
     }
     
-    func switchToggled(sender: UISwitch) {
-        if sender.on {
+    func namesToggled(sender: UIButton) {
+        sender.selected = !sender.selected
+        if sender.selected {
             showAllNames()
             UserSessionTracker.sharedInstance.notify("toggled names on")
         } else {
@@ -164,7 +180,7 @@ class MatchViewController: UIViewController {
         selectedRow = 0
         selectedUsers.removeAll(keepCapacity: true)
         selectedIndices.removeAll(keepCapacity: true)
-        toggleNamesSwitch.on = false
+        toggleNamesButton.selected = false
     }
     
     func settingsToggled(sender: UIButton) {
@@ -193,7 +209,7 @@ class MatchViewController: UIViewController {
         }
     }
 
-    func showButtonPressed() {
+    func showTitleSelect() {
         let pickerView = PickerView.createPickerViewInView(UIApplication.sharedApplication().delegate!.window!!, animated: true)
         pickerView.dataSource = self
         pickerView.delegate = self
@@ -219,7 +235,7 @@ class MatchViewController: UIViewController {
                 }
                 
                 dispatch_async(dispatch_get_main_queue()) {
-                    if self.toggleNamesSwitch.on {
+                    if self.toggleNamesButton.selected {
                         self.showAllNames()
                     } else {
                         self.hideAllNames()
@@ -251,7 +267,7 @@ class MatchViewController: UIViewController {
         let randomIndex: Int = randomInt(titleList.count)
         selectedTitle = titleList[randomIndex]
         selectedRow = randomIndex
-        matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
+        matchTitle.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
     }
 }
 
@@ -276,7 +292,8 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
         selectedTitle = titles[row]
         selectedRow = row
         UserSessionTracker.sharedInstance.notify("selected title id \(titles[row].id)")
-        matchTitleLabel.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
+        matchTitle.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
+        titleSelectButton.setImage(UIImage(named: titles[row].picture), forState: .Normal)
     }
     
     func pickerView(pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
@@ -313,7 +330,7 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
 
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("MatchViewCell", forIndexPath: indexPath) as! ProfilePictureCollectionViewCell
-        cell.backgroundColor = UIColor.grayColor()
+        cell.backgroundColor = UIColor.whiteColor()
         let randomSample: [UInt64] = socialGraphController.currentSample()
         if randomSample.count > 0 {
             let userId = randomSample[indexPath.row]
@@ -342,14 +359,14 @@ extension MatchViewController: UICollectionViewDelegate, UICollectionViewDataSou
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
         UserSessionTracker.sharedInstance.notify("deselected match \(indexPath.row)")
         let cell = collectionView.cellForItemAtIndexPath(indexPath) as! ProfilePictureCollectionViewCell
-        cell.backgroundColor = UIColor.grayColor()
+        cell.backgroundColor = UIColor.whiteColor()
         let randomSample: [UInt64] = socialGraphController.currentSample()
         if let index = find(selectedUsers, randomSample[indexPath.row]) {
              selectedIndices.removeAtIndex(index)
              selectedUsers.removeAtIndex(index)
         }
         collectionView.deselectItemAtIndexPath(indexPath, animated: false)
-        if toggleNamesSwitch.on {
+        if toggleNamesButton.selected {
             cell.addTransparentLayer()
         }
     }
@@ -367,7 +384,7 @@ extension MatchViewController: SocialGraphControllerDelegate {
         socialGraphController.updateRandomSample()
         if isViewLoaded() {
             dispatch_async(dispatch_get_main_queue()) {
-                self.collectionView!.reloadData()
+                self.collectionView?.reloadData()
             }
         }
     }

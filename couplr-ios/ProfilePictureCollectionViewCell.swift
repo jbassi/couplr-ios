@@ -16,16 +16,32 @@ class ProfilePictureCollectionViewCell: UICollectionViewCell {
     var overrideLayerSelection: Bool = false
     let transparentLayer = UIView()
     let nameLabel = UILabel()
+    var width: CGFloat = 100
+    var height: CGFloat = 100
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        layer.masksToBounds = true;
-        layer.cornerRadius = 10;
+        width = frame.width
+        height = frame.height
+
+        layer.masksToBounds = true
+        layer.cornerRadius = 0.15 * width
         
-        imageView.layer.masksToBounds = true
-        imageView.layer.cornerRadius = 10
-        imageView.frame = CGRectMake(4, 4, 92, 92)
-        contentView.addSubview(imageView)
+        let shadowView = UIView(frame: CGRectMake(0, 0, width, height).withMargin(horizontal: 3, vertical: 3))
+        shadowView.layer.shadowColor = UIColor.blackColor().CGColor
+        shadowView.layer.shadowOffset = CGSizeZero
+        shadowView.layer.shadowOpacity = 0.5
+        shadowView.layer.shadowRadius = 1.5
+        
+        imageView.frame = shadowView.bounds
+        imageView.backgroundColor = UIColor.whiteColor()
+        imageView.layer.cornerRadius = 0.15 * width - 1
+        imageView.layer.borderColor = UIColor.grayColor().CGColor
+        imageView.layer.borderWidth = 0.5
+        imageView.clipsToBounds = true
+        
+        shadowView.addSubview(imageView)
+        contentView.addSubview(shadowView)
     }
 
     required init(coder aDecoder: NSCoder) {
@@ -33,13 +49,13 @@ class ProfilePictureCollectionViewCell: UICollectionViewCell {
     }
     
     func addTransparentLayerWithName(name: String) {
-        transparentLayer.frame = CGRectMake(4, 4, 92, 92)
+        transparentLayer.frame = CGRectMake(0, 0, width, height).withMargin(horizontal: 2, vertical: 2)
         transparentLayer.backgroundColor = UIColor(white: 0.1, alpha: 0.8)
         transparentLayer.layer.masksToBounds = true
-        transparentLayer.layer.cornerRadius = 10
+        transparentLayer.layer.cornerRadius = 0.15 * width
         
         nameLabel.numberOfLines = 0
-        nameLabel.frame = CGRectMake(0, 0, 92, 92)
+        nameLabel.frame = CGRectMake(0, 0, width, height).withMargin(horizontal: 2, vertical: 2)
         nameLabel.textColor = UIColor.whiteColor()
         nameLabel.font = UIFont.boldSystemFontOfSize(12)
         nameLabel.text = name

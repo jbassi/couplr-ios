@@ -53,7 +53,7 @@ func parseArrayFromJSONData(inputData: NSData) -> Array<NSDictionary> {
     return boardsDictionary
 }
 
-func profilePictureURLFromId(id: UInt64, withWidth: Int = 200, withHeight: Int = 200) -> NSURL {
+func profilePictureURLFromId(id: UInt64, withWidth: Int = 256, withHeight: Int = 256) -> NSURL {
     return NSURL(string: "\(kFBGraphURLPrefix)\(id)/picture?width=\(withWidth)&height=\(withHeight)")!
 }
 
@@ -312,14 +312,59 @@ func unapprovedUserPermissions(permissions: [String]) -> [String] {
 
 extension CGSize {
     /**
-     * Fits a given an element of some size to a container size, maximizing either horizontal or
-     * vertical scaling.
+     * Fits a given element of some dimension ratio to a container size, maximizing either
+     * horizontal or vertical scaling.
      */
     func resizeDimensionsToFit(containerSize: CGSize) -> CGSize {
         let minimumScale = min(containerSize.width / width, containerSize.height / height)
         return CGSizeMake(width * minimumScale, height * minimumScale)
     }
+    
+    /**
+     * See CGRect::rectForChildSize.
+     */
+    func rectForParentRect(parentRect: CGRect, horizontalCenter: Bool = true, verticalCenter: Bool = true) -> CGRect {
+        return parentRect.rectForChildSize(self, horizontalCenter: horizontalCenter, verticalCenter: verticalCenter)
+    }
 }
+
+extension CGRect {
+    /**
+     * Returns a copy of the CGRect padded by the given horizontal and vertical lengths.
+     */
+    func withMargin(horizontal: CGFloat = 0, vertical: CGFloat = 0) -> CGRect {
+        return CGRectMake(
+            origin.x + horizontal,
+            origin.y + vertical,
+            size.width - 2 * horizontal,
+            size.height - 2 * vertical
+        )
+    }
+    
+    /**
+     * Fits a given element of some size to a containing bounding box, centering the
+     * element in the bounding box by default and snapping to the top left corner
+     * otherwise.
+     */
+    func rectForChildSize(childSize: CGSize, horizontalCenter: Bool = true, verticalCenter: Bool = true) -> CGRect {
+        let horizontalOffset: CGFloat = horizontalCenter ? (size.width - childSize.width) / 2 : 0
+        let verticalOffset: CGFloat = verticalCenter ? (size.height - childSize.height) / 2 : 0
+        return CGRectMake(
+            origin.x + horizontalOffset,
+            origin.y + verticalOffset,
+            childSize.width,
+            childSize.height
+        )
+    }
+    
+    /**
+     * Shrinks the rect by a given ratio (< 1.0), while maintaining the center.
+     */
+    func shrinkByRatio(ratio: CGFloat) -> CGRect {
+        return withMargin(horizontal: ratio * size.width, vertical: ratio * size.height)
+    }
+}
+
 
 /**
  * TODO It's super awkward to put a class in a file called UtilityFunctions. Maybe refactor

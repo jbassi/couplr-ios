@@ -10,6 +10,8 @@ import UIKit
 
 class LoadingView: UIView {
     
+    static var isHidingLoadingView: Bool = false
+    
     var mask: CALayer?
     let imageLayer: UIView = UIView()
     let backgroundView: UIView = UIView()
@@ -83,6 +85,10 @@ class LoadingView: UIView {
     }
     
     func hideAnimated() {
+        if LoadingView.isHidingLoadingView {
+            return
+        }
+        LoadingView.isHidingLoadingView = true
         let keyFrameAnimation = CAKeyframeAnimation(keyPath: "bounds")
         keyFrameAnimation.delegate = self
         keyFrameAnimation.duration = 0.8
@@ -95,7 +101,10 @@ class LoadingView: UIView {
         keyFrameAnimation.timingFunctions = [CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut), CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)]
         keyFrameAnimation.fillMode = kCAFillModeForwards
         keyFrameAnimation.removedOnCompletion = false
-        
+        // HACK Change this to use a semaphore. That's what they're made for :p
+        afterDelay(1.8, {
+            LoadingView.isHidingLoadingView = false
+        })
         self.mask!.addAnimation(keyFrameAnimation, forKey: "bounds")
         self.loadingMessageTimer?.invalidate()
         self.loadingMessage.next()

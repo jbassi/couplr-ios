@@ -131,6 +131,10 @@ let kProfileDetailViewProfileNameLabelFont = UIFont(name: "HelveticaNeue-Light",
 /* MatchViewControllerCollectionView Constants */
 let kMatchViewControllerCollectionViewNumberOfRows: Int = 9
 
+/* Match view Constants */
+let kMatchViewMarginTop: CGFloat = 20
+let kMatchViewTitleHeight: CGFloat = 30
+
 /* History view Constants */
 let kAdditionalLeftPaddingForDeleteButton: CGFloat = 35.0
 
