@@ -30,7 +30,7 @@ class ProfilePictureCollectionViewCell: UICollectionViewCell {
         imageView.frame = CGRectMake(0, 0, width, height).withMargin(horizontal: 3, vertical: 3)
         imageView.backgroundColor = UIColor.whiteColor()
         imageView.layer.cornerRadius = 0.15 * width - 1
-        imageView.layer.borderColor = UIColor.grayColor().CGColor
+        imageView.layer.borderColor = UIColor(white: 0.67, alpha: 1).CGColor
         imageView.layer.borderWidth = 0.5
         imageView.clipsToBounds = true
         

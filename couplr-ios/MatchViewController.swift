@@ -74,16 +74,10 @@ class MatchViewController: UIViewController {
         let buttonSideLength: CGFloat = buttonBounds.width / CGFloat(buttons.count)
         let buttonInsets: CGFloat = 0.15 * buttonSideLength
         for (index: Int, button: UIButton) in enumerate(buttons) {
-            let shadowView = UIView(frame: CGRectMake(buttonBounds.origin.x + CGFloat(index) * buttonSideLength, buttonBounds.origin.y, buttonSideLength, buttonSideLength).withMargin(horizontal: 3, vertical: 3))
-            shadowView.layer.shadowColor = UIColor.blackColor().CGColor
-            shadowView.layer.shadowOffset = CGSizeZero
-            shadowView.layer.shadowOpacity = 0.5
-            shadowView.layer.shadowRadius = 1.5
-            
-            button.frame = shadowView.bounds
+            button.frame = CGRectMake(buttonBounds.origin.x + CGFloat(index) * buttonSideLength, buttonBounds.origin.y, buttonSideLength, buttonSideLength).withMargin(horizontal: 3, vertical: 3)
             button.backgroundColor = UIColor.whiteColor()
             button.layer.cornerRadius = buttonSideLength / 2 - 1
-            button.layer.borderColor = UIColor.grayColor().CGColor
+            button.layer.borderColor = UIColor(white: 0.67, alpha: 1).CGColor
             button.layer.borderWidth = 0.5
             if buttonImageNames[index] != nil {
                 button.setImage(UIImage(named: buttonImageNames[index]!), forState: .Normal)
@@ -94,8 +88,7 @@ class MatchViewController: UIViewController {
             button.clipsToBounds = true
             button.addTarget(self, action: buttonActionNames[index], forControlEvents: UIControlEvents.TouchUpInside)
             
-            shadowView.addSubview(button)
-            view.addSubview(shadowView)
+            view.addSubview(button)
         }
         view.addSubview(collectionView!)
         view.addSubview(matchTitle)
