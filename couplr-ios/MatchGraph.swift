@@ -154,7 +154,6 @@ public class MatchGraph {
         self.currentlyFlushingMatches = false
         self.unregisteredMatches = [MatchTuple]()
         self.matchesBeforeUserHistoryLoaded = [MatchTuple]()
-        self.cachedMatchesByTitle = [UInt64: [(Int,[(UInt64, Int)])]]()
         self.matchUpdateTimes = [MatchTuple: NSDate]()
         self.userVotes = [MatchTuple: NSDate]()
     }
@@ -163,7 +162,7 @@ public class MatchGraph {
      * Loads match titles from Parse and passes them to a given callback
      * function.
      */
-    public func fetchMatchTitles(callback:((didError: Bool)->Void)? = nil) {
+    public func fetchMatchTitles(onComplete: ((didError: Bool) -> Void)? = nil) {
         log("Requesting match titles...", withFlag: "!")
         var query = PFQuery(className: "MatchTitle")
         query.findObjectsInBackgroundWithBlock {
@@ -182,14 +181,10 @@ public class MatchGraph {
                     return first.id < second.id
                 })
                 log("Received \(objects.count) titles.", withIndent: 1, withNewline: true)
-                if callback != nil {
-                    callback!(didError: false)
-                }
+                onComplete?(didError: false)
             } else {
                 log("Error \"\(error!.description)\" while retrieving titles.", withIndent: 1, withFlag: "-", withNewline: true)
-                if callback != nil {
-                    callback!(didError: true)
-                }
+                onComplete?(didError: true)
             }
         }
     }
@@ -222,9 +217,6 @@ public class MatchGraph {
      * not know about (i.e. users who do not appear in the root user's social graph).
      */
     public func sortedMatchesForUser(userId: UInt64) -> [(Int,[(UInt64, Int)])] {
-        if cachedMatchesByTitle[userId] != nil {
-            return cachedMatchesByTitle[userId]!
-        }
         if matches[userId] == nil {
             return [(Int,[(UInt64, Int)])]()
         }
@@ -262,7 +254,6 @@ public class MatchGraph {
             (first:(Int,[(UInt64, Int)]), second:(Int,[(UInt64, Int)])) -> Bool in
             return matchCountsByTitle[first.0]! > matchCountsByTitle[second.0]!
         }
-        cachedMatchesByTitle[userId] = sortedMatches
         return sortedMatches
     }
     
@@ -274,7 +265,7 @@ public class MatchGraph {
      * finishes. The callback takes a Bool parameter indicating whether or not an
      * error occurred when receiving the data.
      */
-    public func fetchMatchesForIds(userIds: [UInt64], callback:((didError: Bool)->Void)? = nil) {
+    public func fetchMatchesForIds(userIds: [UInt64], onComplete: ((didError: Bool) -> Void)? = nil) {
         // FIXME Why is this function being invoked with an empty list?
         if userIds.count == 0 {
             return log("Skipping match request for 0 users.", withFlag:"-")
@@ -290,9 +281,7 @@ public class MatchGraph {
             return true
         }
         if userIdsToQuery.count == 0 {
-            if callback != nil {
-                callback!(didError: false)
-            }
+            onComplete?(didError: false)
             return log("Matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIds))) already loaded.", withIndent: 1, withNewline: true)
         }
         let encodedUserIds: [String] = userIds.map(encodeBase64)
@@ -314,14 +303,10 @@ public class MatchGraph {
                     self.fetchedIdHistory[userId] = true
                 }
                 log("Received and updated \(objects.count) matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent: 1, withNewline: true)
-                if callback != nil {
-                    callback!(didError: false)
-                }
+                onComplete?(didError: false)
             } else {
                 log("Error \(error!.description) occurred when loading matches for \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent: 1, withFlag:"-", withNewline: true)
-                if callback != nil {
-                    callback!(didError: true)
-                }
+                onComplete?(didError: true)
             }
         }
     }
@@ -346,7 +331,7 @@ public class MatchGraph {
      * correspondingly, and running a given callback function upon receiving a
      * response.
      */
-    public func fetchRootUserVoteHistory(callback:((didError: Bool) -> Void)? = nil) {
+    public func fetchRootUserVoteHistory(onComplete: ((didError: Bool) -> Void)? = nil) {
         let rootUser: UInt64 = rootUserFromGraph()
         if rootUser == 0 {
             return log("Warning: MatchGraph::fetchRootUserMatchHistory called before social graph was initialized.", withFlag:"-")
@@ -373,14 +358,10 @@ public class MatchGraph {
                 self.didFetchUserMatchHistory = true
                 self.checkMatchesBeforeUserHistoryLoaded()
                 log("User voted on \(objects.count) matches.", withIndent: 1, withNewline: true)
-                if callback != nil {
-                    callback!(didError: false)
-                }
+                onComplete?(didError: false)
             } else {
                 log("Error \"\(error!.description)\" while fetching user match history.", withIndent: 1, withFlag:"-", withNewline: true)
-                if callback != nil {
-                    callback!(didError: true)
-                }
+                onComplete?(didError: true)
             }
         }
     }
@@ -537,8 +518,6 @@ public class MatchGraph {
         }
         let didUpdateMatch: Bool = matches[from]![to]!.updateMatch(titleId, voterId: voter, updateTime: updateTime)
         if didUpdateMatch {
-            cachedMatchesByTitle[from] = nil
-            cachedMatchesByTitle[to] = nil
             SocialGraphController.sharedInstance.notifyMatchExistsBetweenUsers(from, secondUser: to, withVoter: voter)
         }
         return didUpdateMatch
@@ -599,6 +578,4 @@ public class MatchGraph {
     var userVotes: [MatchTuple: NSDate]
     var matchesBeforeUserHistoryLoaded: [MatchTuple]
     var matchUpdateTimes: [MatchTuple: NSDate]
-    
-    var cachedMatchesByTitle: [UInt64: [(Int,[(UInt64, Int)])]]
 }

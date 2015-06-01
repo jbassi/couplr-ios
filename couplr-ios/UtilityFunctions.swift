@@ -103,11 +103,11 @@ func floatFromAnyObject(anyObject: AnyObject!) -> Float {
  * Sends a GET request to the specified URL and fires the given callback
  * when a response is received.
  */
-func getRequestToURL(url: String, callback:(NSData?, NSURLResponse?, NSError?) -> Void) -> Void {
+func getRequestToURL(url: String, onComplete:(NSData?, NSURLResponse?, NSError?) -> Void) -> Void {
     let nsurl = NSURL(string: url)
     let task = NSURLSession.sharedSession().dataTaskWithURL(nsurl!) {
         (data: NSData?, response: NSURLResponse?, error: NSError?) in
-        callback(data, response, error)
+        onComplete(data, response, error)
     }
     task.resume()
 }
@@ -378,24 +378,20 @@ extension CGRect {
  * the file to be something more general like Utilities?
  */
 class AlertViewHandler: NSObject, UIAlertViewDelegate {
-    init(callback:((buttonIndex: Int) -> Void)? = nil) {
-        self.callback = callback
+    init(onComplete:((buttonIndex: Int) -> Void)? = nil) {
+        self.onComplete = onComplete
     }
     
     func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        if callback != nil {
-            callback!(buttonIndex: buttonIndex)
-        }
+        onComplete?(buttonIndex: buttonIndex)
     }
     
     func alertViewCancel(alertView: UIAlertView) {
-        if callback != nil {
-            callback!(buttonIndex: CANCELED_INDEX)
-        }
+        onComplete?(buttonIndex: CANCELED_INDEX)
     }
     
     let CANCELED_INDEX = -1;
-    var callback:((buttonIndex: Int) -> Void)?
+    var onComplete: ((buttonIndex: Int) -> Void)?
 }
 
 // See accompanying function below.

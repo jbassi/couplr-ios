@@ -145,15 +145,12 @@ public class MatchGraphController {
      *
      * If the request failed, the resulting argument will be nil.
      */
-    public func doAfterLoadingMatchesForId(id: UInt64, callback:([(Int,[(UInt64, Int)])]?) -> Void) {
-        matches?.fetchMatchesForIds([id], callback: {
-            (didError: Bool) -> Void in
-            if didError {
-                callback(nil)
-            } else {
-                callback(self.matches?.sortedMatchesForUser(id))
-            }
-        })
+    public func doAfterLoadingMatchesForId(id: UInt64, onComplete: ((success: Bool) -> Void)? = nil) {
+        doAfterLoadingMatchesForIds([id], onComplete: onComplete)
+    }
+    
+    public func doAfterLoadingMatchesForIds(ids: [UInt64], onComplete: ((success: Bool) -> Void)? = nil) {
+        matches?.fetchMatchesForIds(ids, onComplete: { onComplete?(success: !$0) })
     }
     
     /**
@@ -163,11 +160,11 @@ public class MatchGraphController {
      * TODO Implement "reliability" features here, i.e. resending queries
      * to Parse up to a maximum number of attempts.
      */
-    public func fetchMatchTitles(callback:((didError: Bool)->Void)) {
+    public func fetchMatchTitles(onComplete:((didError: Bool)->Void)) {
         if matches == nil {
-            callback(didError: true)
+            onComplete(didError: true)
         } else {
-            matches!.fetchMatchTitles(callback: callback)
+            matches!.fetchMatchTitles(onComplete: onComplete)
         }
     }
 
@@ -277,7 +274,7 @@ public class MatchGraphController {
     public func didFinishLoadingExtendedSocialGraph() {
         let rootId: UInt64 = SocialGraphController.sharedInstance.rootId()
         let friends: [UInt64] = SocialGraphController.sharedInstance.closestFriendsOfUser(rootId)
-        matches?.fetchMatchesForIds(friends, callback: {
+        matches?.fetchMatchesForIds(friends, onComplete: {
             (didError: Bool) -> Void in
             if !didError {
                 SocialGraphController.sharedInstance.didLoadMatchesForClosestFriends()

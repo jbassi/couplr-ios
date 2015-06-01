@@ -70,7 +70,7 @@ public class SocialGraphController {
                     if MatchGraphController.sharedInstance.matches == nil {
                         return
                     }
-                    MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root], callback: {
+                    MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root], onComplete: {
                         (didError: Bool) -> Void in
                         if !didError {
                             dispatch_async(dispatch_get_main_queue(), { () -> Void in

@@ -29,7 +29,7 @@
 		114E42991AE2143D00CC9EB7 /* TutorialPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114E42981AE2143D00CC9EB7 /* TutorialPageViewController.swift */; };
 		11996CB81AC4D1B400C45DB0 /* MatchPairHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11996CB71AC4D1B400C45DB0 /* MatchPairHeaderView.swift */; };
 		11C9301B1B142FDF0091BFA4 /* FXBlurView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F9F1CBE1A5CFB7300E683A1 /* FXBlurView.m */; };
-		11CF0BDA1AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11CF0BD91AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift */; };
+		11CF0BDA1AC1007E00DF1EF9 /* AbstractProfileDetailLayoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11CF0BD91AC1007E00DF1EF9 /* AbstractProfileDetailLayoverView.swift */; };
 		11E5870F1AC39BFB00D61CDB /* ImageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E5870E1AC39BFB00D61CDB /* ImageTableViewCell.swift */; };
 		11E587111AC3A92F00D61CDB /* ImageTitleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E587101AC3A92F00D61CDB /* ImageTitleTableViewCell.swift */; };
 		11E587131AC3B85100D61CDB /* NewsfeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E587121AC3B85100D61CDB /* NewsfeedViewController.swift */; };
@@ -49,6 +49,7 @@
 		11FDBBBA1AC5F206006DFD9B /* UIImageView+HighlightedWebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBA81AC5F206006DFD9B /* UIImageView+HighlightedWebCache.m */; };
 		11FDBBBB1AC5F206006DFD9B /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBAA1AC5F206006DFD9B /* UIImageView+WebCache.m */; };
 		11FDBBBC1AC5F206006DFD9B /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBAC1AC5F206006DFD9B /* UIView+WebCacheOperation.m */; };
+		F43511631B1C45E4007E8D47 /* ProfileLayoverViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43511621B1C45E4007E8D47 /* ProfileLayoverViews.swift */; };
 		F444E6CE1B155AAB00C8521F /* RandomLoadingMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F444E6CD1B155AAB00C8521F /* RandomLoadingMessage.swift */; };
 		F45AF54F1ADB916A0051FA90 /* UserAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */; };
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
@@ -119,7 +120,7 @@
 		11276E351AC4F5FE00ADD063 /* MatchPairTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchPairTableViewCell.swift; sourceTree = "<group>"; };
 		114E42981AE2143D00CC9EB7 /* TutorialPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TutorialPageViewController.swift; sourceTree = "<group>"; };
 		11996CB71AC4D1B400C45DB0 /* MatchPairHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchPairHeaderView.swift; sourceTree = "<group>"; };
-		11CF0BD91AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileDetailLayoverView.swift; sourceTree = "<group>"; };
+		11CF0BD91AC1007E00DF1EF9 /* AbstractProfileDetailLayoverView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbstractProfileDetailLayoverView.swift; sourceTree = "<group>"; };
 		11E5870E1AC39BFB00D61CDB /* ImageTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageTableViewCell.swift; sourceTree = "<group>"; };
 		11E587101AC3A92F00D61CDB /* ImageTitleTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageTitleTableViewCell.swift; sourceTree = "<group>"; };
 		11E587121AC3B85100D61CDB /* NewsfeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewsfeedViewController.swift; sourceTree = "<group>"; };
@@ -156,6 +157,7 @@
 		11FDBBAA1AC5F206006DFD9B /* UIImageView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+WebCache.m"; sourceTree = "<group>"; };
 		11FDBBAB1AC5F206006DFD9B /* UIView+WebCacheOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+WebCacheOperation.h"; sourceTree = "<group>"; };
 		11FDBBAC1AC5F206006DFD9B /* UIView+WebCacheOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+WebCacheOperation.m"; sourceTree = "<group>"; };
+		F43511621B1C45E4007E8D47 /* ProfileLayoverViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileLayoverViews.swift; sourceTree = "<group>"; };
 		F444E6CD1B155AAB00C8521F /* RandomLoadingMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RandomLoadingMessage.swift; sourceTree = "<group>"; };
 		F44EECDF1B139526003AA77E /* couplr-ios-test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "couplr-ios-test.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F44EECE21B139526003AA77E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 			isa = PBXGroup;
 			children = (
 				0F37CA2119C53954007A6951 /* ProfileViewController.swift */,
+				F43511621B1C45E4007E8D47 /* ProfileLayoverViews.swift */,
 			);
 			name = Profile;
 			sourceTree = "<group>";
@@ -353,7 +356,7 @@
 				0FFBA3031A562D4E00A95F66 /* CouplrNavigationController.swift */,
 				0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */,
 				0F0EB6EA1A5E16B300E2A25B /* LoadingView.swift */,
-				11CF0BD91AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift */,
+				11CF0BD91AC1007E00DF1EF9 /* AbstractProfileDetailLayoverView.swift */,
 				11E5870E1AC39BFB00D61CDB /* ImageTableViewCell.swift */,
 				11E587101AC3A92F00D61CDB /* ImageTitleTableViewCell.swift */,
 				11996CB71AC4D1B400C45DB0 /* MatchPairHeaderView.swift */,
@@ -580,6 +583,7 @@
 				11FDBBB51AC5F206006DFD9B /* SDWebImagePrefetcher.m in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,
 				0FDD9F6F1A5BA0E700927558 /* ProfileDetailView.swift in Sources */,
+				F43511631B1C45E4007E8D47 /* ProfileLayoverViews.swift in Sources */,
 				F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */,
 				11FDBBB81AC5F206006DFD9B /* UIImage+MultiFormat.m in Sources */,
 				11E5870F1AC39BFB00D61CDB /* ImageTableViewCell.swift in Sources */,
@@ -590,7 +594,7 @@
 				0F5A034C19C4E06A0050DC9F /* LoginViewController.swift in Sources */,
 				F45AF54F1ADB916A0051FA90 /* UserAnalytics.swift in Sources */,
 				11996CB81AC4D1B400C45DB0 /* MatchPairHeaderView.swift in Sources */,
-				11CF0BDA1AC1007E00DF1EF9 /* ProfileDetailLayoverView.swift in Sources */,
+				11CF0BDA1AC1007E00DF1EF9 /* AbstractProfileDetailLayoverView.swift in Sources */,
 				F4F0DC7D1A630DBA007FC931 /* CouplrData.xcdatamodeld in Sources */,
 				F4EA6F221AC87426004D6133 /* SocialGraphUpdateUtilities.swift in Sources */,
 				0F37CA2219C53954007A6951 /* ProfileViewController.swift in Sources */,
