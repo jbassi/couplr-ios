@@ -85,6 +85,7 @@ class LoginViewController: UIViewController {
         attributionLabel.textAlignment = NSTextAlignment.Center
         attributionLabel.font = UIFont(name: "HelveticaNeue-Light", size: 10)
         attributionLabel.frame = CGRectMake(0, viewHeight - 36, viewWidth, 36).withMargin(horizontal: 10, vertical: 3)
+        attributionLabel.hidden = true
         
         view.backgroundColor = UIColor.whiteColor()
         addChildViewController(pageViewController)
@@ -160,6 +161,7 @@ class LoginViewController: UIViewController {
         pageViewController.view!.hidden = true
         pageControl.hidden = true
         continueButton.hidden = false
+        attributionLabel.hidden = false
         
         pageViewController.removeFromParentViewController()
         pageViewController.view.removeFromSuperview()
@@ -177,6 +179,7 @@ class LoginViewController: UIViewController {
         continueButton.hidden = true
         pageViewController.view!.hidden = false
         pageControl.hidden = false
+        attributionLabel.hidden = true
         
         let loginViewY: CGFloat = view.bounds.height - 40 - (loginView.bounds.height / 2)
         loginView.frame.origin.y = loginViewY
