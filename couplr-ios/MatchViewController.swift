@@ -41,7 +41,7 @@ class MatchViewController: UIViewController {
         
         let frameWidth: CGFloat = view.frame.width
         let frameHeight: CGFloat = view.frame.height
-        let outerMatchViewRect: CGRect = CGRectMake(0, kMatchViewMarginTop, frameWidth, frameHeight - kCouplrNavigationBarHeight - kMatchViewMarginTop).withMargin(horizontal: 8)
+        let outerMatchViewRect: CGRect = CGRectMake(0, kStatusBarHeight, frameWidth, frameHeight - kCouplrNavigationBarHeight - kStatusBarHeight).withMargin(horizontal: 8)
         var (buttonBounds, matchBounds, titleBounds) = computeComponentRects(frameHeight, outerBoundingRect: outerMatchViewRect)
         if titleBounds.origin.y > kMatchViewTitleHeight {
             (buttonBounds, matchBounds, titleBounds) = computeComponentRects(frameHeight, outerBoundingRect: outerMatchViewRect, marginBetweenElements: (titleBounds.origin.y - kMatchViewTitleHeight) / 4)
@@ -49,7 +49,7 @@ class MatchViewController: UIViewController {
         
         // Set up and position the match title label.
         matchTitle.frame = titleBounds
-        matchTitle.setTitleColor(UIColor.blueColor(), forState: .Normal)
+        matchTitle.setTitleColor(kCouplrLinkColor, forState: .Normal)
         // TODO Dynamically set the font size to expand to the maximum height and width.
         matchTitle.titleLabel?.font = UIFont(name: "HelveticaNeue-Light", size: 20)
         matchTitle.addTarget(self, action: "showTitleSelect", forControlEvents: UIControlEvents.TouchUpInside)

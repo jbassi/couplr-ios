@@ -61,6 +61,11 @@ public class MatchTuple : Hashable {
             SocialGraphController.sharedInstance.nameFromId(secondId) + " for \(titleId) by \(encodeBase64(voterId))"
     }
     
+    public func shouldDisplay() -> Bool {
+        return SocialGraphController.sharedInstance.hasNameForUser(firstId) &&
+            SocialGraphController.sharedInstance.hasNameForUser(secondId)
+    }
+    
     var firstId: UInt64
     var secondId: UInt64
     var voterId: UInt64
@@ -320,10 +325,7 @@ public class MatchGraph {
     public func tryToUpdateMatch(firstId: UInt64, secondId: UInt64, voterId: UInt64, titleId: Int, time: NSDate? = nil) {
         self.tryToUpdateDirectedEdge(firstId, to: secondId, voter: voterId, titleId: titleId, updateTime: time)
         self.tryToUpdateDirectedEdge(secondId, to: firstId, voter: voterId, titleId: titleId, updateTime: time)
-        if time != nil {
-            let matchTuple: MatchTuple = MatchTuple(firstId: firstId, secondId: secondId, titleId: titleId, voterId: voterId)
-            self.matchUpdateTimes[matchTuple] = time!
-        }
+        self.matchUpdateTimes[MatchTuple(firstId: firstId, secondId: secondId, titleId: titleId, voterId: voterId)] = time
     }
 
     /**

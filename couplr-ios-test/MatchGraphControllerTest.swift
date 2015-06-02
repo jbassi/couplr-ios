@@ -84,9 +84,9 @@ class MatchGraphControllerTest: XCTestCase {
     }
     
     func testRootUserRecentMatches() {
-        var recentMatches: [MatchTuple] = controller.rootUserRecentMatches(maxNumMatches: 6).map{ $0.0 }
+        var recentMatches: [MatchTuple] = controller.sortedRecentMatchesForUser(1, maxNumMatches: 6).map{ $0.0 }
         XCTAssertEqual(recentMatches.count, 4, "Should return the minimum of the given max and the total number of matches.")
-        recentMatches = controller.rootUserRecentMatches(maxNumMatches: 2).map{ $0.0 }
+        recentMatches = controller.sortedRecentMatchesForUser(1, maxNumMatches: 2).map{ $0.0 }
         XCTAssertEqual(recentMatches.count, 2, "Should return the minimum of the given max and the total number of matches.")
         XCTAssertEqual(recentMatches[0], MatchTuple(firstId: 1, secondId: 3, voterId: 6, titleId: 1), "Should return the most recent matches.")
         XCTAssertEqual(recentMatches[1], MatchTuple(firstId: 1, secondId: 8, voterId: 2, titleId: 1), "Should return the most recent matches.")

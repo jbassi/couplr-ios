@@ -1,5 +1,5 @@
 //
-//  ProfileTableViews.swift
+//  ProfileLayoverViews.swift
 //  couplr-ios
 //
 //  Created by Wenson Hsieh on 6/1/15.
@@ -28,6 +28,10 @@ class RecentMatchesLayoverView: AbstractProfileDetailLayoverView, UITableViewDel
         titleImage.image = nil // TODO Maybe add a title image for recent matches?
     }
     
+    func setId(userId: UInt64) {
+        self.userId = userId
+    }
+    
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
@@ -36,43 +40,39 @@ class RecentMatchesLayoverView: AbstractProfileDetailLayoverView, UITableViewDel
         return "Recent matches"
     }
     
-    func recentMatches() -> [MatchTuple]? {
-        if recentMatchesResult != nil {
-            return recentMatchesResult!
+    func recentMatchesForCurrentUser() -> [MatchTuple]? {
+        if lastRecentMatchesResult != nil && lastFetchedUserId == userId {
+            return lastRecentMatchesResult!
         }
-        let rootId: UInt64 = socialGraphController.rootId()
-        recentMatchesResult = []
-        let tuples: [MatchTuple] = matchGraphController.rootUserRecentMatches().filter({
-            (tupleAndTime:(MatchTuple, NSDate)) -> Bool in
-            let tuple: MatchTuple = tupleAndTime.0
-            let matchedWithId: UInt64 = tuple.firstId == rootId ? tuple.secondId : tuple.firstId
-            return self.socialGraphController.hasNameForUser(matchedWithId)
-        }).map{ $0.0 }
-        for u: MatchTuple in tuples {
+        lastRecentMatchesResult = []
+        let tuples: [MatchTuple] = matchGraphController.sortedRecentMatchesForUser(userId).map { $0.0 }
+        for match: MatchTuple in tuples {
             var shouldAddMatch: Bool = true
-            for v: MatchTuple in recentMatchesResult! {
-                if u == v {
+            for otherMatch: MatchTuple in lastRecentMatchesResult! {
+                if match == otherMatch {
                     shouldAddMatch = false
+                    break
                 }
             }
             if shouldAddMatch {
-                recentMatchesResult!.append(u)
+                lastRecentMatchesResult!.append(match)
             }
         }
-        return recentMatchesResult
+        lastFetchedUserId = userId
+        return lastRecentMatchesResult
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        self.recentMatchesResult = nil // Reset the recent matches upon rendering a new view.
-        if let recentMatchesResult: [MatchTuple]? = recentMatches() {
+        self.lastRecentMatchesResult = nil // Reset the recent matches upon rendering a new view.
+        if let recentMatchesResult: [MatchTuple]? = recentMatchesForCurrentUser() {
             return recentMatchesResult!.count
         }
         return 0
     }
     
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        self.recentMatchesResult = nil // Reset the recent matches upon rendering a new view.
-        if let recentMatchesResult: [MatchTuple]? = recentMatches() {
+        self.lastRecentMatchesResult = nil // Reset the recent matches upon rendering a new view.
+        if let recentMatchesResult: [MatchTuple]? = recentMatchesForCurrentUser() {
             if recentMatchesResult?.count > 0 {
                 tableView.separatorStyle = .SingleLine
                 return 1
@@ -94,11 +94,10 @@ class RecentMatchesLayoverView: AbstractProfileDetailLayoverView, UITableViewDel
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let rootId: UInt64 = socialGraphController.rootId()
         let cell = tableView.dequeueReusableCellWithIdentifier("RecentViewCell", forIndexPath: indexPath) as! ImageTitleTableViewCell
-        if let recentMatchesResult: [MatchTuple]? = recentMatches() {
+        if let recentMatchesResult: [MatchTuple]? = recentMatchesForCurrentUser() {
             let matchTuple: MatchTuple = recentMatchesResult![indexPath.row]
-            let matchedWithId: UInt64 = matchTuple.firstId == rootId ? matchTuple.secondId : matchTuple.firstId
+            let matchedWithId: UInt64 = matchTuple.firstId == userId ? matchTuple.secondId : matchTuple.firstId
             cell.selectionStyle = .None
             cell.cellImage.layer.cornerRadius = 30
             cell.cellImage.layer.masksToBounds = true
@@ -109,7 +108,9 @@ class RecentMatchesLayoverView: AbstractProfileDetailLayoverView, UITableViewDel
         return cell
     }
     
-    var recentMatchesResult: [MatchTuple]? = nil
+    var lastRecentMatchesResult: [MatchTuple]? = nil
+    var lastFetchedUserId: UInt64 = 0
+    var userId: UInt64 = 0
 }
 
 class MatchesByTitleLayoverView: AbstractProfileDetailLayoverView, UITableViewDelegate, UITableViewDataSource {
@@ -133,13 +134,16 @@ class MatchesByTitleLayoverView: AbstractProfileDetailLayoverView, UITableViewDe
     }
     
     override func setTitleImage() -> Void {
-        titleImage.sd_setImageWithURL(profilePictureURLFromId(userId), placeholderImage: UIImage(named: "unknown"))
+        titleImage.sd_setImageWithURL(profilePictureURLFromId(secondUser), placeholderImage: UIImage(named: "unknown"))
         titleImage.layer.cornerRadius = 25
         titleImage.layer.masksToBounds = true
     }
     
     override func getHeaderLabel() -> String {
-        return "Me and \(socialGraphController.nameFromId(userId))"
+        if socialGraphController.rootId() == firstUser {
+            return "Me and \(socialGraphController.nameFromId(secondUser))"
+        }
+        return "\(socialGraphController.nameFromId(firstUser)) and \(socialGraphController.nameFromId(secondUser))"
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -158,6 +162,7 @@ class MatchesByTitleLayoverView: AbstractProfileDetailLayoverView, UITableViewDe
     }
     
     var matches: [(Int, Int)] = []
-    var userId: UInt64 = 0
+    var secondUser: UInt64 = 0
+    var firstUser: UInt64 = 0
 }
 

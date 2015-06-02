@@ -1,5 +1,5 @@
 //
-//  ProfileDetailLayoverView.swift
+//  AbstractProfileDetailLayoverView.swift
 //  couplr-ios
 //
 //  Created by Jeremy Bassi on 3/23/15.

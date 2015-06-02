@@ -414,3 +414,10 @@ func alertViewHandlerByName(name: String) -> AlertViewHandler {
     }
     return alertViewHandlers["default"]!
 }
+
+/**
+ * Returns the system tint color.
+ */
+func defaultTintColor() -> UIColor? {
+    return UIApplication.sharedApplication().keyWindow?.tintColor
+}

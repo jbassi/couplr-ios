@@ -15,6 +15,7 @@ class ProfileDetailView: UIView {
     let profileNameLabel = UILabel()
     let recentMatchesButton = UIButton()
     let bottomBorder = CALayer()
+    let backButton = UIButton()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -22,38 +23,47 @@ class ProfileDetailView: UIView {
         let frameWidth = frame.size.width
         let frameHeight = frame.size.height
         
-        let profilePictureMask = UIView(frame: CGRectMake(frameWidth * kProfileDetailViewProfilePictureXRatio, frameHeight * kProfileDetailViewProfilePictureYRatio, frameHeight * kProfileDetailViewProfilePictureRatio, frameHeight * kProfileDetailViewProfilePictureRatio))
-        let profilePictureCircle = UIView(frame: CGRectMake(profilePictureMask.frame.origin.x - kProfileDetailViewProfilePicturePadding, profilePictureMask.frame.origin.y - kProfileDetailViewProfilePicturePadding, profilePictureMask.frame.size.width + 2 * kProfileDetailViewProfilePicturePadding, profilePictureMask.frame.size.height + 2 * kProfileDetailViewProfilePicturePadding))
-        profilePictureCircle.backgroundColor = UIColor.grayColor()
-        profilePictureCircle.layer.cornerRadius = profilePictureCircle.frame.size.height / 2
-        profilePictureMask.layer.cornerRadius = profilePictureMask.frame.size.height / 2
+        let kProfileNameLabelHeightRatio: CGFloat = 0.4
         
-        profilePictureView.frame = CGRectMake(0, 0, profilePictureMask.frame.size.width, profilePictureMask.frame.size.height)
-        profilePictureMask.addSubview(profilePictureView)
-        profilePictureMask.clipsToBounds = true
+        let profilePictureMargin: CGFloat = 0.1 * frameHeight
+        let profilePictureFrame = CGRectMake(0, 0, frameHeight, frameHeight) // Frame height is not a typo.
+        let shadowView = UIView(frame: profilePictureFrame.withMargin(horizontal: profilePictureMargin, vertical: profilePictureMargin))
+        shadowView.layer.shadowColor = UIColor.blackColor().CGColor
+        shadowView.layer.shadowOffset = CGSizeZero
+        shadowView.layer.shadowOpacity = 0.5
+        shadowView.layer.shadowRadius = 2
+
+        profilePictureView.frame = shadowView.bounds
+        profilePictureView.backgroundColor = UIColor.whiteColor()
+        profilePictureView.layer.cornerRadius = shadowView.frame.width / 2 - 1
+        profilePictureView.layer.borderColor = UIColor.grayColor().CGColor
+        profilePictureView.layer.borderWidth = 0.5
+        profilePictureView.clipsToBounds = true
+            
+        shadowView.addSubview(profilePictureView)
         
-        let profileNameLabelX: CGFloat = profilePictureCircle.frame.origin.x + profilePictureCircle.frame.size.width + 10
-        let profileNameLabelY: CGFloat = profilePictureCircle.frame.origin.y + (profilePictureCircle.frame.size.height / 2) - (kProfileDetailViewNameLabelX / 2)
-        profileNameLabel.frame = CGRectMake(profileNameLabelX, profileNameLabelY, frame.size.width - profileNameLabelX - kProfileDetailViewBottomBorderWidth - 10, kProfileDetailViewNameLabelX)
+        let profileNameLabelHeight: CGFloat = kProfileNameLabelHeightRatio * frameHeight
+        let profileNameFrame: CGRect = CGRectMake(profilePictureFrame.width, (profilePictureFrame.height - profileNameLabelHeight) / 2, frameWidth - profilePictureFrame.width, profileNameLabelHeight)
+        profileNameLabel.frame = profileNameFrame.withMargin(horizontal: 5)
         profileNameLabel.adjustsFontSizeToFitWidth = true
         profileNameLabel.lineBreakMode = NSLineBreakMode.ByClipping
         profileNameLabel.font = kProfileDetailViewProfileNameLabelFont
         profileNameLabel.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.8)
+
+        let buttonFrame: CGRect = CGRectMake(profilePictureFrame.width, profileNameFrame.height + profileNameFrame.origin.y, profileNameFrame.width, frameHeight - profileNameLabelHeight - profileNameFrame.origin.y)
+        recentMatchesButton.frame = buttonFrame.withMargin(horizontal: 5)
+        recentMatchesButton.setTitleColor(kCouplrLinkColor, forState: .Normal)
+        recentMatchesButton.setTitle("Recent matches", forState: .Normal)
+        recentMatchesButton.contentHorizontalAlignment = UIControlContentHorizontalAlignment.Left
+        recentMatchesButton.contentVerticalAlignment = UIControlContentVerticalAlignment.Top
         
-        bottomBorder.frame = CGRectMake(kProfileDetailViewBottomBorderWidth, frame.origin.y + frame.size.height, frame.size.width - kProfileDetailViewBottomBorderWidth, kProfileDetailViewBottomBorderHeight)
+        bottomBorder.frame = CGRectMake(kProfileDetailViewBottomBorderWidth, frameHeight, frame.size.width - kProfileDetailViewBottomBorderWidth, kProfileDetailViewBottomBorderHeight)
         bottomBorder.backgroundColor = UIColor.grayColor().CGColor
         
-        recentMatchesButton.frame = CGRectMake(profileNameLabelX, profileNameLabelY + profileNameLabel.frame.height + 5, 150, 40)
-        recentMatchesButton.backgroundColor = UIColor.lightGrayColor()
-        recentMatchesButton.setTitle("Recent Matches", forState: .Normal)
-        recentMatchesButton.layer.cornerRadius = 10
-        recentMatchesButton.layer.masksToBounds = true
-        
-        self.layer.addSublayer(bottomBorder)
-        self.addSubview(profileNameLabel)
-        self.addSubview(profilePictureCircle)
-        self.addSubview(profilePictureMask)
-        self.addSubview(recentMatchesButton)
+        layer.addSublayer(bottomBorder)
+        addSubview(profileNameLabel)
+        addSubview(shadowView)
+        addSubview(recentMatchesButton)
     }
     
     required init(coder aDecoder: NSCoder) {

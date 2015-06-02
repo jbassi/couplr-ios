@@ -63,7 +63,7 @@ class NewsfeedViewController: UIViewController {
         }
     }
     
-    func namesToggled(sender: UISwitch) {
+    func namesToggled(sender: UIButton) {
         sender.selected = !sender.selected
         if sender.selected {
             showAllNamesInVisibleCells()

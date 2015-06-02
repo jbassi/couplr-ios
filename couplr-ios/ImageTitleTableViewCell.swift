@@ -26,7 +26,7 @@ class ImageTitleTableViewCell: ImageTableViewCell {
         cellSubText.frame = CGRectMake(cellText.frame.origin.x, cellSubTextY, cellText.frame.width, cellText.frame.height)
         cellSubText.textColor = UIColor.lightGrayColor()
     }
-   
+    
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }

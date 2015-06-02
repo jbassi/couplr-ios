@@ -50,6 +50,8 @@
 		11FDBBBB1AC5F206006DFD9B /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBAA1AC5F206006DFD9B /* UIImageView+WebCache.m */; };
 		11FDBBBC1AC5F206006DFD9B /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 11FDBBAC1AC5F206006DFD9B /* UIView+WebCacheOperation.m */; };
 		F43511631B1C45E4007E8D47 /* ProfileLayoverViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43511621B1C45E4007E8D47 /* ProfileLayoverViews.swift */; };
+		F43511651B1D1440007E8D47 /* ImageActionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43511641B1D1440007E8D47 /* ImageActionTableViewCell.swift */; };
+		F43511671B1D26E3007E8D47 /* UserIdButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F43511661B1D26E3007E8D47 /* UserIdButton.swift */; };
 		F444E6CE1B155AAB00C8521F /* RandomLoadingMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F444E6CD1B155AAB00C8521F /* RandomLoadingMessage.swift */; };
 		F45AF54F1ADB916A0051FA90 /* UserAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */; };
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
@@ -158,6 +160,8 @@
 		11FDBBAB1AC5F206006DFD9B /* UIView+WebCacheOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+WebCacheOperation.h"; sourceTree = "<group>"; };
 		11FDBBAC1AC5F206006DFD9B /* UIView+WebCacheOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+WebCacheOperation.m"; sourceTree = "<group>"; };
 		F43511621B1C45E4007E8D47 /* ProfileLayoverViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileLayoverViews.swift; sourceTree = "<group>"; };
+		F43511641B1D1440007E8D47 /* ImageActionTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageActionTableViewCell.swift; sourceTree = "<group>"; };
+		F43511661B1D26E3007E8D47 /* UserIdButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserIdButton.swift; sourceTree = "<group>"; };
 		F444E6CD1B155AAB00C8521F /* RandomLoadingMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RandomLoadingMessage.swift; sourceTree = "<group>"; };
 		F44EECDF1B139526003AA77E /* couplr-ios-test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "couplr-ios-test.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F44EECE21B139526003AA77E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -362,6 +366,8 @@
 				11996CB71AC4D1B400C45DB0 /* MatchPairHeaderView.swift */,
 				11276E351AC4F5FE00ADD063 /* MatchPairTableViewCell.swift */,
 				F444E6CD1B155AAB00C8521F /* RandomLoadingMessage.swift */,
+				F43511641B1D1440007E8D47 /* ImageActionTableViewCell.swift */,
+				F43511661B1D26E3007E8D47 /* UserIdButton.swift */,
 			);
 			name = "Generic Views";
 			sourceTree = "<group>";
@@ -579,6 +585,7 @@
 				0F9F1CBF1A5CFB7300E683A1 /* FXBlurView.m in Sources */,
 				0FF11BE41A50C63C00C14FDC /* PickerView.swift in Sources */,
 				F4BFF9BA1B13E6F300D4CA58 /* TestExtensions.swift in Sources */,
+				F43511671B1D26E3007E8D47 /* UserIdButton.swift in Sources */,
 				11FDBBB31AC5F206006DFD9B /* SDWebImageDownloaderOperation.m in Sources */,
 				11FDBBB51AC5F206006DFD9B /* SDWebImagePrefetcher.m in Sources */,
 				0F37CA1919C5151E007A6951 /* CouplrSettingsManager.swift in Sources */,
@@ -600,6 +607,7 @@
 				0F37CA2219C53954007A6951 /* ProfileViewController.swift in Sources */,
 				11FDBBAF1AC5F206006DFD9B /* SDImageCache.m in Sources */,
 				11E587111AC3A92F00D61CDB /* ImageTitleTableViewCell.swift in Sources */,
+				F43511651B1D1440007E8D47 /* ImageActionTableViewCell.swift in Sources */,
 				F4EA6F201AC87398004D6133 /* SocialGraphPruningUtilities.swift in Sources */,
 				11FDBBB41AC5F206006DFD9B /* SDWebImageManager.m in Sources */,
 				11FDBBB91AC5F206006DFD9B /* UIImage+WebP.m in Sources */,

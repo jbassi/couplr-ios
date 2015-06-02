@@ -36,6 +36,7 @@ let kCouplrNavigationBarButtonDarkIconNames: [String] = ["nav-profile-dark", "na
 
 /* Couplr Default Color */
 let kCouplrRedColor = UIColor(red: 246/255.0, green: 71/255.0, blue: 71/255.0, alpha: 1)
+let kCouplrLinkColor = UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
 
 /* Empty TableView Strings */
 let kEmptyTableViewMessage = "It looks like cupid is on hiatus. Please check back later!"
@@ -127,6 +128,9 @@ let kProfileDetailViewProfilePictureYRatio: CGFloat = 0.20
 let kProfileDetailViewBottomBorderWidth: CGFloat = 10
 let kProfileDetailViewBottomBorderHeight: CGFloat = 1
 let kProfileDetailViewNameLabelX: CGFloat = 32
+let kProfileHeaderMaximumSize: CGFloat = 125
+let kProfileDefaultHeightRatio: CGFloat = 0.3
+let kProfileBackButtonHeight: CGFloat = 20
 
 /* ProfileDetailView Fonts */
 let kProfileDetailViewProfileNameLabelFont = UIFont(name: "HelveticaNeue-Light", size: 26)
@@ -135,7 +139,6 @@ let kProfileDetailViewProfileNameLabelFont = UIFont(name: "HelveticaNeue-Light",
 let kMatchViewControllerCollectionViewNumberOfRows: Int = 9
 
 /* Match view Constants */
-let kMatchViewMarginTop: CGFloat = 20
 let kMatchViewTitleHeight: CGFloat = 30
 
 /* History view Constants */
