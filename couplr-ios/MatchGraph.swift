@@ -184,13 +184,15 @@ public class MatchGraph {
     public func fetchMatchTitles(onComplete: ((success: Bool) -> Void)? = nil) {
         log("Requesting match titles...", withFlag: "!")
         var query = PFQuery(className: "MatchTitle")
-        query.findObjectsInBackgroundWithBlock {
-            (objects: [AnyObject]!, error: NSError?) -> Void in
+        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError?) -> Void in
             if error == nil {
                 for title: AnyObject in objects {
+                    let picture: String = title["picture"]! as! String
+                    if !imageExistsWithName(picture) {
+                        continue
+                    }
                     let titleId: Int = title["titleId"]! as! Int
                     let text: String = title["text"]! as! String
-                    let picture: String = title["picture"]! as! String
                     self.titlesById[titleId] = MatchTitle(id: titleId, text: text, picture: picture)
                 }
                 for title: MatchTitle in self.titlesById.values {
@@ -285,7 +287,6 @@ public class MatchGraph {
      * error occurred when receiving the data.
      */
     public func fetchMatchesForIds(userIds: [UInt64], onComplete: ((success: Bool) -> Void)? = nil) {
-        // FIXME Why is this function being invoked with an empty list?
         if userIds.count == 0 {
             return log("Skipping match request for 0 users.", withFlag:"-")
         }
@@ -306,22 +307,28 @@ public class MatchGraph {
         let encodedUserIds: [String] = userIds.map(encodeBase64)
         let predicate: NSPredicate = NSPredicate(format:"firstId IN %@ OR secondId IN %@", encodedUserIds, encodedUserIds)
         var query = PFQuery(className:"MatchData", predicate: predicate)
-        query.findObjectsInBackgroundWithBlock {
-            (objects: [AnyObject]!, error: NSError?) -> Void in
+        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError?) -> Void in
             if error == nil {
+                var numMatchUpdates: Int = 0
                 for index in 0..<objects.count {
                     let matchData: AnyObject! = objects[index]
+                    let titleId: Int = matchData["titleId"] as! Int
+                    // If the user is on a version that lacks a title icon asset, do not consider
+                    // the title in any list of matches.
+                    if self.titlesById[titleId] == nil {
+                        continue
+                    }
                     let first: UInt64 = uint64FromAnyObject(matchData["firstId"], base64: true)
                     let second: UInt64 = uint64FromAnyObject(matchData["secondId"], base64: true)
                     let voter: UInt64 = uint64FromAnyObject(matchData["voterId"], base64: true)
-                    let titleId: Int = matchData["titleId"] as! Int
                     self.tryToUpdateMatch(first, secondId: second, voterId: voter, titleId: titleId, time: matchData.updatedAt)
+                    numMatchUpdates++
                 }
                 // Consider a match fetched only after the response arrives.
                 for userId: UInt64 in userIdsToQuery {
                     self.fetchedIdHistory.insert(userId)
                 }
-                log("Received and updated \(objects.count) matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent: 1, withNewline: true)
+                log("Received and updated \(numMatchUpdates) matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent: 1, withNewline: true)
                 onComplete?(success: true)
             } else {
                 log("Error \(error!.description) occurred when loading matches for \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent: 1, withFlag:"-", withNewline: true)
@@ -337,9 +344,9 @@ public class MatchGraph {
      *   tests need to know how to add matches to the graph.
      */
     public func tryToUpdateMatch(firstId: UInt64, secondId: UInt64, voterId: UInt64, titleId: Int, time: NSDate? = nil) {
-        self.tryToUpdateDirectedEdge(firstId, to: secondId, voter: voterId, titleId: titleId, updateTime: time)
-        self.tryToUpdateDirectedEdge(secondId, to: firstId, voter: voterId, titleId: titleId, updateTime: time)
-        self.matchUpdateTimes[MatchTuple(firstId: firstId, secondId: secondId, titleId: titleId, voterId: voterId)] = time
+        tryToUpdateDirectedEdge(firstId, to: secondId, voter: voterId, titleId: titleId, updateTime: time)
+        tryToUpdateDirectedEdge(secondId, to: firstId, voter: voterId, titleId: titleId, updateTime: time)
+        matchUpdateTimes[MatchTuple(firstId: firstId, secondId: secondId, titleId: titleId, voterId: voterId)] = time
     }
 
     /**
@@ -358,22 +365,28 @@ public class MatchGraph {
         log("Requesting match history for current user.", withFlag:"!")
         let predicate: NSPredicate = NSPredicate(format:"voterId = \"\(encodeBase64(rootUser))\"")
         var query = PFQuery(className:"MatchData", predicate: predicate)
-        query.findObjectsInBackgroundWithBlock {
-            (objects: [AnyObject]!, error: NSError?) -> Void in
+        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError?) -> Void in
             if error == nil {
+                var numMatchUpdates: Int = 0
                 for index: Int in 0..<objects.count {
                     let matchData: AnyObject! = objects[index]
+                    let titleId: Int = matchData["titleId"] as! Int
+                    // If the user is on a version that lacks a title icon asset, do not consider
+                    // the title in any list of matches.
+                    if self.titlesById[titleId] == nil {
+                        continue
+                    }
                     let first: UInt64 = uint64FromAnyObject(matchData["firstId"], base64: true)
                     let second: UInt64 = uint64FromAnyObject(matchData["secondId"], base64: true)
-                    let titleId: Int = matchData["titleId"] as! Int
                     let updateTime: NSDate = matchData.updatedAt
                     self.tryToUpdateDirectedEdge(first, to: second, voter: rootUser, titleId: titleId, updateTime: updateTime)
                     self.tryToUpdateDirectedEdge(second, to: first, voter: rootUser, titleId: titleId, updateTime: updateTime)
                     self.userVotes[MatchTuple(firstId: first, secondId: second, titleId: titleId)] = updateTime
+                    numMatchUpdates++
                 }
                 self.didFetchUserMatchHistory = true
                 self.checkMatchesBeforeUserHistoryLoaded()
-                log("User voted on \(objects.count) matches.", withIndent: 1, withNewline: true)
+                log("User voted on \(numMatchUpdates) matches.", withIndent: 1, withNewline: true)
                 onComplete?(success: true)
             } else {
                 log("Error \"\(error!.description)\" while fetching user match history.", withIndent: 1, withFlag:"-", withNewline: true)

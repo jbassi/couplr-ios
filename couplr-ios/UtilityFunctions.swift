@@ -421,3 +421,7 @@ func alertViewHandlerByName(name: String) -> AlertViewHandler {
 func defaultTintColor() -> UIColor? {
     return UIApplication.sharedApplication().keyWindow?.tintColor
 }
+
+func imageExistsWithName(name: String) -> Bool {
+    return UIImage(named: name) != nil
+}
