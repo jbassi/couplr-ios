@@ -82,27 +82,31 @@ let kRandomLoadingMessages: [[String]] = [
         "Buffering heart-shaped assets…",
         "Pinging certified cupids…",
         "Building relationship trees…",
+        "Compiling relationship graph…",
         "Optimizing match hilarity…",
         "Incrementing relationship counters…",
         "Tracing compatibility rays…",
-        "Identifying probable crushes…"
+        "Identifying probable crushes…",
+        "Initializing NSLoveView…",
+        "Hashing love notes…",
+        "Parsing attractiveness weights…",
+        "Regularizing neural nets…"
     ], [
-        "Friendzoning local optima…",
-        "Gossiping with support vectors…",
-        "Compiling relationship heuristics…",
+        "Attempting to make fetch happen…",
+        "Finding support vectors…",
+        "Projecting eigenvector bases…",
         "Enjoying random walks…",
         "Completing infinite loops…",
-        "Hashing love notes…",
         "Factoring massive primes…",
-        "Avoiding that one annoying bug…"
+        "Avoiding local optima…",
+        "Avoiding that one annoying bug…",
+        "Rectifying linear units…"
     ], [
+        "Gossipping with servers…",
         "Converging on true love…",
         "Searching the network for love…",
         "Decrypting secret admirers…",
-        "Initializing NSLoveQueue…",
-        "Attempting to make fetch happen…",
-        "Encoding attractiveness coefficients…",
-        "Dancing with eigenvectors…",
+        "#bayes_caught_me_slippin…",
         "Solving P = NP…"
     ]
 ]

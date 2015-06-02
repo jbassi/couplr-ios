@@ -52,7 +52,7 @@ class MatchViewController: UIViewController {
         matchTitle.setTitleColor(kCouplrLinkColor, forState: .Normal)
         // TODO Dynamically set the font size to expand to the maximum height and width.
         matchTitle.titleLabel?.font = UIFont(name: "HelveticaNeue-Light", size: 20)
-        matchTitle.addTarget(self, action: "showTitleSelect", forControlEvents: UIControlEvents.TouchUpInside)
+        matchTitle.addTarget(self, action: "showTitleSelect", forControlEvents: .TouchUpInside)
         
         // Set up and position the match collection view.
         let flowLayout = UICollectionViewFlowLayout()
@@ -86,15 +86,14 @@ class MatchViewController: UIViewController {
             }
             button.imageEdgeInsets = UIEdgeInsetsMake(buttonInsets, buttonInsets, buttonInsets, buttonInsets)
             button.clipsToBounds = true
-            button.addTarget(self, action: buttonActionNames[index], forControlEvents: UIControlEvents.TouchUpInside)
-            
+            button.addTarget(self, action: buttonActionNames[index], forControlEvents: .TouchUpInside)
             view.addSubview(button)
         }
         view.addSubview(collectionView!)
         view.addSubview(matchTitle)
         initializeSocialGraphAndMatchGraphControllers()
     }
-    
+
     /**
      * Computes the bounding rects of the title, match, and buttons in the match view.
      */
@@ -124,7 +123,7 @@ class MatchViewController: UIViewController {
                 if titleList.count == 0 {
                     showLoginWithAlertViewErrorMessage("Our servers are overloaded! Try again later.", "Something went wrong.")
                 } else {
-                    self.matchTitle.setTitle(titleList[0].text, forState: UIControlState.Normal)
+                    self.matchTitle.setTitle(titleList[0].text, forState: .Normal)
                     self.selectedTitle = titleList[0]
                     self.titleSelectButton.setImage(UIImage(named: titleList[0].picture), forState: .Normal)
                 }
@@ -254,7 +253,7 @@ class MatchViewController: UIViewController {
         let randomIndex: Int = randomInt(titleList.count)
         selectedTitle = titleList[randomIndex]
         selectedRow = randomIndex
-        matchTitle.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
+        matchTitle.setTitle(selectedTitle!.text, forState: .Normal)
         titleSelectButton.setImage(UIImage(named: selectedTitle!.picture), forState: .Normal)
     }
 }
@@ -280,7 +279,7 @@ extension MatchViewController: UIPickerViewDelegate, UIPickerViewDataSource {
         selectedTitle = titles[row]
         selectedRow = row
         UserSessionTracker.sharedInstance.notify("selected title id \(titles[row].id)")
-        matchTitle.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
+        matchTitle.setTitle(selectedTitle!.text, forState: .Normal)
         titleSelectButton.setImage(UIImage(named: titles[row].picture), forState: .Normal)
     }
     
