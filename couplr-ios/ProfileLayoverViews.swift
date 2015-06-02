@@ -137,16 +137,23 @@ class MatchesByTitleLayoverView: AbstractProfileDetailLayoverView, UITableViewDe
     }
     
     override func setTitleImage() -> Void {
-        titleImage.sd_setImageWithURL(profilePictureURLFromId(secondUser), placeholderImage: UIImage(named: "unknown"))
+        titleImage.sd_setImageWithURL(profilePictureURLFromId(firstUser), placeholderImage: UIImage(named: "unknown"))
         titleImage.layer.cornerRadius = 25
         titleImage.layer.masksToBounds = true
+        alternateTitleImage.sd_setImageWithURL(profilePictureURLFromId(secondUser), placeholderImage: UIImage(named: "unknown"))
+        alternateTitleImage.layer.cornerRadius = 25
+        alternateTitleImage.layer.masksToBounds = true
+        var originalFrame: CGRect = titleImage.frame
+        alternateTitleImage.frame = CGRectMake(originalFrame.origin.x + 30, originalFrame.origin.y, originalFrame.width, originalFrame.height)
+        titleImage.frame = CGRectMake(originalFrame.origin.x - 30, originalFrame.origin.y, originalFrame.width, originalFrame.height)
+        titleImage.superview?.addSubview(alternateTitleImage)
     }
     
     override func getHeaderLabel() -> String {
-        if socialGraphController.rootId() == firstUser {
-            return "Me and \(socialGraphController.nameFromId(secondUser))"
-        }
-        return "\(socialGraphController.nameFromId(firstUser)) and \(socialGraphController.nameFromId(secondUser))"
+        let rootId: UInt64 = socialGraphController.rootId()
+        let firstUserName = rootId == firstUser ? "Me" : socialGraphController.nameFromId(firstUser, maxStringLength: 12)
+        let secondUserName = rootId == secondUser ? "Me" : socialGraphController.nameFromId(secondUser, maxStringLength: 12)
+        return "\(firstUserName) and \(secondUserName)"
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -167,5 +174,6 @@ class MatchesByTitleLayoverView: AbstractProfileDetailLayoverView, UITableViewDe
     var matches: [(Int, Int)] = []
     var secondUser: UInt64 = 0
     var firstUser: UInt64 = 0
+    var alternateTitleImage: UIImageView = UIImageView()
 }
 
