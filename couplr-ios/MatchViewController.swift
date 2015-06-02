@@ -176,11 +176,6 @@ class MatchViewController: UIViewController {
         toggleNamesButton.selected = false
     }
     
-    func settingsToggled(sender: UIButton) {
-        CouplrViewCoordinator.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
-        UserSessionTracker.sharedInstance.notify("settings toggled")
-    }
-    
     func showAllNames() {
         for cell in collectionView!.visibleCells() as! [ProfilePictureCollectionViewCell] {
             let randomSample: [UInt64] = socialGraphController.currentSample()

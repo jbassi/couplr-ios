@@ -130,7 +130,7 @@ let kProfileDetailViewBottomBorderHeight: CGFloat = 1
 let kProfileDetailViewNameLabelX: CGFloat = 32
 let kProfileHeaderMaximumSize: CGFloat = 125
 let kProfileDefaultHeightRatio: CGFloat = 0.3
-let kProfileBackButtonHeight: CGFloat = 20
+let kProfileTopButtonHeight: CGFloat = 20
 
 /* ProfileDetailView Fonts */
 let kProfileDetailViewProfileNameLabelFont = UIFont(name: "HelveticaNeue-Light", size: 26)

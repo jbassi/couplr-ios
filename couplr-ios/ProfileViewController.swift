@@ -16,6 +16,7 @@ class ProfileViewController: UIViewController {
     let matchGraphController = MatchGraphController.sharedInstance
     var profileDetailView: ProfileDetailView?
     var backButton: UIButton?
+    var logoutButton: UIButton?
     var matchTableView: UITableView?
     var currentUserId: UInt64 = 0
     var cachedMatchCounts: [UInt64: MatchesByUser] = [UInt64: MatchesByUser]()
@@ -28,10 +29,10 @@ class ProfileViewController: UIViewController {
         }
         
         let containerWidth: CGFloat = view.bounds.size.width
-        let containerHeight: CGFloat = view.bounds.size.height - kStatusBarHeight - kCouplrNavigationBarHeight - kProfileBackButtonHeight
+        let containerHeight: CGFloat = view.bounds.size.height - kStatusBarHeight - kCouplrNavigationBarHeight - kProfileTopButtonHeight
         
         let profileHeaderHeight: CGFloat = min(kProfileDefaultHeightRatio * containerHeight, kProfileHeaderMaximumSize)
-        profileDetailView = ProfileDetailView(frame: CGRectMake(0, kStatusBarHeight + kProfileBackButtonHeight, containerWidth, profileHeaderHeight))
+        profileDetailView = ProfileDetailView(frame: CGRectMake(0, kStatusBarHeight + kProfileTopButtonHeight, containerWidth, profileHeaderHeight))
         profileDetailView!.profileNameLabel.text = socialGraphController.nameFromId(currentUserId, maxStringLength: 20)
         profileDetailView!.recentMatchesButton.addTarget(self, action: "showRecentMatches:", forControlEvents: .TouchUpInside)
         profileDetailView!.profilePictureView.sd_setImageWithURL(profilePictureURLFromId(currentUserId), placeholderImage: UIImage(named: "unknown"))
@@ -42,16 +43,24 @@ class ProfileViewController: UIViewController {
         matchTableView!.registerClass(ImageActionTableViewCell.self, forCellReuseIdentifier: "ProfileViewCell")
         
         backButton = UIButton()
-        backButton!.frame = CGRectMake(0, kStatusBarHeight, 125, kProfileBackButtonHeight)
+        backButton!.frame = CGRectMake(0, kStatusBarHeight, 125, kProfileTopButtonHeight)
         backButton!.setTitle("‹ Back to my profile", forState: .Normal)
         backButton!.setTitleColor(kCouplrLinkColor, forState: .Normal)
         backButton!.titleLabel?.font = UIFont(name: "HelveticaNeue", size: 12)
         backButton!.addTarget(self, action: "resetProfileToRoot", forControlEvents: .TouchUpInside)
         backButton!.hidden = true
         
+        logoutButton = UIButton()
+        logoutButton!.frame = CGRectMake(containerWidth - 60, kStatusBarHeight, 60, kProfileTopButtonHeight)
+        logoutButton!.setTitle("Log out", forState: .Normal)
+        logoutButton!.setTitleColor(kCouplrLinkColor, forState: .Normal)
+        logoutButton!.titleLabel?.font = UIFont(name: "HelveticaNeue", size: 12)
+        logoutButton!.addTarget(self, action: "handleLogout", forControlEvents: .TouchUpInside)
+        
         self.view.addSubview(matchTableView!)
         self.view.addSubview(profileDetailView!)
         self.view.addSubview(backButton!)
+        self.view.addSubview(logoutButton!)
     }
     
     func showRecentMatches(sender: UIButton) {
@@ -63,6 +72,11 @@ class ProfileViewController: UIViewController {
     
     func resetProfileToRoot() {
         setUserId(socialGraphController.rootId())
+    }
+    
+    func handleLogout() {
+        CouplrViewCoordinator.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+        UserSessionTracker.sharedInstance.notify("settings toggled")
     }
     
     func setUserId(userId: UInt64) {

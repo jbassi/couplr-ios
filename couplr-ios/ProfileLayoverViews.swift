@@ -25,7 +25,9 @@ class RecentMatchesLayoverView: AbstractProfileDetailLayoverView, UITableViewDel
     }
     
     override func setTitleImage() -> Void {
-        titleImage.image = nil // TODO Maybe add a title image for recent matches?
+        titleImage.sd_setImageWithURL(profilePictureURLFromId(userId), placeholderImage: UIImage(named: "unknown"))
+        titleImage.layer.masksToBounds = true
+        titleImage.layer.cornerRadius = titleImage.frame.width / 2 - 1
     }
     
     func setId(userId: UInt64) {
@@ -37,7 +39,7 @@ class RecentMatchesLayoverView: AbstractProfileDetailLayoverView, UITableViewDel
     }
     
     override func getHeaderLabel() -> String {
-        return "Recent matches"
+        return socialGraphController.nameFromId(userId, maxStringLength: 20)
     }
     
     func recentMatchesForCurrentUser() -> [MatchTuple]? {
@@ -74,6 +76,7 @@ class RecentMatchesLayoverView: AbstractProfileDetailLayoverView, UITableViewDel
         self.lastRecentMatchesResult = nil // Reset the recent matches upon rendering a new view.
         if let recentMatchesResult: [MatchTuple]? = recentMatchesForCurrentUser() {
             if recentMatchesResult?.count > 0 {
+                tableView.backgroundView = nil
                 tableView.separatorStyle = .SingleLine
                 return 1
             } else {
