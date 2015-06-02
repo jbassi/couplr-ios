@@ -14,6 +14,7 @@ class LoginViewController: UIViewController {
     let loginView: FBLoginView = FBLoginView()
     let continueButton: UIButton = UIButton()
     let pageControl: UIPageControl = UIPageControl()
+    let attributionLabel: UILabel = UILabel()
     var viewControllerArray = Array<UIViewController>()
     var pageViewController: UIPageViewController!
 
@@ -29,6 +30,9 @@ class LoginViewController: UIViewController {
         loginView.hidden = true
         continueButton.hidden = true
         pageControl.hidden = true
+        
+        let viewWidth: CGFloat = view.bounds.width
+        let viewHeight: CGFloat = view.bounds.height
         
         loginView.delegate = self
         loginView.readPermissions = ["user_friends", "user_status", "user_posts", "user_photos"]
@@ -75,12 +79,20 @@ class LoginViewController: UIViewController {
         pageViewController.view.frame = CGRectMake(0, kStatusBarHeight+20, view.bounds.width, view.bounds.height-kStatusBarHeight-pageControl.frame.size.height-loginView.frame.size.height-70)
         pageViewController.view.hidden = true
         
+        attributionLabel.text = "Icons made by Freepik from www.flaticon.com. Flaticon is licensed by Creative Commons 3.0"
+        attributionLabel.lineBreakMode = NSLineBreakMode.ByWordWrapping
+        attributionLabel.numberOfLines = 0
+        attributionLabel.textAlignment = NSTextAlignment.Center
+        attributionLabel.font = UIFont(name: "HelveticaNeue-Light", size: 10)
+        attributionLabel.frame = CGRectMake(0, viewHeight - 36, viewWidth, 36).withMargin(horizontal: 10, vertical: 3)
+        
         view.backgroundColor = UIColor.whiteColor()
         addChildViewController(pageViewController)
         view.addSubview(pageViewController.view)
         view.addSubview(pageControl)
         view.addSubview(loginView)
         view.addSubview(continueButton)
+        view.addSubview(attributionLabel)
         
         view.bringSubviewToFront(pageControl)
         pageViewController.didMoveToParentViewController(self)
