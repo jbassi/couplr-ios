@@ -9,7 +9,6 @@
 import UIKit
 
 extension SocialGraph {
-    
     /**
      * Iterate through all edges in the graph and remove edges
      * that have a weight less than a minimum threshold.

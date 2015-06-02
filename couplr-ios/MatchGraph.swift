@@ -9,6 +9,10 @@
 import Parse
 import UIKit
 
+public enum VoteState {
+    case SavedVote, UnsavedVote, HasNotVoted, ShouldNotAllowVote
+}
+
 public class MatchTitle : Equatable {
     public init(id: Int, text: String, picture: String) {
         self.id = id
@@ -135,6 +139,16 @@ public class MatchList {
         return latestNonRootUpdateTimes[titleId]
     }
     
+    /**
+     * Returns true iff the given voter has not yet
+     */
+    public func userDidVote(userId: UInt64, titleId: Int) -> Bool {
+        if matchesByTitle[titleId] == nil {
+            return false
+        }
+        return find(matchesByTitle[titleId]!, userId) != nil
+    }
+    
     private func shouldUpdateLatestTime(titleId: Int, voterId: UInt64, updateTime: NSDate) -> Bool {
         return voterId != SocialGraphController.sharedInstance.rootId() &&
             (latestNonRootUpdateTimes[titleId] == nil || updateTime.compare(latestNonRootUpdateTimes[titleId]!) == .OrderedDescending)
@@ -154,11 +168,11 @@ public class MatchGraph {
         self.matches = [UInt64: [UInt64: MatchList]]()
         self.titlesById = [Int: MatchTitle]()
         self.titleList = [MatchTitle]()
-        self.fetchedIdHistory = [UInt64: Bool]()
+        self.fetchedIdHistory = Set<UInt64>()
         self.didFetchUserMatchHistory = false
         self.currentlyFlushingMatches = false
-        self.unregisteredMatches = [MatchTuple]()
-        self.matchesBeforeUserHistoryLoaded = [MatchTuple]()
+        self.unregisteredMatches = Set<MatchTuple>()
+        self.matchesBeforeUserHistoryLoaded = Set<MatchTuple>()
         self.matchUpdateTimes = [MatchTuple: NSDate]()
         self.userVotes = [MatchTuple: NSDate]()
     }
@@ -167,7 +181,7 @@ public class MatchGraph {
      * Loads match titles from Parse and passes them to a given callback
      * function.
      */
-    public func fetchMatchTitles(onComplete: ((didError: Bool) -> Void)? = nil) {
+    public func fetchMatchTitles(onComplete: ((success: Bool) -> Void)? = nil) {
         log("Requesting match titles...", withFlag: "!")
         var query = PFQuery(className: "MatchTitle")
         query.findObjectsInBackgroundWithBlock {
@@ -186,10 +200,10 @@ public class MatchGraph {
                     return first.id < second.id
                 })
                 log("Received \(objects.count) titles.", withIndent: 1, withNewline: true)
-                onComplete?(didError: false)
+                onComplete?(success: true)
             } else {
                 log("Error \"\(error!.description)\" while retrieving titles.", withIndent: 1, withFlag: "-", withNewline: true)
-                onComplete?(didError: true)
+                onComplete?(success: false)
             }
         }
     }
@@ -270,7 +284,7 @@ public class MatchGraph {
      * finishes. The callback takes a Bool parameter indicating whether or not an
      * error occurred when receiving the data.
      */
-    public func fetchMatchesForIds(userIds: [UInt64], onComplete: ((didError: Bool) -> Void)? = nil) {
+    public func fetchMatchesForIds(userIds: [UInt64], onComplete: ((success: Bool) -> Void)? = nil) {
         // FIXME Why is this function being invoked with an empty list?
         if userIds.count == 0 {
             return log("Skipping match request for 0 users.", withFlag:"-")
@@ -279,14 +293,14 @@ public class MatchGraph {
         // Do not re-fetch matches.
         let userIdsToQuery: [UInt64] = userIds.filter {
             (userId: UInt64) -> Bool in
-            if self.fetchedIdHistory[userId] != nil {
+            if self.fetchedIdHistory.contains(userId) {
                 log("Skipping match query for user \(SocialGraphController.sharedInstance.namesFromIds(userIds))")
                 return false
             }
             return true
         }
         if userIdsToQuery.count == 0 {
-            onComplete?(didError: false)
+            onComplete?(success: true)
             return log("Matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIds))) already loaded.", withIndent: 1, withNewline: true)
         }
         let encodedUserIds: [String] = userIds.map(encodeBase64)
@@ -305,13 +319,13 @@ public class MatchGraph {
                 }
                 // Consider a match fetched only after the response arrives.
                 for userId: UInt64 in userIdsToQuery {
-                    self.fetchedIdHistory[userId] = true
+                    self.fetchedIdHistory.insert(userId)
                 }
                 log("Received and updated \(objects.count) matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent: 1, withNewline: true)
-                onComplete?(didError: false)
+                onComplete?(success: true)
             } else {
                 log("Error \(error!.description) occurred when loading matches for \(SocialGraphController.sharedInstance.namesFromIds(userIdsToQuery)).", withIndent: 1, withFlag:"-", withNewline: true)
-                onComplete?(didError: true)
+                onComplete?(success: false)
             }
         }
     }
@@ -333,8 +347,8 @@ public class MatchGraph {
      * correspondingly, and running a given callback function upon receiving a
      * response.
      */
-    public func fetchRootUserVoteHistory(onComplete: ((didError: Bool) -> Void)? = nil) {
-        let rootUser: UInt64 = rootUserFromGraph()
+    public func fetchRootUserVoteHistory(onComplete: ((success: Bool) -> Void)? = nil) {
+        let rootUser: UInt64 = SocialGraphController.sharedInstance.rootId()
         if rootUser == 0 {
             return log("Warning: MatchGraph::fetchRootUserMatchHistory called before social graph was initialized.", withFlag:"-")
         }
@@ -360,10 +374,10 @@ public class MatchGraph {
                 self.didFetchUserMatchHistory = true
                 self.checkMatchesBeforeUserHistoryLoaded()
                 log("User voted on \(objects.count) matches.", withIndent: 1, withNewline: true)
-                onComplete?(didError: false)
+                onComplete?(success: true)
             } else {
                 log("Error \"\(error!.description)\" while fetching user match history.", withIndent: 1, withFlag:"-", withNewline: true)
-                onComplete?(didError: true)
+                onComplete?(success: false)
             }
         }
     }
@@ -374,7 +388,7 @@ public class MatchGraph {
      * from disappearing in the case of a crash.
      */
     public func flushUnregisteredMatches() {
-        let rootUser: UInt64 = rootUserFromGraph()
+        let rootUser: UInt64 = SocialGraphController.sharedInstance.rootId()
         if rootUser == 0 {
             return log("Warning: MatchGraph::flushUnregisteredMatches called before social graph was initialized.", withFlag: "-")
         }
@@ -412,9 +426,9 @@ public class MatchGraph {
      * if and only if a saved match was found and removed from the match graph.
      */
     public func userDidUndoMatch(from: UInt64, to: UInt64, withTitleId: Int) -> Bool {
-        let rootUser: UInt64 = rootUserFromGraph()
+        let rootUser: UInt64 = SocialGraphController.sharedInstance.rootId()
         if rootUser == 0 {
-            log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag: "-")
+            log("Warning: MatchGraph::userDidUndoMatch called before social graph was initialized.", withFlag: "-")
             return false
         }
         let matchToRemove: MatchTuple = MatchTuple(firstId: to, secondId: from, titleId: withTitleId)
@@ -427,24 +441,8 @@ public class MatchGraph {
             pruneDirectedMatchListIfEmpty(to, to: from)
         }
         // Attempt to remove any matches that were going to be flushed to Parse.
-        var indicesToRemove: [Int] = []
-        for (index: Int, match: MatchTuple) in enumerate(matchesBeforeUserHistoryLoaded) {
-            if match == matchToRemove {
-                indicesToRemove.append(index)
-            }
-        }
-        for index in indicesToRemove {
-            matchesBeforeUserHistoryLoaded.removeAtIndex(index)
-        }
-        indicesToRemove.removeAll()
-        for (index: Int, match: MatchTuple) in enumerate(unregisteredMatches) {
-            if match == matchToRemove {
-                indicesToRemove.append(index)
-            }
-        }
-        for index in indicesToRemove {
-            unregisteredMatches.removeAtIndex(index)
-        }
+        matchesBeforeUserHistoryLoaded.remove(matchToRemove)
+        unregisteredMatches.remove(matchToRemove)
         // Update other auxiliary datastructures as necessary.
         userVotes[matchToRemove] = nil
         matchUpdateTimes[MatchTuple(firstId: to, secondId: from, titleId: withTitleId, voterId: rootUser)] = nil
@@ -463,10 +461,10 @@ public class MatchGraph {
         }
         let match: MatchTuple = MatchTuple(firstId: from, secondId: to)
         if !didFetchUserMatchHistory {
-            matchesBeforeUserHistoryLoaded.append(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId))
+            matchesBeforeUserHistoryLoaded.insert(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId))
             return true
         }
-        let rootUser: UInt64 = rootUserFromGraph()
+        let rootUser: UInt64 = SocialGraphController.sharedInstance.rootId()
         if rootUser == 0 {
             log("Warning: MatchGraph::userDidMatch called before social graph was initialized.", withFlag: "-")
             return false
@@ -476,7 +474,7 @@ public class MatchGraph {
             log("User already voted on [\(match.firstId), \(match.secondId)] with title \"\(titlesById[withTitleId]!.text)\"")
             return true
         }
-        unregisteredMatches.append(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId))
+        unregisteredMatches.insert(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId))
         userVotes[MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: withTitleId)] = NSDate()
         CouplrViewCoordinator.sharedInstance.refreshHistoryView()
         SocialGraphController.sharedInstance.userDidMatch(match.firstId, toSecondId: match.secondId)
@@ -488,6 +486,39 @@ public class MatchGraph {
      */
     public func matchListsForUserId(userId: UInt64) -> [UInt64: MatchList] {
         return matches[userId] == nil ? [UInt64: MatchList]() : matches[userId]!
+    }
+    
+    /**
+     * Returns the MatchList between two given nodes. If no matches exist between them,
+     * returns nil.
+     */
+    public subscript(firstId: UInt64, secondId: UInt64) -> MatchList? {
+        return matchListsForUserId(firstId)[secondId]
+    }
+    
+    /**
+     * Returns a value indicating whether the root user has voted on a given match.
+     */
+    public func rootUserVoteState(firstId: UInt64, secondId: UInt64, titleId: Int) -> VoteState {
+        let rootId: UInt64 = SocialGraphController.sharedInstance.rootId()
+        let match: MatchTuple = MatchTuple(firstId: firstId, secondId: secondId, titleId: titleId, voterId: rootId)
+        if !match.shouldDisplay() {
+            // Do not allow the user to vote on matches with non-visible users.
+            return .ShouldNotAllowVote
+        }
+        if !didFetchUserMatchHistory {
+            // Do not allow the user to vote if the user's vote history has not been fetched.
+            return .ShouldNotAllowVote
+        }
+        if unregisteredMatches.contains(match) {
+            // The user has voted on the match, but it has not been saved to Parse.
+            return .UnsavedVote
+        }
+        let matchList: MatchList? = self[firstId, secondId]
+        if matchList == nil || !matchList!.userDidVote(rootId, titleId: titleId) {
+            return .HasNotVoted
+        }
+        return .SavedVote
     }
     
     /**
@@ -526,17 +557,6 @@ public class MatchGraph {
     }
 
     /**
-     * Grabs the root user ID from the graph. If the graph has not been loaded, returns
-     * a default error value of 0.
-     */
-    private func rootUserFromGraph() -> UInt64 {
-        if SocialGraphController.sharedInstance.graph == nil {
-            return 0
-        }
-        return SocialGraphController.sharedInstance.rootId()
-    }
-
-    /**
      * Walks through the list of user-supplied matches before the user's match history
      * was loaded and appends valid matches (i.e. those the user has not already voted
      * on) to the list of registered matches.
@@ -545,16 +565,16 @@ public class MatchGraph {
      * history arrives.
      */
     private func checkMatchesBeforeUserHistoryLoaded() {
-        let rootUser: UInt64 = rootUserFromGraph()
+        let rootUser: UInt64 = SocialGraphController.sharedInstance.rootId()
         if rootUser == 0 {
             return log("Warning: MatchGraph::checkMatchesBeforeUserHistoryLoaded called before social graph was initialized.", withFlag:"-")
         }
         for match: MatchTuple in matchesBeforeUserHistoryLoaded {
             if tryToUpdateDirectedEdge(match.firstId, to: match.secondId, voter: rootUser, titleId: match.titleId) &&
                 tryToUpdateDirectedEdge(match.secondId, to: match.firstId, voter: rootUser , titleId: match.titleId) {
-                    
+
                 log("Appending buffered match [\(match.firstId), \(match.secondId)] with title \"\(titlesById[match.titleId])\" to unregistered matches.")
-                unregisteredMatches.append(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: match.titleId))
+                unregisteredMatches.insert(MatchTuple(firstId: match.firstId, secondId: match.secondId, titleId: match.titleId))
             } else {
                 log("User already voted on [\(match.firstId), \(match.secondId)] with title \"\(titlesById[match.titleId]!.text)\"")
             }
@@ -573,11 +593,11 @@ public class MatchGraph {
     var matches: [UInt64: [UInt64: MatchList]]
     var titlesById: [Int: MatchTitle]
     var titleList: [MatchTitle]
-    var fetchedIdHistory: [UInt64: Bool]
+    var fetchedIdHistory: Set<UInt64>
     var didFetchUserMatchHistory: Bool
     var currentlyFlushingMatches: Bool
-    var unregisteredMatches: [MatchTuple]
+    var unregisteredMatches: Set<MatchTuple>
     var userVotes: [MatchTuple: NSDate]
-    var matchesBeforeUserHistoryLoaded: [MatchTuple]
+    var matchesBeforeUserHistoryLoaded: Set<MatchTuple>
     var matchUpdateTimes: [MatchTuple: NSDate]
 }

@@ -100,7 +100,7 @@ public class MatchGraphController {
         if matches == nil {
             matches = MatchGraph()
         }
-        matches!.fetchRootUserVoteHistory { (didError) -> Void in
+        matches!.fetchRootUserVoteHistory { (success) -> Void in
             SocialGraphController.sharedInstance.didLoadVoteHistoryOrInitializeGraph()
         }
     }
@@ -135,21 +135,33 @@ public class MatchGraphController {
         }
         return recentMatchesAndUpdateTimes
     }
+    
+    /**
+     * Wrapper around SocialGraph::rootUserVoteState used to determine whether or
+     * not to allow the root user to submit a given match from the newsfeed.
+     */
+    public func shouldAllowUserToVoteFromNewsfeed(firstId: UInt64, secondId: UInt64, titleId: Int) -> Bool {
+        if matches == nil {
+            return false
+        }
+        return matches!.rootUserVoteState(firstId, secondId: secondId, titleId: titleId) == .HasNotVoted
+    }
 
     /**
-     * Query all matches for a given match ID and update the graph
-     * accordingly. Invoke the callback function using a dictionary
-     * mapping each user the given id is matched with to another
-     * dictionary mapping title id to vote count.
-     *
-     * If the request failed, the resulting argument will be nil.
+     * Query all matches for a given match ID and update the graph accordingly.
+     * Invokes the callback function with a boolean argument indicating whether
+     * the request was successful.
      */
     public func doAfterLoadingMatchesForId(id: UInt64, onComplete: ((success: Bool) -> Void)? = nil) {
         doAfterLoadingMatchesForIds([id], onComplete: onComplete)
     }
     
+    /**
+     * Same idea as MatchGraphController::doAfterLoadingMatchesForId, but instead
+     * of querying just one id, queries a batch of ids.
+     */
     public func doAfterLoadingMatchesForIds(ids: [UInt64], onComplete: ((success: Bool) -> Void)? = nil) {
-        matches?.fetchMatchesForIds(ids, onComplete: { onComplete?(success: !$0) })
+        matches?.fetchMatchesForIds(ids, onComplete: onComplete)
     }
     
     /**
@@ -159,9 +171,9 @@ public class MatchGraphController {
      * TODO Implement "reliability" features here, i.e. resending queries
      * to Parse up to a maximum number of attempts.
      */
-    public func fetchMatchTitles(onComplete:((didError: Bool)->Void)) {
+    public func fetchMatchTitles(onComplete: ((success: Bool) -> Void)) {
         if matches == nil {
-            onComplete(didError: true)
+            onComplete(success: false)
         } else {
             matches!.fetchMatchTitles(onComplete: onComplete)
         }
@@ -273,9 +285,8 @@ public class MatchGraphController {
     public func didFinishLoadingExtendedSocialGraph() {
         let rootId: UInt64 = SocialGraphController.sharedInstance.rootId()
         let friends: [UInt64] = SocialGraphController.sharedInstance.closestFriendsOfUser(rootId)
-        matches?.fetchMatchesForIds(friends, onComplete: {
-            (didError: Bool) -> Void in
-            if !didError {
+        matches?.fetchMatchesForIds(friends, onComplete: { (success: Bool) -> Void in
+            if success {
                 SocialGraphController.sharedInstance.didLoadMatchesForClosestFriends()
                 CouplrViewCoordinator.sharedInstance.refreshNewsfeedView()
             }

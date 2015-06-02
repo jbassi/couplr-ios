@@ -38,9 +38,9 @@ extension SocialGraph {
     
     private func randomWalkSample(size: Int, expectedNumRandomHops: Float = kExpectedNumRandomHops, keepUsers: [UInt64] = []) -> [UInt64] {
         let randomHopProbability: Float = expectedNumRandomHops / Float(size - 1)
-        var samples: [UInt64: Bool] = [UInt64: Bool]()
+        var samples: Set<UInt64> = Set<UInt64>()
         for userId in keepUsers {
-            samples[userId] = true
+            samples.insert(userId)
         }
         var nextStep: UInt64 = root
         while samples.count < size {
@@ -56,9 +56,9 @@ extension SocialGraph {
                     nextStep = sampleRandomNode(samples)
                 }
             }
-            samples[nextStep] = true
+            samples.insert(nextStep)
         }
-        return Array(samples.keys)
+        return Array(samples)
     }
     
     /**
@@ -66,7 +66,7 @@ extension SocialGraph {
      * to a new neighboring node that does not already appear in the list of previous
      * nodes and is not the root. If there is no such node, returns 0.
      */
-    private func takeRandomStepFrom(node: UInt64, withNodesTraversed: [UInt64: Bool]) -> UInt64 {
+    private func takeRandomStepFrom(node: UInt64, withNodesTraversed: Set<UInt64>) -> UInt64 {
         var possibleNextNodes: [(UInt64, Float)] = [(UInt64, Float)]()
         var originalNormalizedWeights: [Float] = [Float]() // Debugging purposes.
         let currentGender: Gender = node == root ? Gender.Undetermined : genderFromId(node)
@@ -75,7 +75,7 @@ extension SocialGraph {
         let meanNonRootWeight: Float = baselineEdgeWeight()
         // Compute sampling weights prior to gender renormalization.
         for (neighbor: UInt64, weight: Float) in self.edges[node]! {
-            if neighbor == root || withNodesTraversed[neighbor] != nil {
+            if neighbor == root || withNodesTraversed.contains(neighbor) {
                 continue
             }
             let neighborScore: Float = sampleWeightForScore(weight - meanNonRootWeight)
@@ -201,13 +201,13 @@ extension SocialGraph {
     /**
      * Randomly samples a node out of the root user's neighbors.
      */
-    private func sampleRandomNode(withNodesTraversed: [UInt64: Bool]) -> UInt64 {
+    private func sampleRandomNode(withNodesTraversed: Set<UInt64>) -> UInt64 {
         var possibleNextNodes: [UInt64] = Array(edges[root]!.keys.filter { (neighbor: UInt64) -> Bool in
-            return withNodesTraversed[neighbor] == nil
+            return !withNodesTraversed.contains(neighbor)
         })
         if possibleNextNodes.count == 0 {
             possibleNextNodes = Array(nodes.keys.filter { (neighbor: UInt64) -> Bool in
-                return withNodesTraversed[neighbor] == nil && neighbor != self.root
+                return !withNodesTraversed.contains(neighbor) && neighbor != self.root
             })
         }
         return possibleNextNodes[randomInt(possibleNextNodes.count)]

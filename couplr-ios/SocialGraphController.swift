@@ -21,7 +21,7 @@ public class SocialGraphController {
     var graphSerializationSemaphore = dispatch_semaphore_create(1)
     var graphInitializeBeginTime: Double = 0
     var doBuildGraphFromCoreData: Bool = false
-    var matchesRecordedInSocialGraph: [MatchTuple: Bool] = [MatchTuple: Bool]() // HACK This name is so terrible I can't even.
+    var matchesRecordedInSocialGraph: Set<MatchTuple> = Set<MatchTuple>() // HACK This name is so terrible I can't even.
 
     lazy var managedObjectContext: NSManagedObjectContext? = {
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -52,7 +52,7 @@ public class SocialGraphController {
         graphSerializationSemaphore = dispatch_semaphore_create(1)
         graphInitializeBeginTime = 0
         doBuildGraphFromCoreData = false
-        matchesRecordedInSocialGraph = [MatchTuple: Bool]()
+        matchesRecordedInSocialGraph = Set<MatchTuple>()
         graph = nil
     }
 
@@ -70,9 +70,8 @@ public class SocialGraphController {
                     if MatchGraphController.sharedInstance.matches == nil {
                         return
                     }
-                    MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root], onComplete: {
-                        (didError: Bool) -> Void in
-                        if !didError {
+                    MatchGraphController.sharedInstance.matches!.fetchMatchesForIds([root], onComplete: { (success: Bool) -> Void in
+                        if success {
                             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 CouplrViewCoordinator.sharedInstance.refreshProfileView()
                             })
@@ -311,9 +310,9 @@ public class SocialGraphController {
             return
         }
         let pair: MatchTuple = MatchTuple(firstId: firstUser, secondId: secondUser)
-        if matchesRecordedInSocialGraph[pair] == nil {
+        if !matchesRecordedInSocialGraph.contains(pair) {
             graph!.connectNode(firstUser, toNode: secondUser, withWeight: kMatchExistsBetweenUsersWeight)
-            matchesRecordedInSocialGraph[pair] = true
+            matchesRecordedInSocialGraph.insert(pair)
         }
     }
 

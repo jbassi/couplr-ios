@@ -117,9 +117,8 @@ class MatchViewController: UIViewController {
         // TODO Retry query upon failure.
         socialGraphController.graphInitializeBeginTime = currentTimeInSeconds()
         matchGraphController.matches = MatchGraph()
-        matchGraphController.fetchMatchTitles({
-            (didError: Bool) -> Void in
-            if !didError {
+        matchGraphController.fetchMatchTitles({ (success: Bool) -> Void in
+            if success {
                 self.socialGraphController.initializeGraph()
                 let titleList: [MatchTitle] = self.matchGraphController.matchTitles()
                 if titleList.count == 0 {
@@ -256,6 +255,7 @@ class MatchViewController: UIViewController {
         selectedTitle = titleList[randomIndex]
         selectedRow = randomIndex
         matchTitle.setTitle(selectedTitle!.text, forState: UIControlState.Normal)
+        titleSelectButton.setImage(UIImage(named: selectedTitle!.picture), forState: .Normal)
     }
 }
 

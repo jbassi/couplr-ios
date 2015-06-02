@@ -80,13 +80,13 @@ class ProfileViewController: UIViewController {
     }
     
     func setUserId(userId: UInt64) {
-        profileDetailView!.profilePictureView.sd_setImageWithURL(profilePictureURLFromId(userId), placeholderImage: UIImage(named: "unknown"))
-        profileDetailView!.profileNameLabel.text = socialGraphController.nameFromId(userId, maxStringLength: 20)
-        currentUserId = userId
         matchGraphController.doAfterLoadingMatchesForId(userId, onComplete: { (success) in
             if !success {
                 return
             }
+            self.profileDetailView!.profilePictureView.sd_setImageWithURL(profilePictureURLFromId(userId), placeholderImage: UIImage(named: "unknown"))
+            self.profileDetailView!.profileNameLabel.text = self.socialGraphController.nameFromId(userId, maxStringLength: 20)
+            self.currentUserId = userId
             self.backButton?.hidden = userId == self.socialGraphController.rootId()
             self.cachedMatchCounts[userId] = self.matchGraphController.sortedMatchesForUserByUserId(userId)
             self.matchTableView?.reloadData()
