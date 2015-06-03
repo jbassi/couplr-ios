@@ -194,17 +194,24 @@ func shortenFullName(name: String, mode: NameDisplayMode) -> String {
  * Prints log messages for debugging.
  */
 func log(message: String, withIndent: Int = 0, withNewline: Bool = false, withFlag: Character = "+") {
-    if !kOutputLogMessages {
+    if !kOutputLogMessages && kMaxNumDebugLogLines == 0 {
         return
     }
+    var result: String
     var spacing: String = " "
     for i: Int in 0..<withIndent {
         spacing += "    "
     }
     if withNewline {
-        println("[\(withFlag)]\(spacing)\(message)\n")
+        result = "[\(withFlag)]\(spacing)\(message)\n"
     } else {
-        println("[\(withFlag)]\(spacing)\(message)")
+        result = "[\(withFlag)]\(spacing)\(message)"
+    }
+    if kOutputLogMessages {
+        println(result)
+    }
+    if kMaxNumDebugLogLines > 0 {
+        UserSessionTracker.sharedInstance.log(result)
     }
 }
 

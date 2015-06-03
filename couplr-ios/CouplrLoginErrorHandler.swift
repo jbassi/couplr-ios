@@ -11,6 +11,7 @@ import UIKit
 func showLoginWithAlertViewErrorMessage(message: String, alertTitle: String, completionHandler: AlertViewHandler? = nil) {
     let alertView = UIAlertView(title: alertTitle, message: message, delegate: completionHandler, cancelButtonTitle: "OK")
     alertView.show()
+    UserSessionTracker.sharedInstance.flushLog()
     CouplrViewCoordinator.sharedInstance.dismissLoadingScreen()
     CouplrViewCoordinator.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
 }

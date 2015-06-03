@@ -83,6 +83,7 @@ public class SocialGraphController {
                         self.initializeGraphFromCoreData(root)
                     } else {
                         self.graph = SocialGraph(root: root, nodes: [UInt64: String]())
+                        UserSessionTracker.sharedInstance.setRootId(root)
                         self.graph!.updateGraphUsingPosts()
                     }
                 } else {
@@ -336,6 +337,7 @@ public class SocialGraphController {
             nodes[node.id()] = node.name
         }
         self.graph = SocialGraph(root: rootId, nodes: nodes)
+        UserSessionTracker.sharedInstance.setRootId(rootId)
         let edges: [EdgeData] = EdgeData.allObjects(managedObjectContext!)
         for edgeData: EdgeData in edges {
             graph!.connectNode(edgeData.from(), toNode: edgeData.to(), withWeight: edgeData.weight)

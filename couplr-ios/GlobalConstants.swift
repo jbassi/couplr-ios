@@ -179,3 +179,6 @@ let kMaxNumClosestFriends: Int = 25
 
 /* Debugging output */
 let kOutputLogMessages: Bool = false
+
+// To disable the debug log entirely, set this value to 0.
+let kMaxNumDebugLogLines: Int = 50
