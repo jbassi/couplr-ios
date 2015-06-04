@@ -24,10 +24,6 @@ public class UserSessionTracker {
         return UserSessionTrackerSingleton.instance
     }
     
-    public func setRootId(rootId: UInt64) {
-        lastKnownRoot = rootId
-    }
-    
     public func notify(action: String) {
         let timeElapsed: Double = currentTimeInSeconds() - self.appStartTime
         if session.count < 99 {
@@ -45,10 +41,7 @@ public class UserSessionTracker {
     }
     
     public func flushUserSession() {
-        let currentRootId: UInt64 = SocialGraphController.sharedInstance.rootId()
-        if currentRootId != 0 {
-            lastKnownRoot = currentRootId
-        }
+        tryToUpdateLastKnownRoot()
         let encodedRoot: String = encodeBase64(lastKnownRoot)
         if encodedRoot == "2I8<O^K4T00" || encodedRoot == "860JAQC@T00" {
             return // HACK This is to stop our usage sessions from flooding our analytics data.
@@ -63,13 +56,22 @@ public class UserSessionTracker {
         session.removeAll()
     }
     
+    public func tryToUpdateLastKnownRoot() {
+        let currentRootId: UInt64 = SocialGraphController.sharedInstance.rootId()
+        if currentRootId != 0 {
+            lastKnownRoot = currentRootId
+        }
+    }
+    
     public func flushLog() {
+        tryToUpdateLastKnownRoot()
         if log.count == 0 {
             return
         }
         var userLog: PFObject = PFObject(className: "UserLog")
-        userLog["startTime"] = round(appStartTime)
         userLog["output"] = "\n".join(log)
+        userLog["rootId"] = encodeBase64(lastKnownRoot)
+        userLog["startTime"] = round(appStartTime)
         userLog.saveEventually()
         log.removeAll()
     }

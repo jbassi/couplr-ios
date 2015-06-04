@@ -45,7 +45,7 @@ let kEmptyTableViewMessage = "It looks like cupid is on hiatus. Please check bac
 let kMaxAllowedBatchRequestSize: Int = 50
 let kFacebookAPIVersion: String = "v2.2"
 
-/* General TableViewCell Constatns */
+/* General TableViewCell Constants */
 let kTableViewCellHeight: CGFloat = 80
 
 /* PickerView Constants */

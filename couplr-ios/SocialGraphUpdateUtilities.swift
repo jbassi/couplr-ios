@@ -16,24 +16,24 @@ extension SocialGraph {
      * graph data from Parse. Only keeps one active request at a time, and makes a maximum
      * of maxNumFriends requests before stopping.
      */
-    public func updateGraphDataFromFriends(maxNumFriends: Int = kMaxGraphDataQueries) {
+    public func updateGraphDataFromFriends(maxNumFriends: Int = kMaxNumFriendGraphs) {
         log("Fetching friends list...", withFlag: "!")
         let request: FBRequest = FBRequest.requestForMyFriends()
         request.startWithCompletionHandler{(connection: FBRequestConnection!, result: AnyObject!, error: NSError!) -> Void in
             if error == nil {
-                var couplrFriends: [UInt64] = [UInt64]()
                 if result["data"] == nil {
                     UserSessionTracker.sharedInstance.notify("Failed to fetch friends list!")
                     self.didFinishUpdatingFromFriendGraphs()
                     return
                 }
+                var couplrFriends: [UInt64] = [UInt64]()
                 let friendsData: AnyObject! = result["data"]!
                 for index in 0..<friendsData.count {
                     let friendObject: AnyObject! = friendsData[index]!
                     couplrFriends.append(uint64FromAnyObject(friendObject["id"]))
                 }
                 log("Found \(couplrFriends.count) friend(s).", withIndent: 1, withNewline: true)
-                self.fetchAndUpdateGraphDataForFriends(&couplrFriends)
+                self.fetchAndUpdateGraphDataForUserIds(couplrFriends, numFriendsToQuery: maxNumFriends)
             }
         }
     }
@@ -154,86 +154,89 @@ extension SocialGraph {
     }
     
     /**
-     * Makes a request to Parse for the graph rooted at the user given by id. If the graph
-     * data exists, updates the graph using the new graph data, introducing new nodes and
-     * edges and incrementing existing ones.
+     * Given a list of user ids, attempts to pull in graphs corresponding
+     * to the top N friends and use them to update the social network. If
+     * the graph data exists, updates the graph using the new graph data,
+     * introducing new nodes and edges or incrementing existing edges.
      */
-    private func fetchAndUpdateGraphDataForFriends(inout idList: [UInt64], numFriendsQueried: Int = 0) {
-        let id: UInt64 = popNextHighestConnectedFriend(&idList)
-        if numFriendsQueried > kMaxGraphDataQueries || id == 0 {
-            didFinishUpdatingFromFriendGraphs()
-            return
+    private func fetchAndUpdateGraphDataForUserIds(userIds: [UInt64], numFriendsToQuery: Int) {
+        var encodedUserIds: [String] = sorted(userIds, { (firstId: UInt64, secondId: UInt64) -> Bool in
+            return self[self.root, firstId] > self[self.root, secondId]
+        }).filter({ (userId: UInt64) -> Bool in
+            SocialGraphController.sharedInstance.hasNameForUser(userId)
+        }).map(encodeBase64)
+        if encodedUserIds.count > numFriendsToQuery {
+            encodedUserIds = Array(encodedUserIds[0..<numFriendsToQuery])
         }
-        log("Pulling the social graph of \(SocialGraphController.sharedInstance.nameFromId(id))...", withFlag: "!")
-        var query: PFQuery = PFQuery(className: "GraphData")
-        query.whereKey("rootId", equalTo: encodeBase64(id))
-        query.findObjectsInBackgroundWithBlock({
-            (objects: [AnyObject]!, error: NSError?) -> Void in
-            if error != nil || objects.count < 1 {
-                log("\(SocialGraphController.sharedInstance.nameFromId(id))'s graph was not found. Moving on...", withFlag: "?", withIndent: 1)
-                self.fetchAndUpdateGraphDataForFriends(&idList, numFriendsQueried: numFriendsQueried)
-                return
-            }
-            let graphData: AnyObject! = objects[0]
-            let newNamesObject: AnyObject! = graphData["names"]
-            var newNames: [UInt64: String] = [UInt64: String]()
-            for nodeAsObject: AnyObject in newNamesObject.allKeys {
-                let node: UInt64 = uint64FromAnyObject(nodeAsObject, base64: true)
-                newNames[node] = newNamesObject[nodeAsObject.description] as? String
-            }
-            let newEdges: AnyObject! = graphData["edges"]
-            // Parse incoming graph's edges into a dictionary for fast lookup.
-            var newEdgeMap: [UInt64: [UInt64: Float]] = [UInt64: [UInt64: Float]]()
-            for index in 0..<newEdges.count {
-                let edge: AnyObject! = newEdges[index]!
-                let src: UInt64 = uint64FromAnyObject(edge[0], base64: true)
-                let dst: UInt64 = uint64FromAnyObject(edge[1], base64: true)
-                let weight: Float = floatFromAnyObject(edge[2])
-                if newEdgeMap[src] == nil {
-                    newEdgeMap[src] = [UInt64: Float]()
-                }
-                if newEdgeMap[dst] == nil {
-                    newEdgeMap[dst] = [UInt64: Float]()
-                }
-                newEdgeMap[src]![dst] = weight
-                newEdgeMap[dst]![src] = weight
-            }
-            var newNodeList: [UInt64] = [UInt64]()
-            // Use new edges to determine whether each new node should be added to the graph.
-            for (node: UInt64, name: String) in newNames {
-                if self.nodes[node] != nil {
-                    continue
-                }
-                // Check whether the node has enough neighbors in the current social network.
-                let neighbors: [UInt64: Float] = newEdgeMap[node]!
-                var mutualFriendCount: Int = 0
-                for (neighbor: UInt64, weight: Float) in neighbors {
-                    if self.nodes[neighbor] != nil {
-                        mutualFriendCount++
+        var query = PFQuery(className:"GraphData", predicate: NSPredicate(format:"rootId IN %@", encodedUserIds))
+        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError?) -> Void in
+            if error != nil {
+                return log("Failed to fetch friend graphs from parse for ids \(encodedUserIds)). Error: \(error!.description)", withFlag: "-", withIndent: 1)
+            } else {
+                log("Found \(objects.count) graph object(s). Updating social graph...", withIndent: 1)
+                for graphObject: AnyObject in objects {
+                    let graphRootId: UInt64 = decodeBase64(graphObject["rootId"] as! String)
+                    log("Updating with \(SocialGraphController.sharedInstance.nameFromId(graphRootId))'s data...", withIndent: 2)
+                    let newNamesObject: AnyObject! = graphObject["names"]
+                    var newNames: [UInt64: String] = [UInt64: String]()
+                    for nodeAsObject: AnyObject in newNamesObject.allKeys {
+                        let node: UInt64 = uint64FromAnyObject(nodeAsObject, base64: true)
+                        newNames[node] = newNamesObject[nodeAsObject.description] as? String
                     }
-                }
-                if mutualFriendCount >= kMutualFriendsThreshold {
-                    newNodeList.append(node)
-                }
-            }
-            // Update the graph to contain all the new nodes.
-            for newNode: UInt64 in newNodeList {
-                self.updateNodeWithId(newNode, andName: newNames[newNode]!)
-            }
-            // Add all new edges that connect two members of the original graph.
-            var edgeUpdateCount: Int = 0
-            for (node: UInt64, neighbors: [UInt64: Float]) in newEdgeMap {
-                for (neighbor: UInt64, weight: Float) in neighbors {
-                    if node < neighbor && self.nodes[node] != nil && self.nodes[neighbor] != nil {
-                        self.connectNode(node, toNode: neighbor, withWeight: weight)
-                        edgeUpdateCount++
+                    let newEdges: AnyObject! = graphObject["edges"]
+                    // Parse incoming graph's edges into a dictionary for fast lookup.
+                    var newEdgeMap: [UInt64: [UInt64: Float]] = [UInt64: [UInt64: Float]]()
+                    for index in 0..<newEdges.count {
+                        let edge: AnyObject! = newEdges[index]!
+                        let source: UInt64 = uint64FromAnyObject(edge[0], base64: true)
+                        let destination: UInt64 = uint64FromAnyObject(edge[1], base64: true)
+                        let weight: Float = floatFromAnyObject(edge[2])
+                        if newEdgeMap[source] == nil {
+                            newEdgeMap[source] = [UInt64: Float]()
+                        }
+                        if newEdgeMap[destination] == nil {
+                            newEdgeMap[destination] = [UInt64: Float]()
+                        }
+                        newEdgeMap[source]![destination] = weight
+                        newEdgeMap[destination]![source] = weight
                     }
+                    var newNodeList: [UInt64] = [UInt64]()
+                    // Use new edges to determine whether each new node should be added to the graph.
+                    for (node: UInt64, name: String) in newNames {
+                        if self.nodes[node] != nil {
+                            continue
+                        }
+                        // Check whether the node has enough neighbors in the current social network.
+                        let neighbors: [UInt64: Float] = newEdgeMap[node]!
+                        var mutualFriendCount: Int = 0
+                        for (neighbor: UInt64, weight: Float) in neighbors {
+                            if self.nodes[neighbor] != nil {
+                                mutualFriendCount++
+                            }
+                        }
+                        if mutualFriendCount >= kMutualFriendsThreshold {
+                            newNodeList.append(node)
+                        }
+                    }
+                    // Update the graph to contain all the new nodes.
+                    for newNode: UInt64 in newNodeList {
+                        self.updateNodeWithId(newNode, andName: newNames[newNode]!)
+                    }
+                    // Add all new edges that connect two members of the original graph.
+                    var edgeUpdateCount: Int = 0
+                    for (node: UInt64, neighbors: [UInt64: Float]) in newEdgeMap {
+                        for (neighbor: UInt64, weight: Float) in neighbors {
+                            if node < neighbor && self.nodes[node] != nil && self.nodes[neighbor] != nil {
+                                self.connectNode(node, toNode: neighbor, withWeight: weight)
+                                edgeUpdateCount++
+                            }
+                        }
+                    }
+                    log("\(newNodeList.count) nodes added; \(edgeUpdateCount) edges updated.", withIndent: 2, withNewline: true)
                 }
             }
-            log("Finished updating graph for root id \(SocialGraphController.sharedInstance.nameFromId(id)).", withIndent: 1)
-            log("\(newNodeList.count) nodes added; \(edgeUpdateCount) edges updated.", withIndent: 1, withNewline: true)
-            self.fetchAndUpdateGraphDataForFriends(&idList, numFriendsQueried: numFriendsQueried + 1)
-        })
+            self.didFinishUpdatingFromFriendGraphs()
+        }
     }
 
     /**

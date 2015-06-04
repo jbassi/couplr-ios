@@ -31,7 +31,7 @@ let kSigmoidExponentialBase: Float = 2.0             // The exponential base for
 let kRandomSampleCount: Int = 9                      // The number of people to randomly sample.
 let kExpectedNumRandomHops: Float = 1.0              // The expected number of random hops when performing random walk sampling.
 
-let kMaxGraphDataQueries: Int = 5                    // Max number of friends to query graph data from.
+let kMaxNumFriendGraphs: Int = 5                     // Max number of friends to query graph data from.
 let kMinExportEdgeWeight: Float = 0.75               // Only export edges with more than this weight.
 let kScaleFactorForExportingRootEdges: Float = 0.25  // Export root edges scaled by this number.
 let kMutualFriendsThreshold: Int = 5                 // This many mutual friends to pull a friend over to the user's graph.
