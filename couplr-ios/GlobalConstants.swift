@@ -36,6 +36,7 @@ let kCouplrNavigationBarButtonDarkIconNames: [String] = ["nav-profile-dark", "na
 
 /* Couplr Default Color */
 let kCouplrRedColor = UIColor(red: 246/255.0, green: 71/255.0, blue: 71/255.0, alpha: 1)
+let kCouplrGreenColor = UIColor(red: 166/255.0, green: 211/255.0, blue: 54/255.0, alpha: 1)
 let kCouplrLinkColor = UIColor(red: 0, green: 0.478, blue: 1, alpha: 1)
 
 /* Empty TableView Strings */
@@ -50,7 +51,7 @@ let kTableViewCellHeight: CGFloat = 80
 
 /* PickerView Constants */
 let kPickerViewWidthInsets: CGFloat = 80.0
-let kPickerViewHeight: CGFloat = 180.0
+let kPickerViewHeight: CGFloat = 216
 let kPickerViewCornerRadius: CGFloat = 3.0
 let kPickerViewBlurViewBlurRadius: CGFloat = 20.0
 let kPickerShowAnimationDuration: NSTimeInterval = 0.5
@@ -176,6 +177,8 @@ let kPhotosGraphPathFields: String = "fields=from,tags.fields(id,name)"
 /* News feed */
 let kMaxNumNewsfeedMatches: Int = 25
 let kMaxNumClosestFriends: Int = 25
+let kMatchButtonWidth: CGFloat = 80
+let kMatchButtonRevealTimer: Double = 0.25
 
 /* Debugging output */
 let kOutputLogMessages: Bool = false

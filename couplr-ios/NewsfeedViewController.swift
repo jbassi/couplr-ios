@@ -16,6 +16,8 @@ class NewsfeedViewController: UIViewController {
     var newsfeedTableView: UITableView?
     var cachedNewsfeedMatches: [(MatchTuple, NSDate)]?
     
+    var currentRevealedTableIndex: Int = -1
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -31,7 +33,7 @@ class NewsfeedViewController: UIViewController {
         newsfeedTableView = UITableView(frame: CGRectMake(0, headerViewHeight, view.bounds.size.width, newsfeedTableViewHeight))
         newsfeedTableView!.delegate = self
         newsfeedTableView!.dataSource = self
-        newsfeedTableView!.registerClass(MatchPairTableViewCell.self, forCellReuseIdentifier: "NewsfeedViewCell")
+        newsfeedTableView!.registerClass(NewsfeedTableViewCell.self, forCellReuseIdentifier: "NewsfeedViewCell")
 
         view.addSubview(headerView!)
         view.addSubview(newsfeedTableView!)
@@ -46,7 +48,7 @@ class NewsfeedViewController: UIViewController {
     
     func showAllNamesInVisibleCells() {
         for cell in newsfeedTableView!.visibleCells() {
-            let newsCell = cell as! MatchPairTableViewCell
+            let newsCell = cell as! NewsfeedTableViewCell
             if let matches: [(MatchTuple, NSDate)]? = newsfeedMatches() {
                 let match: MatchTuple = matches![newsfeedTableView!.indexPathForCell(newsCell)!.row].0
                 let nameForFirstId: String = socialGraphController.nameFromId(match.firstId, maxStringLength: 12)
@@ -58,7 +60,7 @@ class NewsfeedViewController: UIViewController {
     
     func hideAllNamesInVisibleCells() {
         for cell in newsfeedTableView!.visibleCells() {
-            let newsCell = cell as! MatchPairTableViewCell
+            let newsCell = cell as! NewsfeedTableViewCell
             newsCell.removeTransparentLayer()
         }
     }
@@ -73,7 +75,6 @@ class NewsfeedViewController: UIViewController {
             UserSessionTracker.sharedInstance.notify("toggled newsfeed names off")
         }
     }
-    
 }
 
 extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
@@ -111,13 +112,18 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         self.cachedNewsfeedMatches = nil
         let matches: [(MatchTuple, NSDate)]? = newsfeedMatches()
-        return matches == nil ? 0 : matches!.count
+        if matches == nil {
+            return 0
+        }
+        return matches!.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as! MatchPairTableViewCell
+        let row: Int = indexPath.row
+        let cell = tableView.dequeueReusableCellWithIdentifier("NewsfeedViewCell", forIndexPath: indexPath) as! NewsfeedTableViewCell
         if let matchesAndUpdateTimes: [(MatchTuple, NSDate)]? = newsfeedMatches() {
             let (match: MatchTuple, updateTime: NSDate) = matchesAndUpdateTimes![indexPath.row]
+            cell.setMatch(match)
             cell.cellText.text = matchGraphController.matchTitleFromId(match.titleId)!.text
             cell.selectionStyle = .None
             cell.leftCellImage.sd_setImageWithURL(profilePictureURLFromId(match.firstId), placeholderImage: UIImage(named: "unknown"))
@@ -132,7 +138,39 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
             let updateTimeInterval: NSTimeInterval = NSDate().timeIntervalSinceDate(updateTime)
             cell.dateLabel.text = "\(timeElapsedAsText(updateTimeInterval)) ago"
         }
+        if currentRevealedTableIndex == row {
+            // HACK Why can't I directly set the frame origin without using a delay?
+            afterDelay(0.0, { cell.revealButton(immediately: true) })
+        }
         return cell
+    }
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        let row: Int = indexPath.row
+        let cell = tableView.cellForRowAtIndexPath(indexPath) as! NewsfeedTableViewCell
+        if currentRevealedTableIndex != row {
+            if cell.shouldAllowUserToVote() {
+                cell.setButtonVisible(true)
+                cellAtTableRow(currentRevealedTableIndex)?.hideButton()
+                cell.revealButton(onComplete: { finished in
+                    self.currentRevealedTableIndex = row
+                })
+            } else {
+                cell.setButtonVisible(false)
+                cell.shake()
+            }
+        } else {
+            if cell.isButtonHidden() {
+                // The user has submitted a match here.
+                currentRevealedTableIndex = -1
+                cell.setButtonVisible(false)
+                cell.shake()
+            } else {
+                cellAtTableRow(currentRevealedTableIndex)?.hideButton(onComplete: { finished in
+                    self.currentRevealedTableIndex = -1
+                })
+            }
+        }
     }
     
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
@@ -151,4 +189,10 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
         headerView!.nameToggleButton.enabled = true
     }
     
+    private func cellAtTableRow(row: Int) -> NewsfeedTableViewCell? {
+        if row < 0 {
+            return nil
+        }
+        return newsfeedTableView?.cellForRowAtIndexPath(NSIndexPath(forRow: row, inSection: 0)) as? NewsfeedTableViewCell
+    }
 }
