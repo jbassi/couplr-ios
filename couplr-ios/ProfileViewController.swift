@@ -166,7 +166,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         pickerView.secondUser = sortedMatches[indexPath.row].0
         for (user: UInt64, list) in sortedMatches {
             if user == pickerView.secondUser {
-                pickerView.matches = list
+                pickerView.matches = sorted(list, { $0.1 > $1.1 })
             }
         }
         pickerView.showAnimated(true)
