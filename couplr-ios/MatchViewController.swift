@@ -70,6 +70,7 @@ class MatchViewController: UIViewController {
         // Set up and position the buttons.
         let buttons: [UIButton] = [toggleNamesButton, titleSelectButton, shuffleButton, submitButton]
         let buttonImageNames: [String?] = ["matchview-names", nil, "matchview-shuffle", "matchview-match"]
+        let buttonImageNamesHighlight: [String?] = ["matchview-names-highlight", nil, "matchview-shuffle-highlight", "matchview-match-highlight"]
         let buttonActionNames: [Selector] = [Selector("namesToggled:"), Selector("showTitleSelect"), Selector("shuffleUnselectedMatches"), Selector("submitMatch")]
         let buttonSideLength: CGFloat = buttonBounds.width / CGFloat(buttons.count)
         let buttonInsets: CGFloat = 0.15 * buttonSideLength
@@ -79,8 +80,9 @@ class MatchViewController: UIViewController {
             button.layer.cornerRadius = buttonSideLength / 2 - 1
             button.layer.borderColor = UIColor(white: 0.67, alpha: 1).CGColor
             button.layer.borderWidth = 0.5
-            if buttonImageNames[index] != nil {
+            if buttonImageNames[index] != nil && buttonImageNamesHighlight[index] != nil {
                 button.setImage(UIImage(named: buttonImageNames[index]!), forState: .Normal)
+                button.setImage(UIImage(named: buttonImageNamesHighlight[index]!), forState: .Highlighted)
             } else {
                 button.setImage(nil, forState: .Normal)
             }
@@ -89,6 +91,7 @@ class MatchViewController: UIViewController {
             button.addTarget(self, action: buttonActionNames[index], forControlEvents: .TouchUpInside)
             view.addSubview(button)
         }
+        toggleNamesButton.setImage(UIImage(named: "matchview-names-highlight"), forState: .Selected)
         view.addSubview(collectionView!)
         view.addSubview(matchTitle)
         initializeSocialGraphAndMatchGraphControllers()
@@ -157,9 +160,11 @@ class MatchViewController: UIViewController {
     func namesToggled(sender: UIButton) {
         sender.selected = !sender.selected
         if sender.selected {
+            toggleNamesButton.layer.borderColor = kCouplrRedColor.CGColor
             showAllNames()
             UserSessionTracker.sharedInstance.notify("toggled names on")
         } else {
+            toggleNamesButton.layer.borderColor = UIColor(white: 0.67, alpha: 1).CGColor
             hideAllNames()
             UserSessionTracker.sharedInstance.notify("toggled names off")
         }

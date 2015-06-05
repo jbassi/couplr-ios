@@ -38,6 +38,8 @@ class MatchPairHeaderView: UIView {
         nameToggleButton.layer.borderColor = UIColor(white: 0.67, alpha: 1).CGColor
         nameToggleButton.layer.borderWidth = 0.5
         nameToggleButton.setImage(UIImage(named: "matchview-names"), forState: .Normal)
+        nameToggleButton.setImage(UIImage(named: "matchview-names-highlight"), forState: .Selected)
+        nameToggleButton.setImage(UIImage(named: "matchview-names-highlight"), forState: .Highlighted)
         nameToggleButton.imageEdgeInsets = UIEdgeInsetsMake(nameToggleButtonInsets, nameToggleButtonInsets, nameToggleButtonInsets, nameToggleButtonInsets)
         nameToggleButton.clipsToBounds = true
         

@@ -68,9 +68,11 @@ class NewsfeedViewController: UIViewController {
     func namesToggled(sender: UIButton) {
         sender.selected = !sender.selected
         if sender.selected {
+            headerView!.nameToggleButton.layer.borderColor = kCouplrRedColor.CGColor
             showAllNamesInVisibleCells()
             UserSessionTracker.sharedInstance.notify("toggled newsfeed names on")
         } else {
+            headerView!.nameToggleButton.layer.borderColor = UIColor(white: 0.67, alpha: 1).CGColor
             hideAllNamesInVisibleCells()
             UserSessionTracker.sharedInstance.notify("toggled newsfeed names off")
         }
