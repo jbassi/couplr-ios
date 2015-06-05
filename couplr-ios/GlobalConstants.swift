@@ -178,7 +178,7 @@ let kPhotosGraphPathFields: String = "fields=from,tags.fields(id,name)"
 let kMaxNumNewsfeedMatches: Int = 25
 let kMaxNumClosestFriends: Int = 25
 let kMatchButtonWidth: CGFloat = 80
-let kMatchButtonRevealTimer: Double = 0.25
+let kMatchButtonRevealTimer: Double = 0.5
 
 /* Debugging output */
 let kOutputLogMessages: Bool = false

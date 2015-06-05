@@ -140,10 +140,6 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
             let updateTimeInterval: NSTimeInterval = NSDate().timeIntervalSinceDate(updateTime)
             cell.dateLabel.text = "\(timeElapsedAsText(updateTimeInterval)) ago"
         }
-        if currentRevealedTableIndex == row {
-            // HACK Why can't I directly set the frame origin without using a delay?
-            afterDelay(0.0, { cell.revealButton(immediately: true) })
-        }
         return cell
     }
     
@@ -177,6 +173,14 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         return kTableViewCellHeight
+    }
+    
+    func scrollViewWillBeginDragging(scrollView: UIScrollView) {
+        if self.currentRevealedTableIndex != -1 {
+            cellAtTableRow(currentRevealedTableIndex)?.hideButton(onComplete: { finished in
+                self.currentRevealedTableIndex = -1
+            })
+        }
     }
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
