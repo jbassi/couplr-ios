@@ -84,6 +84,10 @@ class NewsfeedTableViewCell: MatchPairTableViewCell {
         }
         animateHorizontalImmediately(0, timeInSeconds: immediately ? 0 : kMatchButtonRevealTimer, onComplete: { finished in
             self.buttonHidden = true
+            if self.shouldShowHudView {
+                self.animateHudView()
+                self.shouldShowHudView = false
+            }
             onComplete?(finished: finished)
         })
     }
@@ -95,7 +99,14 @@ class NewsfeedTableViewCell: MatchPairTableViewCell {
         }
         MatchGraphController.sharedInstance.userDidMatch(match!.firstId, to: match!.secondId, withTitleId: match!.titleId)
         UserSessionTracker.sharedInstance.notify("submitted match via newsfeed")
+        shouldShowHudView = true
         hideButton()
+    }
+    
+    private func animateHudView() {
+        hudView = HudView.hudInView(self, animated: true)
+        hudView?.text = "Matched"
+        afterDelay(0.5, { self.hudView?.hideAnimated(true) })
     }
     
     private func animateHorizontalImmediately(toOffset: CGFloat, timeInSeconds: Double, onComplete: ((finished: Bool) -> Void)? = nil) {
@@ -109,6 +120,8 @@ class NewsfeedTableViewCell: MatchPairTableViewCell {
         }, completion: onComplete)
     }
     
+    private var hudView: HudView? = nil
+    private var shouldShowHudView = false
     private var match: MatchTuple? = nil
     private var matchButton: UIButton = UIButton()
     private var buttonHidden: Bool = true

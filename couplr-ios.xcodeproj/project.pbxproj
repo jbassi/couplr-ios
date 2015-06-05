@@ -28,6 +28,7 @@
 		11276E361AC4F5FE00ADD063 /* MatchPairTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11276E351AC4F5FE00ADD063 /* MatchPairTableViewCell.swift */; };
 		114E42991AE2143D00CC9EB7 /* TutorialPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 114E42981AE2143D00CC9EB7 /* TutorialPageViewController.swift */; };
 		11996CB81AC4D1B400C45DB0 /* MatchPairHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11996CB71AC4D1B400C45DB0 /* MatchPairHeaderView.swift */; };
+		11A4745B1B21076C00AF2563 /* HudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A4745A1B21076C00AF2563 /* HudView.swift */; };
 		11C9301B1B142FDF0091BFA4 /* FXBlurView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F9F1CBE1A5CFB7300E683A1 /* FXBlurView.m */; };
 		11CF0BDA1AC1007E00DF1EF9 /* AbstractProfileDetailLayoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11CF0BD91AC1007E00DF1EF9 /* AbstractProfileDetailLayoverView.swift */; };
 		11E5870F1AC39BFB00D61CDB /* ImageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E5870E1AC39BFB00D61CDB /* ImageTableViewCell.swift */; };
@@ -123,6 +124,7 @@
 		11276E351AC4F5FE00ADD063 /* MatchPairTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchPairTableViewCell.swift; sourceTree = "<group>"; };
 		114E42981AE2143D00CC9EB7 /* TutorialPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TutorialPageViewController.swift; sourceTree = "<group>"; };
 		11996CB71AC4D1B400C45DB0 /* MatchPairHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchPairHeaderView.swift; sourceTree = "<group>"; };
+		11A4745A1B21076C00AF2563 /* HudView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HudView.swift; sourceTree = "<group>"; };
 		11CF0BD91AC1007E00DF1EF9 /* AbstractProfileDetailLayoverView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbstractProfileDetailLayoverView.swift; sourceTree = "<group>"; };
 		11E5870E1AC39BFB00D61CDB /* ImageTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageTableViewCell.swift; sourceTree = "<group>"; };
 		11E587101AC3A92F00D61CDB /* ImageTitleTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageTitleTableViewCell.swift; sourceTree = "<group>"; };
@@ -358,6 +360,7 @@
 			children = (
 				0F9F1CBC1A5CFB7300E683A1 /* FXBlurView */,
 				0FF11BE31A50C63C00C14FDC /* PickerView.swift */,
+				11A4745A1B21076C00AF2563 /* HudView.swift */,
 				0FA10B3E1A53816B007A5A9D /* ProfilePictureCollectionViewCell.swift */,
 				0FFBA3031A562D4E00A95F66 /* CouplrNavigationController.swift */,
 				0FDD9F6E1A5BA0E700927558 /* ProfileDetailView.swift */,
@@ -627,6 +630,7 @@
 				0F37CA1D19C52455007A6951 /* CouplrLoginErrorHandler.swift in Sources */,
 				11FDBBB11AC5F206006DFD9B /* SDWebImageDecoder.m in Sources */,
 				11FDBBB01AC5F206006DFD9B /* SDWebImageCompat.m in Sources */,
+				11A4745B1B21076C00AF2563 /* HudView.swift in Sources */,
 				11FDBBBA1AC5F206006DFD9B /* UIImageView+HighlightedWebCache.m in Sources */,
 				11FDBBAE1AC5F206006DFD9B /* NSData+ImageContentType.m in Sources */,
 				0F1B9EE319C4DD7A00CD64FD /* AppDelegate.swift in Sources */,
