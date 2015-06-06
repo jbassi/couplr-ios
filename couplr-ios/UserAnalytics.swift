@@ -13,7 +13,7 @@ public class UserSessionTracker {
     public init() {
         self.appStartTime = currentTimeInSeconds()
         self.session = []
-        self.log = []
+        self.logMessages = []
         self.lastKnownRoot = 0
     }
     
@@ -33,10 +33,10 @@ public class UserSessionTracker {
         }
     }
     
-    public func log(message: String) {
-        self.log.append(message)
-        if self.log.count > kMaxNumDebugLogLines {
-            self.log.removeAtIndex(0)
+    public func appendLog(message: String) {
+        self.logMessages.append(message)
+        if self.logMessages.count > kMaxNumDebugLogLines {
+            self.logMessages.removeAtIndex(0)
         }
     }
     
@@ -45,6 +45,9 @@ public class UserSessionTracker {
         let encodedRoot: String = encodeBase64(lastKnownRoot)
         if encodedRoot == "2I8<O^K4T00" || encodedRoot == "860JAQC@T00" {
             return // HACK This is to stop our usage sessions from flooding our analytics data.
+        }
+        if lastKnownRoot == 0 {
+            return log("Should not log user session for unknown root user.", withFlag: "-")
         }
         var userSession: PFObject = PFObject(className: "UserSession")
         userSession["userId"] = encodedRoot
@@ -65,19 +68,19 @@ public class UserSessionTracker {
     
     public func flushLog() {
         tryToUpdateLastKnownRoot()
-        if log.count == 0 {
+        if logMessages.count == 0 {
             return
         }
         var userLog: PFObject = PFObject(className: "UserLog")
-        userLog["output"] = "\n".join(log)
+        userLog["output"] = "\n".join(logMessages)
         userLog["rootId"] = encodeBase64(lastKnownRoot)
         userLog["startTime"] = round(appStartTime)
         userLog.saveEventually()
-        log.removeAll()
+        logMessages.removeAll()
     }
     
     var appStartTime: Double
     var session: [(String, Double)]
-    var log: [String]
+    var logMessages: [String]
     var lastKnownRoot: UInt64
 }

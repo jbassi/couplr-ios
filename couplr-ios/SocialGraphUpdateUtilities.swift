@@ -168,7 +168,7 @@ extension SocialGraph {
         if encodedUserIds.count > numFriendsToQuery {
             encodedUserIds = Array(encodedUserIds[0..<numFriendsToQuery])
         }
-        var query = PFQuery(className:"GraphData", predicate: NSPredicate(format:"rootId IN %@", encodedUserIds))
+        var query = PFQuery(className:"GraphData", predicate: NSPredicate(format: "rootId IN %@", encodedUserIds))
         query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError?) -> Void in
             if error != nil {
                 return log("Failed to fetch friend graphs from parse for ids \(encodedUserIds)). Error: \(error!.description)", withFlag: "-", withIndent: 1)

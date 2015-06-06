@@ -8,6 +8,20 @@
 
 import UIKit
 
+/* PubNub constants */
+let kCouplrPubNubConfiguration = PNConfiguration(
+    forOrigin: "pubsub.pubnub.com",
+    publishKey: "pub-c-e2f2d8d4-6aab-421b-a62c-f3919eca4f48",
+    subscribeKey: "sub-c-d26674e4-07ca-11e5-9ecd-0619f8945a4f",
+    secretKey: "sec-c-ZTc1N2RiOWUtYzA1MS00M2I0LWFlNWEtNDgzNDhiNDhlZDI2"
+)
+// Every minute, check to see if there are any new conversations to join.
+let kConversationInvitePollingPeriod: NSTimeInterval = 60
+let kAuthorTimestampSeparator: Character = Character(",")
+let kTimestampTextSeparator: Character = Character(":")
+let kDateIn1970: NSDate = NSDate(timeIntervalSince1970: 0)
+let kMaxNumPastMessagesPerPage: Int = 25
+
 /* Automatically reload upon exiting/reentering the app no more than once every 2 minutes. */
 let kAutoRefreshPeriod: Double = 120
 
@@ -181,7 +195,7 @@ let kMatchButtonWidth: CGFloat = 80
 let kMatchButtonRevealTimer: Double = 0.5
 
 /* Debugging output */
-let kOutputLogMessages: Bool = false
+let kOutputLogMessages: Bool = true
 
 // To disable the debug log entirely, set this value to 0.
 let kMaxNumDebugLogLines: Int = 50

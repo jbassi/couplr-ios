@@ -55,6 +55,20 @@ public class SocialGraphController {
         matchesRecordedInSocialGraph = Set<MatchTuple>()
         graph = nil
     }
+    
+    /**
+     * Associates an id with a name to the SocialGraph if the id is not
+     * already mapped to a name.
+     */
+    public func addNameForUserId(id: UInt64, name: String) {
+        if graph == nil {
+            return log("Warning: SocialGraphController::addNameForUserId called before the graph has been initialized.")
+        }
+        if graph!.names[id] == nil {
+            graph!.names[id] = name
+        }
+    }
+    
 
     /**
      * Makes a request for the current user's ID and compares it against
@@ -149,12 +163,17 @@ public class SocialGraphController {
      * of the name until it fits. Starts by making the middle name
      * (if it exists) a middle initial, and then the last name an
      * initial.
+     * 
+     * If maxStringLength is negative, the entire name is returned.
      */
     public func nameFromId(id: UInt64, maxStringLength: Int = kMaxNameDisplayLength) -> String {
         if graph == nil || graph!.names[id] == nil {
             return String(id)
         }
         var name: String = graph!.names[id]!
+        if maxStringLength < 0 {
+            return name
+        }
         if name.lengthOfBytesUsingEncoding(NSUTF8StringEncoding) > maxStringLength {
             name = shortenFullName(name, NameDisplayMode.MiddleInitial)
         }

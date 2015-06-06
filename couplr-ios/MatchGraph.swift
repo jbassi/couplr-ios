@@ -305,7 +305,7 @@ public class MatchGraph {
             return log("Matches for users \(SocialGraphController.sharedInstance.namesFromIds(userIds))) already loaded.", withIndent: 1, withNewline: true)
         }
         let encodedUserIds: [String] = userIds.map(encodeBase64)
-        let predicate: NSPredicate = NSPredicate(format:"firstId IN %@ OR secondId IN %@", encodedUserIds, encodedUserIds)
+        let predicate: NSPredicate = NSPredicate(format: "firstId IN %@ OR secondId IN %@", encodedUserIds, encodedUserIds)
         var query = PFQuery(className:"MatchData", predicate: predicate)
         query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError?) -> Void in
             if error == nil {
@@ -363,7 +363,7 @@ public class MatchGraph {
             return log("Request for user history denied. Already fetched root user history.", withFlag:"?")
         }
         log("Requesting match history for current user.", withFlag:"!")
-        let predicate: NSPredicate = NSPredicate(format:"voterId = \"\(encodeBase64(rootUser))\"")
+        let predicate: NSPredicate = NSPredicate(format: "voterId = \"\(encodeBase64(rootUser))\"")
         var query = PFQuery(className:"MatchData", predicate: predicate)
         query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError?) -> Void in
             if error == nil {

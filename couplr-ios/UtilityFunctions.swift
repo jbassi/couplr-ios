@@ -211,7 +211,7 @@ func log(message: String, withIndent: Int = 0, withNewline: Bool = false, withFl
         println(result)
     }
     if kMaxNumDebugLogLines > 0 {
-        UserSessionTracker.sharedInstance.log(result)
+        UserSessionTracker.sharedInstance.appendLog(result)
     }
 }
 
@@ -261,13 +261,14 @@ func encodeBase64(value: UInt64) -> String {
  * Deserialize a string as an unsigned long long.
  */
 func decodeBase64(string: String) -> UInt64 {
+    let length: Int = string.length()
     let values = string.replace("/", withString: "\\").unicodeScalars
     var cursor = values.endIndex.predecessor()
     var result: UInt64 = 0
-    for i in 0..<11 {
+    for i in 0..<length {
         let chr = values[cursor]
         result = (result << 6) + UInt64(chr.value - 48)
-        if i != 10 {
+        if i != length - 1 {
             cursor = cursor.predecessor()
         }
     }
@@ -303,6 +304,10 @@ func lower32Bits(num: UInt64) -> UInt {
 }
 
 extension String {
+    func length() -> Int {
+        return count(self)
+    }
+    
     func replace(target: String, withString: String) -> String {
         return self.stringByReplacingOccurrencesOfString(target, withString: withString, options: NSStringCompareOptions.LiteralSearch, range: nil)
     }
@@ -379,6 +384,15 @@ extension CGRect {
     }
 }
 
+extension NSDate {
+    /**
+     * Formats this date as <number> <time units> ago. Dates that are more than a year ago
+     * are "An eternity ago" while dates that are less than a minute old are "A moment ago".
+     */
+    func ago() -> String {
+        return "\(timeElapsedAsText(currentTimeInSeconds() - timeIntervalSince1970)) ago"
+    }
+}
 
 /**
  * TODO It's super awkward to put a class in a file called UtilityFunctions. Maybe refactor
