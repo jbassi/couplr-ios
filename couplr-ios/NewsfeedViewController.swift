@@ -17,6 +17,7 @@ class NewsfeedViewController: UIViewController {
     var cachedNewsfeedMatches: [(MatchTuple, NSDate)]?
     
     var currentRevealedTableIndex: Int = -1
+    var allowTableCellSelection: Bool = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -144,6 +145,10 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        if !allowTableCellSelection {
+            return
+        }
+        allowTableCellSelection = false
         let row: Int = indexPath.row
         let cell = tableView.cellForRowAtIndexPath(indexPath) as! NewsfeedTableViewCell
         if currentRevealedTableIndex != row {
@@ -152,10 +157,12 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
                 cellAtTableRow(currentRevealedTableIndex)?.hideButton()
                 cell.revealButton(onComplete: { finished in
                     self.currentRevealedTableIndex = row
+                    self.allowTableCellSelection = true
                 })
             } else {
                 cell.setButtonVisible(false)
                 cell.shake()
+                allowTableCellSelection = true
             }
         } else {
             if cell.isButtonHidden() {
@@ -163,9 +170,11 @@ extension NewsfeedViewController: UITableViewDelegate, UITableViewDataSource {
                 currentRevealedTableIndex = -1
                 cell.setButtonVisible(false)
                 cell.shake()
+                allowTableCellSelection = true
             } else {
                 cellAtTableRow(currentRevealedTableIndex)?.hideButton(onComplete: { finished in
                     self.currentRevealedTableIndex = -1
+                    self.allowTableCellSelection = true
                 })
             }
         }
