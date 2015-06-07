@@ -51,10 +51,10 @@ class NewsfeedTableViewCell: MatchPairTableViewCell {
         let position: CGPoint = self.center
         let path: UIBezierPath = UIBezierPath()
         path.moveToPoint(CGPointMake(position.x, position.y))
-        path.addLineToPoint(CGPointMake(position.x - 20, position.y))
-        path.addLineToPoint(CGPointMake(position.x + 10, position.y))
-        path.addLineToPoint(CGPointMake(position.x - 5, position.y))
-        path.addLineToPoint(CGPointMake(position.x + 2, position.y))
+        path.addLineToPoint(CGPointMake(position.x + 20, position.y))
+        path.addLineToPoint(CGPointMake(position.x - 10, position.y))
+        path.addLineToPoint(CGPointMake(position.x + 5, position.y))
+        path.addLineToPoint(CGPointMake(position.x - 2, position.y))
         path.addLineToPoint(CGPointMake(position.x, position.y))
         let animation: CAKeyframeAnimation = CAKeyframeAnimation()
         animation.keyPath = "position"
