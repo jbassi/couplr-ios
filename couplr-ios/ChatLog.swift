@@ -118,7 +118,12 @@ class ChatLog : SequenceType {
      * given. fromIndex must
      */
     func historicalMessageIdsFrom(fromIndex: Int, toIndex: Int) -> [String] {
-        return Array(historicalMessageIds[max(0, fromIndex)..<min(toIndex, historicalMessageIds.count)])
+        let startIndex: Int = max(0, fromIndex)
+        let endIndex: Int = min(toIndex, historicalMessageIds.count)
+        if startIndex >= endIndex {
+            return []
+        }
+        return Array(historicalMessageIds[startIndex..<endIndex])
     }
     
     func generate() -> ChatMessageGenerator {

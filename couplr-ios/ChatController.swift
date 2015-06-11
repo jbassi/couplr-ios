@@ -9,6 +9,8 @@
 import UIKit
 import Parse
 
+// MARK: Event handler interface
+
 /**
  * An object that listens in on key ChatController events. This should really be a protocol instead of
  * a separate class, but I was not able to make it work with optional methods. Just extend this class and
@@ -55,6 +57,8 @@ class ChatEventHandler {
     func handleLoadPastMessagesComplete(success: Bool, messages: [ChatMessage], conversation: Conversation) { }
 }
 
+// MARK: - Supporting datastructures
+
 func channelNameForOtherId(userId: UInt64) -> String? {
     let rootId: UInt64 = SocialGraphController.sharedInstance.rootId()
     if rootId == 0 {
@@ -98,11 +102,11 @@ class Conversation {
             dispatch_semaphore_signal(self.chatHistorySemaphore)
             if error != nil {
                 onComplete?(success: false, messages: [], conversation: self)
-                return log("Failed to fetch chat history with error: \(error!.description).", withFlag: "-", withIndent: 1)
+                return log("Failed to fetch chat history with error: \(error!.description).", withFlag: "-")
             }
             let validMessages: [ChatMessage] = messageObjects.map({ ChatMessage(fromParseObject: $0) }).filter { $0.isValid() }
             self.chatLog!.addEarlierMessages(validMessages)
-            log("Fetched \(messageObjects.count) message(s). Moved message index to \(nextMessagesIndex).", withIndent: 1)
+            log("Fetched \(validMessages.count) message(s). Moved message index to \(nextMessagesIndex).")
             self.currentMessageIndex = nextMessagesIndex
             onComplete?(success: true, messages: validMessages, conversation: self)
         }
@@ -127,12 +131,15 @@ class Conversation {
     var invite: ConversationInvite
     var channel: PNChannel
     var chatLog: ChatLog? = nil
+    // Unconfirmed messages are messages that have not yet been saved to Parse.
     var unconfirmedMessages: [ChatMessage] = []
     var hasLoadedChannel: Bool = false
     var noMoreMessagesToFetch: Bool = false
     
     private var chatHistorySemaphore = dispatch_semaphore_create(1)
 }
+
+// MARK: - Singleton ChatController class
 
 class ChatController: NSObject {
     
@@ -142,6 +149,8 @@ class ChatController: NSObject {
         }
         return ChatControllerSingleton.instance
     }
+    
+    // MARK: - Public controller API methods
     
     /**
      * Sets a handler that listens to chat server events.
@@ -368,6 +377,10 @@ class ChatController: NSObject {
         }
     }
     
+    /**
+     * Sends a message to the given user id. Exits early if the conversation is not yet ready or there
+     * is no existing chatroom with the user id.
+     */
     func sendMessage(message: String, toUserId: UInt64) {
         let rootId: UInt64 = socialGraphController.rootId()
         // Handle error scenarios first.
@@ -375,7 +388,7 @@ class ChatController: NSObject {
             return log("Failed to send message to \(socialGraphController.nameFromId(toUserId)): invalid text or root id.", withFlag: "-")
         }
         let conversation: Conversation? = self.conversationsByOtherId[toUserId]
-        if conversation == nil || !conversation!.hasLoadedChannel {
+        if conversation == nil || !conversation!.isReady() {
             return log("Failed to send message to \(socialGraphController.nameFromId(toUserId)): conversation missing or not ready.", withFlag: "+")
         }
         log("Attempting to save a message to \(conversation!.invite.otherName) in Parse...", withFlag: "!")
@@ -421,15 +434,22 @@ class ChatController: NSObject {
         }
     }
     
+    /**
+     * Fetches up to a given number of messages from the conversation with the given user id. The messages
+     * are fetched in reverse chronological order, starting from the most recent message sent before the
+     * current session began.
+     */
     func fetchPastMessagesForConversationWith(otherId: UInt64, maxNumMessages: Int = kMaxNumPastMessagesPerPage) {
-        if let conversation: Conversation? = conversationsByOtherId[otherId] {
-            conversation!.fetchPastMessages(maxNumMessages: maxNumMessages, onComplete: { success, messages, conversation in
-                self.eventHandler?.handleLoadPastMessagesComplete(success, messages: messages, conversation: conversation)
-            })
-        } else {
-            log("Failed to fetch past messages: no such conversation with other id \(otherId)", withFlag: "-")
+        let conversation: Conversation? = conversationsByOtherId[otherId]
+        if conversation == nil {
+            return log("Failed to fetch past messages: no such conversation with other id \(otherId)", withFlag: "-")
         }
+        conversation!.fetchPastMessages(maxNumMessages: maxNumMessages, onComplete: { success, messages, conversation in
+            self.eventHandler?.handleLoadPastMessagesComplete(success, messages: messages, conversation: conversation)
+        })
     }
+    
+    // MARK: - Private subroutines and fields
     
     private func shouldPollForInvitations() -> Bool {
         return invitePollingTimer != nil
