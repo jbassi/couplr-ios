@@ -94,7 +94,7 @@ class ConversationInvite {
     /**
      * Acknowledgment flags determine whether or not the root has seen
      * the conversation invite already. TL;DR Acknowledgement has to do
-     * with notifying the root that the other user accepted the invitation.
+     * with notifying the root that the feeling is mutual.
      */
     var acknowledgedByMe: Bool = false
     

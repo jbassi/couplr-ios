@@ -58,6 +58,7 @@
 		F456B96C1B26791200310B3E /* ConversationInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = F456B96B1B26791200310B3E /* ConversationInvite.swift */; };
 		F456B96E1B26795600310B3E /* ChatLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F456B96D1B26795600310B3E /* ChatLog.swift */; };
 		F45AF54F1ADB916A0051FA90 /* UserAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */; };
+		F45FCB281B2A102200D30BBD /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45FCB271B2A102200D30BBD /* Conversation.swift */; };
 		F461AE1B1A5CB2FE0066FF44 /* MatchGraphController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */; };
 		F4875BA81B0D9FBF006FCB94 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4875BA71B0D9FBF006FCB94 /* HistoryViewController.swift */; };
 		F48D52321B1456A900D84CAC /* SocialGraphControllerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F48D52311B1456A900D84CAC /* SocialGraphControllerTest.swift */; };
@@ -279,6 +280,7 @@
 		F456B96B1B26791200310B3E /* ConversationInvite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConversationInvite.swift; sourceTree = "<group>"; };
 		F456B96D1B26795600310B3E /* ChatLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatLog.swift; sourceTree = "<group>"; };
 		F45AF54E1ADB916A0051FA90 /* UserAnalytics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserAnalytics.swift; sourceTree = "<group>"; };
+		F45FCB271B2A102200D30BBD /* Conversation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
 		F461AE1A1A5CB2FE0066FF44 /* MatchGraphController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MatchGraphController.swift; sourceTree = "<group>"; };
 		F4875BA71B0D9FBF006FCB94 /* HistoryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
 		F48D52311B1456A900D84CAC /* SocialGraphControllerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialGraphControllerTest.swift; sourceTree = "<group>"; };
@@ -837,6 +839,7 @@
 				F49FD2CE1B23631F00548CA9 /* ChatController.swift */,
 				F456B96B1B26791200310B3E /* ConversationInvite.swift */,
 				F456B96D1B26795600310B3E /* ChatLog.swift */,
+				F45FCB271B2A102200D30BBD /* Conversation.swift */,
 			);
 			name = Chat;
 			sourceTree = "<group>";
@@ -1397,6 +1400,7 @@
 				11276E361AC4F5FE00ADD063 /* MatchPairTableViewCell.swift in Sources */,
 				F4D4224E1B22D80700525B5B /* PNHelper.m in Sources */,
 				F4D422341B22D80700525B5B /* PNClient.m in Sources */,
+				F45FCB281B2A102200D30BBD /* Conversation.swift in Sources */,
 				F4D422221B22D80700525B5B /* PNClientStateUpdateResponseParser.m in Sources */,
 				F4D4223D1B22D80700525B5B /* PNOperationStatus.m in Sources */,
 				0FF11BE11A50C55500C14FDC /* MatchViewController.swift in Sources */,

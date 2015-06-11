@@ -73,8 +73,17 @@ class ChatMessage {
 
 class ChatLog : SequenceType {
 
-    init(historicalMessageIds: [String]) {
+    init(historicalMessageIds: [String], updatedAt: NSDate) {
         self.historicalMessageIds = historicalMessageIds
+        self.updatedAt = updatedAt
+    }
+    
+    func numTotalMessages() -> Int {
+        return recentMessages.count + historicalMessageIds.count
+    }
+    
+    func numFetchedMessages() -> Int {
+        return recentMessages.count + historicalMessages.count
     }
     
     func latestMessage() -> ChatMessage? {
@@ -130,6 +139,8 @@ class ChatLog : SequenceType {
         return ChatMessageGenerator(historicalMessages: self.historicalMessages, recentMessages: self.recentMessages)
     }
     
+    var updatedAt: NSDate
+    
     // Sorted in descending order.
     private var historicalMessages: [ChatMessage] = []
     // Sorted in ascending order.
@@ -161,9 +172,9 @@ class ChatLog : SequenceType {
             return nil
         }
         
-        var historicalMessagesIndex: Int
-        var recentMessagesIndex: Int
-        var historicalMessages: [ChatMessage]
-        var recentMessages: [ChatMessage]
+        private var historicalMessagesIndex: Int
+        private var recentMessagesIndex: Int
+        private var historicalMessages: [ChatMessage]
+        private var recentMessages: [ChatMessage]
     }
 }

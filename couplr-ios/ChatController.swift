@@ -44,7 +44,7 @@ class ChatEventHandler {
      * Invoked when one or more conversations have been initialized. This means that the user can begin to post
      * messages to the conversation, and that the messages histories for these conversation has been fetched.
      */
-    func handleLoadConversationHistoryComplete(success: Bool, conversations: [Conversation]?) { }
+    func handleLoadConversationHistoryComplete(success: Bool, conversations: [Conversation]) { }
     
     /**
      * Invoked when receiving a chatmessage. This includes messages sent by the root user.
@@ -55,88 +55,11 @@ class ChatEventHandler {
      * Invoked after fetching past messages.
      */
     func handleLoadPastMessagesComplete(success: Bool, messages: [ChatMessage], conversation: Conversation) { }
-}
-
-// MARK: - Supporting datastructures
-
-func channelNameForOtherId(userId: UInt64) -> String? {
-    let rootId: UInt64 = SocialGraphController.sharedInstance.rootId()
-    if rootId == 0 {
-        return nil
-    }
-    let pair: MatchTuple = MatchTuple(firstId: rootId, secondId: userId)
-    return "couplr_\(pair.firstId)_\(pair.secondId)"
-}
-
-/**
- * The first id is assumed to be the root user.
- */
-class Conversation {
-    init(invite: ConversationInvite) {
-        self.invite = invite
-        self.channel = PNChannel.channelWithName(channelNameForOtherId(invite.otherId)!, shouldObservePresence: true) as! PNChannel!
-    }
     
-    func isReady() -> Bool {
-        return hasLoadedChannel && chatLog != nil
-    }
-    
-    func fetchPastMessages(maxNumMessages: Int = kMaxNumPastMessagesPerPage, onComplete: ((success: Bool, messages: [ChatMessage], conversation: Conversation) -> Void)? = nil) {
-        if !isReady() {
-            onComplete?(success: false, messages: [], conversation: self)
-            return log("Cannot invoke Conversation::fetchPastMessages before conversation is ready.", withFlag: "-")
-        }
-        let nextMessagesIndex: Int = currentMessageIndex + maxNumMessages
-        let messageIds: [String] = chatLog!.historicalMessageIdsFrom(currentMessageIndex, toIndex: nextMessagesIndex)
-        if messageIds.count == 0 {
-            noMoreMessagesToFetch = true
-        }
-        if noMoreMessagesToFetch {
-            onComplete?(success: true, messages: [], conversation: self)
-            return log("No more messages to fetch.")
-        }
-        dispatch_semaphore_wait(chatHistorySemaphore, DISPATCH_TIME_FOREVER)
-        let query: PFQuery = PFQuery(className: "Message")
-        query.whereKey("objectId", containedIn: messageIds)
-        query.findObjectsInBackgroundWithBlock { messageObjects, error in
-            dispatch_semaphore_signal(self.chatHistorySemaphore)
-            if error != nil {
-                onComplete?(success: false, messages: [], conversation: self)
-                return log("Failed to fetch chat history with error: \(error!.description).", withFlag: "-")
-            }
-            let validMessages: [ChatMessage] = messageObjects.map({ ChatMessage(fromParseObject: $0) }).filter { $0.isValid() }
-            self.chatLog!.addEarlierMessages(validMessages)
-            log("Fetched \(validMessages.count) message(s). Moved message index to \(nextMessagesIndex).")
-            self.currentMessageIndex = nextMessagesIndex
-            onComplete?(success: true, messages: validMessages, conversation: self)
-        }
-    }
-    
-    func confirmMessageSavedToParse(message: ChatMessage) {
-        if chatLog == nil {
-            return;
-        }
-        var unconfirmedMessageIndex: Int = -1
-        for (index: Int, chatMessage: ChatMessage) in enumerate(unconfirmedMessages) {
-            if message === chatMessage {
-                unconfirmedMessageIndex = index
-            }
-        }
-        if unconfirmedMessageIndex != -1 {
-            unconfirmedMessages.removeAtIndex(unconfirmedMessageIndex)
-        }
-    }
-    
-    var currentMessageIndex: Int = 0
-    var invite: ConversationInvite
-    var channel: PNChannel
-    var chatLog: ChatLog? = nil
-    // Unconfirmed messages are messages that have not yet been saved to Parse.
-    var unconfirmedMessages: [ChatMessage] = []
-    var hasLoadedChannel: Bool = false
-    var noMoreMessagesToFetch: Bool = false
-    
-    private var chatHistorySemaphore = dispatch_semaphore_create(1)
+    /**
+     * Invoked after unrequesting a conversation.
+     */
+    func handleUnrequestedConversation(success: Bool, withOtherId: UInt64) { }
 }
 
 // MARK: - Singleton ChatController class
@@ -226,11 +149,13 @@ class ChatController: NSObject {
             dispatch_semaphore_signal(self.conversationInviteSemaphore)
             // First, check for failure scenarios.
             if error != nil {
+                self.eventHandler?.handleUnrequestedConversation(false, withOtherId: userId)
                 return log("Failed to undo a channel request with error: \(error!.description).", withFlag: "-", withIndent: 1)
             }
             let invite: ConversationInvite = ConversationInvite(objectFromParse: object)
             if !invite.isValid() {
-                return log("Failed to undo a channel request: could not initialize existing invite.", withFlag: "-", withIndent: 1)
+                self.eventHandler?.handleUnrequestedConversation(false, withOtherId: userId)
+                return log("Failed to undo a channel request: could not parse existing invite.", withFlag: "-", withIndent: 1)
             }
             // Handle success scenarios.
             if invite.requestedByOther {
@@ -248,6 +173,7 @@ class ChatController: NSObject {
             }
             // Delete the conversation.
             self.setConversationForId(invite.otherId, toConversation: nil)
+            self.eventHandler?.handleUnrequestedConversation(true, withOtherId: userId)
         }
     }
     
@@ -449,6 +375,22 @@ class ChatController: NSObject {
         })
     }
     
+    /**
+     * Returns a list of conversations sorted by update time. The first entry in the result is the
+     * conversation that has most recently been updated.
+     */
+    func conversationsSortedByUpdateTime() -> [Conversation] {
+        return Array(conversationsByOtherId.values).sorted { before, after in
+            if before.chatLog == nil {
+                return false
+            }
+            if after.chatLog == nil {
+                return true
+            }
+            return before.chatLog!.updatedAt.compare(after.chatLog!.updatedAt) == .OrderedDescending
+        }
+    }
+    
     // MARK: - Private subroutines and fields
     
     private func shouldPollForInvitations() -> Bool {
@@ -457,9 +399,18 @@ class ChatController: NSObject {
     
     private func setConversationForId(otherId: UInt64, toConversation: Conversation?) {
         self.conversationsByOtherId[otherId] = toConversation
-        if let channelName: String? = channelNameForOtherId(otherId) {
+        if let channelName: String? = ChatController.channelNameForOtherId(otherId) {
             self.conversationsByChannelName[channelName!] = toConversation
         }
+    }
+    
+    static func channelNameForOtherId(userId: UInt64) -> String? {
+        let rootId: UInt64 = SocialGraphController.sharedInstance.rootId()
+        if rootId == 0 {
+            return nil
+        }
+        let pair: MatchTuple = MatchTuple(firstId: rootId, secondId: userId)
+        return "couplr_\(pair.firstId)_\(pair.secondId)"
     }
     
     // Invitation state variables.
@@ -539,7 +490,7 @@ extension ChatController: PNDelegate {
                     let channelName: String = historyObject["channel"] as! String
                     if let conversation: Conversation? = self.conversationsByChannelName[channelName] {
                         log("Loaded conversation with \(conversation!.invite.otherName): found \(messageIds.count) message(s)", withIndent: 1)
-                        conversation!.chatLog = ChatLog(historicalMessageIds: messageIds.reverse())
+                        conversation!.chatLog = ChatLog(historicalMessageIds: messageIds.reverse(), updatedAt: historyObject.updatedAt)
                         conversationsInitialized.append(conversation!)
                     }
                 }
@@ -551,7 +502,7 @@ extension ChatController: PNDelegate {
                     newHistoryObject["channel"] = channelName
                     newHistoryObject["messageIds"] = []
                     newHistoryObject.saveEventually()
-                    conversation.chatLog = ChatLog(historicalMessageIds: [])
+                    conversation.chatLog = ChatLog(historicalMessageIds: [], updatedAt: NSDate())
                     conversationsInitialized.append(conversation)
                 }
             }

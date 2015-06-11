@@ -195,7 +195,7 @@ let kMatchButtonWidth: CGFloat = 80
 let kMatchButtonRevealTimer: Double = 0.5
 
 /* Debugging output */
-let kOutputLogMessages: Bool = true
+let kOutputLogMessages: Bool = false
 
 // To disable the debug log entirely, set this value to 0.
 let kMaxNumDebugLogLines: Int = 50
