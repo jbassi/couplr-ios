@@ -186,7 +186,38 @@ public class GenderData: NSManagedObject {
         if let fetchResults = context.executeFetchRequest(request, error: &error) as? [GenderData] {
             return fetchResults
         }
-        log("Could not fetch local edges with error \"\(error?.description)\"", withFlag: "-")
+        log("Could not fetch local gender predictions with error \"\(error?.description)\"", withFlag: "-")
+        return []
+    }
+}
+
+@objc(MessageData)
+/**
+ * Stores an entry containing an objectId and its corresponding
+ * message text, both as strings.
+ */
+public class MessageData: NSManagedObject {
+    
+    @NSManaged var objectId: String
+    @NSManaged var message: String
+    
+    public func set(objectId: String, message: String) {
+        self.objectId = objectId
+        self.message = message
+    }
+    
+    class func insert(context: NSManagedObjectContext, objectId: String, message: String) {
+        let messageData: MessageData = NSEntityDescription.insertNewObjectForEntityForName("MessageData", inManagedObjectContext: context) as! MessageData
+        messageData.set(objectId, message: message)
+    }
+    
+    class func allObjects(context: NSManagedObjectContext) -> [MessageData] {
+        let request = NSFetchRequest(entityName: "MessageData")
+        var error: NSError? = nil
+        if let fetchResults = context.executeFetchRequest(request, error: &error) as? [MessageData] {
+            return fetchResults
+        }
+        log("Could not fetch local cached messages with error \"\(error?.description)\"", withFlag: "-")
         return []
     }
 }

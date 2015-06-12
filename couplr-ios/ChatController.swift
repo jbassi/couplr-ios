@@ -370,7 +370,7 @@ class ChatController: NSObject {
         if conversation == nil {
             return log("Failed to fetch past messages: no such conversation with other id \(otherId)", withFlag: "-")
         }
-        conversation!.fetchPastMessages(maxNumMessages: maxNumMessages, onComplete: { success, messages, conversation in
+        conversation!.fetchPastMessages(maxNumMessages: maxNumMessages, messageCache: &self.messageCache, onComplete: { success, messages, conversation in
             self.eventHandler?.handleLoadPastMessagesComplete(success, messages: messages, conversation: conversation)
         })
     }
@@ -389,6 +389,15 @@ class ChatController: NSObject {
             }
             return before.chatLog!.updatedAt.compare(after.chatLog!.updatedAt) == .OrderedDescending
         }
+    }
+    
+    /**
+     * Saves unflushed messages to core data, so they don't have to be loaded from Parse next time
+     * the chat history is requested. The actual loading of messages from core data is taken care
+     * internally.
+     */
+    func saveUnflushedMessagesToCoreData() {
+        messageCache.flushToCoreData()
     }
     
     // MARK: - Private subroutines and fields
@@ -424,6 +433,7 @@ class ChatController: NSObject {
     // Conversation state variables.
     private var conversationsByOtherId: [UInt64: Conversation] = [UInt64: Conversation]()
     private var conversationsByChannelName: [String: Conversation] = [String: Conversation]()
+    private var messageCache: ChatMessageCache = ChatMessageCache()
     
     // For convenience only.
     private let socialGraphController = SocialGraphController.sharedInstance
@@ -435,6 +445,7 @@ class ChatController: NSObject {
 extension ChatController: PNDelegate {
     func pubnubClient(client: PubNub!, didConnectToOrigin origin: String!) {
         self.eventHandler?.handleConnectedToPubNub(true)
+        self.messageCache.loadFromCoreData()
     }
     
     func pubnubClient(client: PubNub!, connectionDidFailWithError error: PNError!) {

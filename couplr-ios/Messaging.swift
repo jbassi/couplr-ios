@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class ChatMessage {
     
@@ -14,7 +15,7 @@ class ChatMessage {
      * Initialize a ChatMessage from an incoming PubNub message.
      */
     convenience init(fromPNMessage: PNMessage) {
-        self.init(rawText: fromPNMessage.message as! String)
+        self.init(fromMessageBody: fromPNMessage.message as! String)
     }
     
     /**
@@ -26,17 +27,17 @@ class ChatMessage {
             self.init(text: "")
             didProperlyInitialize = false
         } else {
-            self.init(rawText: fromParseObject["text"] as! String)
+            self.init(fromMessageBody: fromParseObject["text"] as! String)
         }
     }
     
-    private init(rawText: String) {
-        let authorTimestampIndex: String.Index = find(rawText, kAuthorTimestampSeparator)!
-        let timestampTextIndex: String.Index = find(rawText, kTimestampTextSeparator)!
-        self.authorId = uint64FromAnyObject(rawText.substringToIndex(authorTimestampIndex), base64: false)
-        let timeInSeconds: Int = rawText.substringWithRange(Range<String.Index>(start: authorTimestampIndex.successor(), end: timestampTextIndex)).toInt()!
+    init(fromMessageBody: String) {
+        let authorTimestampIndex: String.Index = find(fromMessageBody, kAuthorTimestampSeparator)!
+        let timestampTextIndex: String.Index = find(fromMessageBody, kTimestampTextSeparator)!
+        self.authorId = uint64FromAnyObject(fromMessageBody.substringToIndex(authorTimestampIndex), base64: false)
+        let timeInSeconds: Int = fromMessageBody.substringWithRange(Range<String.Index>(start: authorTimestampIndex.successor(), end: timestampTextIndex)).toInt()!
         self.timestamp = NSDate(timeIntervalSince1970: Double(timeInSeconds))
-        self.text = rawText.substringFromIndex(timestampTextIndex.successor())
+        self.text = fromMessageBody.substringFromIndex(timestampTextIndex.successor())
     }
     
     /**
@@ -177,4 +178,56 @@ class ChatLog : SequenceType {
         private var historicalMessages: [ChatMessage]
         private var recentMessages: [ChatMessage]
     }
+}
+
+class ChatMessageCache {
+    
+    lazy var managedObjectContext: NSManagedObjectContext? = {
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        return appDelegate.managedObjectContext
+    }()
+    
+    func loadFromCoreData() {
+        if managedObjectContext == nil {
+            return
+        }
+        for data: MessageData in MessageData.allObjects(managedObjectContext!) {
+            messagesByObjectId[data.objectId] = ChatMessage(fromMessageBody: data.message)
+        }
+        log("Loaded \(messagesByObjectId.count) messages from core data.")
+    }
+    
+    func flushToCoreData() {
+        if unflushedMessageIds.count == 0 {
+            return log("No unflushed messages to save.")
+        }
+        if managedObjectContext == nil {
+            return log("Failed to flush saved messages: managed object context is nil.", withFlag: "-")
+        }
+        var numMessagesSaved: Int = 0
+        for objectId: String in unflushedMessageIds {
+            if messagesByObjectId[objectId] != nil {
+                MessageData.insert(managedObjectContext!, objectId: objectId, message: messagesByObjectId[objectId]!.messageBody())
+                numMessagesSaved++
+            }
+        }
+        unflushedMessageIds.removeAll(keepCapacity: false)
+        managedObjectContext!.save(nil)
+        log("Saved \(numMessagesSaved) messages to core data")
+    }
+    
+    subscript(id: String) -> ChatMessage? {
+        get {
+            return messagesByObjectId[id]
+        }
+        set(message) {
+            if messagesByObjectId[id] == nil {
+                unflushedMessageIds.insert(id)
+            }
+            messagesByObjectId[id] = message
+        }
+    }
+    
+    var messagesByObjectId: [String: ChatMessage] = [:]
+    var unflushedMessageIds: Set<String> = Set<String>()
 }

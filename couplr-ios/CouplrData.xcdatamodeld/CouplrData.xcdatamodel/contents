@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6751" systemVersion="14D105g" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14E26a" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="EdgeData" representedClassName="EdgeData" syncable="YES">
         <attribute name="fromBase64" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="toBase64" optional="YES" attributeType="String" syncable="YES"/>
@@ -8,6 +8,10 @@
     <entity name="GenderData" representedClassName="GenderData" syncable="YES">
         <attribute name="firstName" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="genderAsString" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="MessageData" syncable="YES">
+        <attribute name="message" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="objectId" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <entity name="NameData" representedClassName="NameData" syncable="YES">
         <attribute name="idBase64" optional="YES" attributeType="String" syncable="YES"/>
@@ -24,8 +28,9 @@
     <elements>
         <element name="EdgeData" positionX="-306" positionY="81" width="128" height="88"/>
         <element name="GenderData" positionX="-333" positionY="63" width="128" height="73"/>
+        <element name="NameData" positionX="-333" positionY="63" width="128" height="73"/>
         <element name="NodeData" positionX="-369" positionY="9" width="144" height="75"/>
         <element name="RootData" positionX="-333" positionY="72" width="128" height="75"/>
-        <element name="NameData" positionX="-333" positionY="63" width="128" height="73"/>
+        <element name="MessageData" positionX="-333" positionY="63" width="128" height="75"/>
     </elements>
 </model>

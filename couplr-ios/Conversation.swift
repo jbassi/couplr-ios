@@ -22,7 +22,7 @@ class Conversation {
         return hasLoadedChannel && chatLog != nil
     }
     
-    func fetchPastMessages(maxNumMessages: Int = kMaxNumPastMessagesPerPage, onComplete: ((success: Bool, messages: [ChatMessage], conversation: Conversation) -> Void)? = nil) {
+    func fetchPastMessages(maxNumMessages: Int = kMaxNumPastMessagesPerPage, inout messageCache: ChatMessageCache, onComplete: ((success: Bool, messages: [ChatMessage], conversation: Conversation) -> Void)? = nil) {
         if !isReady() {
             onComplete?(success: false, messages: [], conversation: self)
             return log("Cannot invoke Conversation::fetchPastMessages before conversation is ready.", withFlag: "-")
@@ -36,20 +36,37 @@ class Conversation {
             onComplete?(success: true, messages: [], conversation: self)
             return log("No more messages to fetch.")
         }
+        var messagesLoadedFromCache: [ChatMessage] = []
+        var messageIdsMissingFromCache: [String] = []
+        for objectId: String in messageIds {
+            if messageCache[objectId] != nil {
+                messagesLoadedFromCache.append(messageCache[objectId]!)
+            } else {
+                messageIdsMissingFromCache.append(objectId)
+            }
+        }
+        if messageIdsMissingFromCache.count == 0 {
+            // No need to request messages from Parse.
+            chatLog!.addEarlierMessages(messagesLoadedFromCache)
+            log("Fetched \(messagesLoadedFromCache.count) message(s). Moved message index to \(nextMessagesIndex).")
+            self.currentMessageIndex = nextMessagesIndex
+            onComplete?(success: true, messages: messagesLoadedFromCache, conversation: self)
+            return
+        }
         dispatch_semaphore_wait(chatHistorySemaphore, DISPATCH_TIME_FOREVER)
         let query: PFQuery = PFQuery(className: "Message")
-        query.whereKey("objectId", containedIn: messageIds)
+        query.whereKey("objectId", containedIn: messageIdsMissingFromCache)
         query.findObjectsInBackgroundWithBlock { messageObjects, error in
             dispatch_semaphore_signal(self.chatHistorySemaphore)
             if error != nil {
                 onComplete?(success: false, messages: [], conversation: self)
                 return log("Failed to fetch chat history with error: \(error!.description).", withFlag: "-")
             }
-            let validMessages: [ChatMessage] = messageObjects.map({ ChatMessage(fromParseObject: $0) }).filter { $0.isValid() }
-            self.chatLog!.addEarlierMessages(validMessages)
-            log("Fetched \(validMessages.count) message(s). Moved message index to \(nextMessagesIndex).")
+            let messagesLoadedFromParse: [ChatMessage] = messageObjects.map({ ChatMessage(fromParseObject: $0) }).filter { $0.isValid() }
+            self.chatLog!.addEarlierMessages(messagesLoadedFromParse + messagesLoadedFromCache)
+            log("Fetched \(messagesLoadedFromParse.count) message(s). Moved message index to \(nextMessagesIndex).")
             self.currentMessageIndex = nextMessagesIndex
-            onComplete?(success: true, messages: validMessages, conversation: self)
+            onComplete?(success: true, messages: messagesLoadedFromParse, conversation: self)
         }
     }
     
