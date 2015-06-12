@@ -161,7 +161,7 @@ class CouplrNavigationController: UINavigationController {
             let horizontalInset: CGFloat = (button.bounds.width - (button.bounds.height - kCouplrNavigationBarBottomInset - kCouplrNavigationBarTopInset)) / 2
             button.imageEdgeInsets = UIEdgeInsetsMake(kCouplrNavigationBarTopInset, horizontalInset, kCouplrNavigationBarBottomInset, horizontalInset)
             button.setImage(UIImage(named: kCouplrNavigationBarButtonIconNames[index]), forState: .Normal)
-            button.setImage(UIImage(named: kCouplrNavigationBarButtonDarkIconNames[index]), forState: .Selected)
+            button.setImage(UIImage(named: kCouplrNavigationBarButtonDarkIconNames[index]), forState: .Highlighted)
             button.tag = kCouplrNavigationBarButtonTags[index]
             button.adjustsImageWhenHighlighted = false
             customNavigationBar.addSubview(button)
