@@ -9,6 +9,7 @@
 import UIKit
 
 /* PubNub constants */
+let kEnableChatFeature: Bool = false
 let kCouplrPubNubConfiguration = PNConfiguration(
     forOrigin: "pubsub.pubnub.com",
     publishKey: "pub-c-e2f2d8d4-6aab-421b-a62c-f3919eca4f48",

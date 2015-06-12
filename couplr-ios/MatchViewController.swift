@@ -373,7 +373,9 @@ extension MatchViewController: SocialGraphControllerDelegate {
         socialGraphLoaded = true
         CouplrViewCoordinator.sharedInstance.dismissLoadingScreen()
         UserSessionTracker.sharedInstance.notify("initialized social graph")
-        ChatController.sharedInstance.startPollingForInvitations()
+        if kEnableChatFeature {
+            ChatController.sharedInstance.startPollingForInvitations()
+        }
         socialGraphController.updateRandomSample()
         if isViewLoaded() {
             dispatch_async(dispatch_get_main_queue()) {

@@ -28,9 +28,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         application.applicationSupportsShakeToEdit = true
         
         // PubNub chat server initialization.
-        PubNub.setConfiguration(kCouplrPubNubConfiguration)
-        PubNub.setDelegate(ChatController.sharedInstance)
-        PubNub.connect()
+        if kEnableChatFeature {
+            PubNub.setConfiguration(kCouplrPubNubConfiguration)
+            PubNub.setDelegate(ChatController.sharedInstance)
+            PubNub.connect()
+        }
         return true
     }
 
@@ -53,8 +55,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             CouplrViewCoordinator.sharedInstance.navigationController?.resetNavigation()
             CouplrViewCoordinator.sharedInstance.matchViewController?.resetToggleNamesSwitchAndSelectedMatches()
         }
-        ChatController.sharedInstance.saveUnflushedMessagesToCoreData()
-        ChatController.sharedInstance.stopPollingForInvitations()
+        if kEnableChatFeature {
+            ChatController.sharedInstance.saveUnflushedMessagesToCoreData()
+            ChatController.sharedInstance.stopPollingForInvitations()
+        }
     }
 
     func applicationWillEnterForeground(application: UIApplication) {
@@ -70,8 +74,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
         saveContext()
-        ChatController.sharedInstance.saveUnflushedMessagesToCoreData()
-        ChatController.sharedInstance.stopPollingForInvitations()
+        if kEnableChatFeature {
+            ChatController.sharedInstance.saveUnflushedMessagesToCoreData()
+            ChatController.sharedInstance.stopPollingForInvitations()
+        }
         MatchGraphController.sharedInstance.appWillHalt()
     }
 
