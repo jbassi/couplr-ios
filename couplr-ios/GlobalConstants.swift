@@ -23,8 +23,8 @@ let kTimestampTextSeparator: Character = Character(":")
 let kDateIn1970: NSDate = NSDate(timeIntervalSince1970: 0)
 let kMaxNumPastMessagesPerPage: Int = 25
 
-/* Automatically reload upon exiting/reentering the app no more than once every 2 minutes. */
-let kAutoRefreshPeriod: Double = 120
+/* Automatically reload upon exiting/reentering the app no more than once every 5 minutes. */
+let kAutoRefreshPeriod: Double = 300
 
 /* iOS Navigation Bar Height */
 let kStatusBarSize = UIApplication.sharedApplication().statusBarFrame.size
