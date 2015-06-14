@@ -72,18 +72,32 @@ class LoginViewController: UIViewController {
             matchTutorialPage.pageIndex = 0
             matchTutorialPage.screenFileName = "tutorial-screen-match"
             matchTutorialPage.descriptionText = kTutorialMatchDescription
+            
+            let titlesTutorialPage = TutorialPageViewController()
+            titlesTutorialPage.pageIndex = 1
+            titlesTutorialPage.screenFileName = "tutorial-screen-titles"
+            titlesTutorialPage.descriptionText = kTutorialTitlesDescription
+            
             let profileTutorialPage = TutorialPageViewController()
-            profileTutorialPage.pageIndex = 1
+            profileTutorialPage.pageIndex = 2
             profileTutorialPage.screenFileName = "tutorial-screen-profile"
             profileTutorialPage.descriptionText = kTutorialProfileDescription
+            
             let newsfeedTutorialPage = TutorialPageViewController()
-            newsfeedTutorialPage.pageIndex = 2
+            newsfeedTutorialPage.pageIndex = 3
             newsfeedTutorialPage.screenFileName = "tutorial-screen-newsfeed"
             newsfeedTutorialPage.descriptionText = kTutorialNewsfeedDescription
             
+            let historyTutorialPage = TutorialPageViewController()
+            historyTutorialPage.pageIndex = 4
+            historyTutorialPage.screenFileName = "tutorial-screen-history"
+            historyTutorialPage.descriptionText = kTutorialHistoryDescription
+            
             viewControllerArray.append(matchTutorialPage)
+            viewControllerArray.append(titlesTutorialPage)
             viewControllerArray.append(profileTutorialPage)
             viewControllerArray.append(newsfeedTutorialPage)
+            viewControllerArray.append(historyTutorialPage)
             
             let pageControlX: CGFloat = (view.bounds.width / 2) - (pageControl.bounds.width / 2)
             let pageControlY: CGFloat = loginViewY - 20

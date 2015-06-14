@@ -81,9 +81,11 @@ let kTutorialPhoneContentRect: CGRect = CGRectMake(0.0645, 0.1152, 0.8711, 0.768
 let kTutorialPhoneSize: CGSize = CGSizeMake(861, 1735)
 let kTutorialDescriptionHeightRatio: CGFloat = 0.25
 let kTutorialDescriptionHorizontalPadding: CGFloat = 15.0
-let kTutorialMatchDescription: String = "Select a title and anonymously match 2 friends together."
-let kTutorialProfileDescription: String = "See who you've been matched with in your profile."
+let kTutorialMatchDescription: String = "Select 2 friends and press the heart to submit a match."
+let kTutorialTitlesDescription: String = "Press the current title to select a new match title."
+let kTutorialProfileDescription: String = "See you and your friends' matches in your profile."
 let kTutorialNewsfeedDescription: String = "See your friends' recent matches in your newsfeed."
+let kTutorialHistoryDescription: String = "View or undo the matches you've submitted in the history view."
 
 /* LoadingView Constants */
 let kLoadingViewBlurViewBlurRadius: CGFloat = 20.0
