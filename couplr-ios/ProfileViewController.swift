@@ -52,7 +52,7 @@ class ProfileViewController: UIViewController {
         
         logoutButton = UIButton()
         logoutButton!.frame = CGRectMake(containerWidth - 60, kStatusBarHeight, 60, kProfileTopButtonHeight)
-        logoutButton!.setTitle("Log out", forState: .Normal)
+        logoutButton!.setTitle("Logout", forState: .Normal)
         logoutButton!.setTitleColor(kCouplrLinkColor, forState: .Normal)
         logoutButton!.titleLabel?.font = UIFont(name: "HelveticaNeue", size: 12)
         logoutButton!.addTarget(self, action: "handleLogout", forControlEvents: .TouchUpInside)
@@ -75,8 +75,19 @@ class ProfileViewController: UIViewController {
     }
     
     func handleLogout() {
-        CouplrViewCoordinator.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
-        UserSessionTracker.sharedInstance.notify("settings toggled")
+        let actionSheet: UIAlertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
+        let logoutAction = UIAlertAction(title: "Logout", style: .Destructive, handler: {
+            (alert: UIAlertAction!) -> Void in
+                FBSession.activeSession().closeAndClearTokenInformation()
+                CouplrViewCoordinator.sharedInstance.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+                UserSessionTracker.sharedInstance.notify("logout")
+        })
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
+        
+        actionSheet.addAction(logoutAction)
+        actionSheet.addAction(cancelAction)
+        
+        self.presentViewController(actionSheet, animated: true, completion: nil)
     }
     
     func setUserId(userId: UInt64) {
