@@ -28,6 +28,7 @@ let kAutoRefreshPeriod: Double = 300
 
 /* iOS Navigation Bar Height */
 let kStatusBarSize = UIApplication.sharedApplication().statusBarFrame.size
+let kScreenSize: CGFloat = UIScreen.mainScreen().bounds.size.height
 let kStatusBarHeight = min(kStatusBarSize.width, kStatusBarSize.height)
 
 /* CouplrSettingsManager Constants */

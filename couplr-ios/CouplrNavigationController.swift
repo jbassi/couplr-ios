@@ -118,10 +118,6 @@ class CouplrNavigationController: UINavigationController {
         super.viewWillAppear(animated)
         view.backgroundColor = UIColor.whiteColor()
         setNavigationBarHidden(true, animated: false)
-    }
-    
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
         
         buttonArray.append(profileViewButton)
         buttonArray.append(newsfeedViewButton)
@@ -129,6 +125,10 @@ class CouplrNavigationController: UINavigationController {
         buttonArray.append(historyViewButton)
         
         setupNavigationBarButtons()
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         setupPageViewController()
     }
     
@@ -151,7 +151,7 @@ class CouplrNavigationController: UINavigationController {
     }
     
     func setupNavigationBarButtons() {
-        customNavigationBar.frame = CGRectMake(0, view.frame.size.height-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight)
+        customNavigationBar.frame = CGRectMake(0, kScreenSize-kCouplrNavigationBarHeight, view.frame.size.width, kCouplrNavigationBarHeight)
         let buttonWidth = view.frame.width / CGFloat(viewControllerArray.count)
         for (index: Int, button: UIButton) in enumerate(buttonArray) {
             let buttonOffset: CGFloat = buttonWidth * CGFloat(index)
