@@ -419,7 +419,9 @@ class AlertViewHandler: NSObject, UIAlertViewDelegate {
 let alertViewHandlers: [String: AlertViewHandler] = [
     "default": AlertViewHandler(),
     "request_missing_permissions": AlertViewHandler{ (buttonIndex: Int) -> Void in
-        FBSession.activeSession().requestNewReadPermissions(["user_friends", "user_photos", "user_posts", "user_status"], completionHandler: nil)
+        FBSession.activeSession().requestNewReadPermissions(["user_friends", "user_photos", "user_posts", "user_status"], completionHandler: { success in
+            FBSession.activeSession().closeAndClearTokenInformation()
+        })
     }
 ]
 
